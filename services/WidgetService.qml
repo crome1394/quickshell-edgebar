@@ -309,32 +309,9 @@ Singleton {
     }
 
     function visible(id) {
-        switch (String(id || "")) {
-        case "launcher": return Config.showLauncherPill
-        case "quickLaunch": return Config.showQuickLaunchPill
-        case "quickLaunch2": return Config.showQuickLaunch2Pill
-        case "quickLaunch3": return Config.showQuickLaunch3Pill
-        case "quickLaunch4": return Config.showQuickLaunch4Pill
-        case "freshRss": return Config.showFreshRssPill
-        case "workspaces": return Config.showWorkspacesPill
-        case "stats": return Config.showStatsWidget
-        case "tray": return Config.showTrayPill
-        // The BT · Audio row is not in the catalog. The flag still round-trips.
-        case "connectivity": return Config.showAudioPill
-        case "bluetooth": return Config.showBluetoothPill
-        case "networkPanel": return Config.showNetworkPanel
-        case "clock": return Config.showClockPill
-        case "notifications": return Config.showNotificationPill
-        case "volume": return Config.showVolumePill
-        case "hyprInsp": return Config.showHyprInspPill
-        case "controlBar": return Config.showControlBarPill
-        case "tailscale": return Config.showTailscalePill
-        case "opacity": return Config.showOpacityPill
-        case "power": return Config.showPowerPill
-        case "activeWindow": return Config.showActiveWindowPill
-        default:
-            return root.isDivider(id)
-        }
+        if (BarSettings.isWidget(id))
+            return BarSettings.shown(id)
+        return root.isDivider(id)
     }
 
     function zoneEntries(zone) {
@@ -392,7 +369,7 @@ Singleton {
             return
         }
         if (key === "activeWindow") {
-            Config.setWidgetShown(key, !root.visible(key))
+            BarSettings.setShown(key, !root.visible(key))
             return
         }
         root.ensureEditor()
@@ -865,28 +842,7 @@ Singleton {
     }
 
     function shownSnapshot() {
-        return {
-            launcher: Config.showLauncherPill,
-            quickLaunch: Config.showQuickLaunchPill,
-            quickLaunch2: Config.showQuickLaunch2Pill,
-            quickLaunch3: Config.showQuickLaunch3Pill,
-            quickLaunch4: Config.showQuickLaunch4Pill,
-            freshRss: Config.showFreshRssPill,
-            workspaces: Config.showWorkspacesPill,
-            stats: Config.showStatsWidget,
-            tray: Config.showTrayPill,
-            connectivity: Config.showAudioPill,
-            bluetooth: Config.showBluetoothPill,
-            networkPanel: Config.showNetworkPanel,
-            clock: Config.showClockPill,
-            notifications: Config.showNotificationPill,
-            volume: Config.showVolumePill,
-            hyprInsp: Config.showHyprInspPill,
-            controlBar: Config.showControlBarPill,
-            tailscale: Config.showTailscalePill,
-            opacity: Config.showOpacityPill,
-            power: Config.showPowerPill
-        }
+        return BarSettings.shownSnapshot()
     }
 
     function editorVisible(id) {
@@ -1023,7 +979,7 @@ Singleton {
         root.undoReady = true
         const next = root.editorState()
         root.editorDirty = false
-        Config.applyBarsState(next)
+        BarSettings.apply(next)
         root.seedEditor()
     }
 
@@ -1038,7 +994,7 @@ Singleton {
         root.undoReady = false
         root.undoState = null
         root.editorDirty = false
-        Config.applyBarsState(previous)
+        BarSettings.apply(previous)
         root.seedEditor()
     }
 
