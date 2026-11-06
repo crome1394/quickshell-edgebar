@@ -10,6 +10,7 @@ import QtQuick
 //   normalize(obj) a clamped copy with the same keys in the same order
 //   commit(obj)    write obj to the saved fields
 //   defaults()     the object Reset drafts
+//   signature(obj) optional; see same()
 //
 // `value` is safe in bindings: reading it never writes. A clean draft
 // follows the saved values, so a change saved elsewhere shows at once.
@@ -26,7 +27,12 @@ QtObject {
     readonly property var value: root.dirty ? root.draft : root.owner.snapshot()
     readonly property bool canUndo: root.dirty || root.undoReady
 
+    // An owner may define signature(obj) when two drafts can differ in
+    // text but save the same (an empty symbol saves the default).
     function same(a, b) {
+        const o = root.owner
+        if (typeof o.signature === "function")
+            return o.signature(a) === o.signature(b)
         return JSON.stringify(a) === JSON.stringify(b)
     }
 
