@@ -39,7 +39,7 @@ Item {
             { tab: "notifications", section: "", title: "Notifications · Toasts", keys: "notification toast corner timeout swaync popup" },
             { tab: "notifications", section: "", title: "Notifications · History", keys: "notification history bell counter dnd expand stagger boot" },
             { tab: "system", section: "dependencies", title: "System · Dependencies", keys: "dependencies packages programs fonts services missing install reinstall check" },
-            { tab: "system", section: "display", title: "System · Display", keys: "display monitor resolution screen" }
+            { tab: "system", section: "display", title: "System · Display", keys: "display monitor resolution screen refresh rate hz bit depth 10-bit color mode" }
         ]
     }
 

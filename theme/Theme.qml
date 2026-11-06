@@ -137,6 +137,14 @@ Singleton {
     readonly property int menuPreviewSize: 64
     // Width of the label column on form-style settings pages.
     readonly property int formLabelWidth: 96
+
+    // Settings → System → Display.
+    readonly property int displayConfirmSeconds: 15
+    readonly property int displaySettleMs: 1500
+    readonly property int displayTileWidth: 150
+    readonly property int displayTileHeight: 92
+    readonly property int displayPreviewHeight: 120
+    readonly property int displayRejectedMax: 64
     readonly property int menuCommandMax: 400
 
     // System Stats face. The poll matches the old bar: one sample about every 2s.
