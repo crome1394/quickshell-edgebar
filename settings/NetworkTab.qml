@@ -19,7 +19,6 @@ Item {
     }
 
     Component.onCompleted: {
-        Config.ensureNetEditor()
         root.refreshNetwork()
     }
 
@@ -90,8 +89,8 @@ Item {
                         title: "Full IP on bar"
                         detail: "Complete IPv4 address"
                         tip: "Show the complete IPv4 address on the network pill"
-                        checked: Config.editorNetFull
-                        onToggled: Config.editNetFull(!Config.editorNetFull)
+                        checked: NetworkSettings.editor.value.full
+                        onToggled: NetworkSettings.editor.set("full", !NetworkSettings.editor.value.full)
                     }
 
                     CheckRow {
@@ -99,8 +98,8 @@ Item {
                         title: "Last octet on bar"
                         detail: "Last IPv4 octet when full IP is off"
                         tip: "Show the last IPv4 octet on the network pill when full IP is off"
-                        checked: Config.editorNetOctet
-                        onToggled: Config.editNetOctet(!Config.editorNetOctet)
+                        checked: NetworkSettings.editor.value.octet
+                        onToggled: NetworkSettings.editor.set("octet", !NetworkSettings.editor.value.octet)
                     }
 
                     CheckRow {
@@ -108,8 +107,8 @@ Item {
                         title: "Device name on bar"
                         detail: "Adapter name beside the address"
                         tip: "Show the adapter name, such as enp10s0 or wlan0, beside the address"
-                        checked: Config.editorNetDevice
-                        onToggled: Config.editNetDevice(!Config.editorNetDevice)
+                        checked: NetworkSettings.editor.value.device
+                        onToggled: NetworkSettings.editor.set("device", !NetworkSettings.editor.value.device)
                     }
                 }
             }
@@ -180,13 +179,13 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        applyEnabled: Config.netEditorDirty
-        undoEnabled: Config.canUndoNet()
+        applyEnabled: NetworkSettings.editor.dirty
+        undoEnabled: NetworkSettings.editor.canUndo
         applyTip: "Save the address text shown on the network pill"
         undoTip: "Drop an unsaved draft, or put back the last applied one"
         resetTip: "Turn full IP off, last octet on, and the device name off. Apply saves it."
-        onApplyClicked: Config.applyNetEditor()
-        onUndoClicked: Config.undoNetEditor()
-        onResetClicked: Config.resetNetEditor()
+        onApplyClicked: NetworkSettings.editor.apply()
+        onUndoClicked: NetworkSettings.editor.undo()
+        onResetClicked: NetworkSettings.editor.reset()
     }
 }
