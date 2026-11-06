@@ -207,7 +207,9 @@ Singleton {
             "end"
         ]
         const level = root.clamp(all)
-        const rows = root.overridesNorm(overrides).filter((r) => r.on && (level < 100 || r.active < 100 || r.inactive < 100))
+        // Every enabled override is written, 100% too: a solid override must
+        // beat opacity from the user's own rules (HyprGlass sets 0.90).
+        const rows = root.overridesNorm(overrides).filter((r) => r.on)
         if (level < 100)
             lines.push("add({ name = 'qs-opacity-apps', match = { class = [[.*]] }, opacity = '"
                 + root.level(level) + " override " + root.level(level) + " override' })")
