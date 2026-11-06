@@ -10,6 +10,7 @@
 - Application Menu: the icon can be an SVG or PNG image instead of a symbol. Settings → Applications → Application Menu has a Symbol / Image switch, a file chooser, and an optional tint that fills a one-color SVG with the icon color (and the accent on hover). If the image is missing or broken, the bar shows the symbol.
 - The Application Menu settings page is laid out as labeled rows with a live preview, a size slider, and Default buttons for the font and color. New shared pieces: `settings/FormRow.qml`, `settings/ChipButton.qml`, and `components/MenuIconImage.qml`.
 - Settings can be opened over IPC: `qs ipc call settings open`, `close`, `toggle`, and `openTab <tab> <section>` (for example `openTab applications menu`). An unknown tab is refused.
+- Settings search is keyboard friendly: Tab or ↓ moves from the field into the results, ↑/↓ move the highlight (↑ from the top goes back to the field), Enter opens the highlighted result, Tab or Shift+Tab returns to the field, Esc closes, and typing goes back to the field. Hover and click still work.
 
 ## 0.1.5 — 2026-11-05
 
