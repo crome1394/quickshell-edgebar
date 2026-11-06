@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import qs.settings
 import qs.theme
 
@@ -64,12 +65,56 @@ FloatingWindow {
         search.closeSearch()
     }
 
+    // True when `tab` is one of the tab ids along the bottom.
+    function knownTab(tab) {
+        const list = tabs.model
+        for (let i = 0; i < list.length; i++) {
+            if (list[i].id === tab)
+                return true
+        }
+        return false
+    }
+
     function pushReveal(loader, tab) {
         const item = loader.item
         if (!item)
             return
         item.revealSection = window.revealTab === tab ? window.revealSection : ""
         item.revealSerial = window.revealTab === tab ? window.revealSerial : 0
+    }
+
+    // qs ipc call settings open
+    // qs ipc call settings openTab applications menu
+    // Tab ids: bar, widgets, wallpaper, applications, connectivity, audio,
+    // notifications, region, system. The section is optional ("" for none)
+    // and each tab ignores sections it does not have.
+    IpcHandler {
+        target: "settings"
+
+        function open(): void {
+            window.show()
+        }
+
+        function close(): void {
+            window.hide()
+        }
+
+        function toggle(): void {
+            if (window.visible)
+                window.hide()
+            else
+                window.show()
+        }
+
+        function openTab(tab: string, section: string): string {
+            const id = String(tab || "").trim()
+            if (!window.knownTab(id))
+                return "unknown tab: " + id
+            const part = String(section || "").trim()
+            window.jump(id, /^[A-Za-z0-9_-]{0,40}$/.test(part) ? part : "")
+            window.show()
+            return "ok"
+        }
     }
 
     onClosed: {

@@ -38,6 +38,8 @@ Each screen edge can show a bar. The widgets drawn today are workspaces, the clo
 - Bar tooltips open outside the bar: below a top widget, above a bottom widget, to the right of a left widget, and to the left of a right widget.
 - **Applications → Application Menu** sets the menu icon: a symbol from a font, or an SVG or PNG image with an optional tint, plus its size, color, and the command a click runs.
 
+Open Settings from a keybind or a script with `qs ipc call settings open`, `close`, or `toggle`. `qs ipc call settings openTab applications menu` jumps to a tab and section. Tab ids are `bar`, `widgets`, `wallpaper`, `applications`, `connectivity`, `audio`, `notifications`, `region`, and `system`; pass `""` for no section.
+
 Settings are stored in `state/bar-layout.json`.
 
 ## License
