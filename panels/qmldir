@@ -1,0 +1,9 @@
+module panels
+ActiveWindowPanel 1.0 ActiveWindowPanel.qml
+SettingsPanel 1.0 SettingsPanel.qml
+OverviewCapture 1.0 OverviewCapture.qml
+OverviewCard 1.0 OverviewCard.qml
+OverviewLayer 1.0 OverviewLayer.qml
+OverviewPreview 1.0 OverviewPreview.qml
+NotificationHistory 1.0 NotificationHistory.qml
+NotificationHost 1.0 NotificationHost.qml

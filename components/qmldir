@@ -1,0 +1,6 @@
+module components
+AudioLevels 1.0 AudioLevels.qml
+BarTip 1.0 BarTip.qml
+DockFace 1.0 DockFace.qml
+SpannerIcon 1.0 SpannerIcon.qml
+SystemStats 1.0 SystemStats.qml

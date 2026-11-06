@@ -1,0 +1,19 @@
+module pills
+AudioPill 1.0 AudioPill.qml
+BluetoothMenu 1.0 BluetoothMenu.qml
+NotificationPill 1.0 NotificationPill.qml
+BluetoothPill 1.0 BluetoothPill.qml
+ClockCalendar 1.0 ClockCalendar.qml
+ClockPill 1.0 ClockPill.qml
+LaunchPill 1.0 LaunchPill.qml
+MenuPill 1.0 MenuPill.qml
+NetworkMenu 1.0 NetworkMenu.qml
+NetworkPill 1.0 NetworkPill.qml
+OpacityPill 1.0 OpacityPill.qml
+PowerPill 1.0 PowerPill.qml
+SettingsPill 1.0 SettingsPill.qml
+StatGroup 1.0 StatGroup.qml
+StatsPill 1.0 StatsPill.qml
+TrayPill 1.0 TrayPill.qml
+WorkspaceButton 1.0 WorkspaceButton.qml
+WorkspacesPill 1.0 WorkspacesPill.qml
