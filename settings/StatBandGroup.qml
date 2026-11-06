@@ -49,12 +49,12 @@ Column {
                 from: 0
                 to: 100
                 step: 5
-                value: Config.statBandAt(group.metric, band.modelData.slot)
-                readout: Config.statBandAt(group.metric, band.modelData.slot) + "%"
+                value: StatsSettings.bandAt(group.metric, band.modelData.slot)
+                readout: StatsSettings.bandAt(group.metric, band.modelData.slot) + "%"
                 tip: String(band.modelData.tip || "")
                 showSwatch: true
-                swatch: Config.statColorAt(group.metric, band.modelData.slot)
-                onChanged: (value) => Config.editStatBand(group.metric, band.modelData.slot, value)
+                swatch: StatsSettings.colorAt(group.metric, band.modelData.slot)
+                onChanged: (value) => StatsSettings.setBand(group.metric, band.modelData.slot, value)
                 onSwatchClicked: group.colorRequested(band.modelData.slot)
             }
         }
@@ -79,7 +79,7 @@ Column {
             width: Theme.chip
             height: parent.height
             radius: Theme.radiusSm
-            color: Config.statColorAt(group.metric, 3)
+            color: StatsSettings.colorAt(group.metric, 3)
             border.width: Theme.borderWidth
             border.color: Theme.border
 

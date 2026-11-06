@@ -27,10 +27,10 @@ Rectangle {
     readonly property string faceFont: Config.fontClamp(Config.statFont)
     readonly property bool faceBold: Config.statBold !== false
     readonly property bool faceItalic: !!Config.statItalic
-    readonly property int facePercent: Config.statFontPercentValue()
+    readonly property int facePercent: StatsSettings.fontPercentValue()
 
     function utilColor(util, metric) {
-        const bands = Config.statBandsFor(metric)
+        const bands = StatsSettings.bandsFor(metric)
         return Theme.statUtilColor(util, metric, bands[0], bands[1], bands[2])
     }
 
@@ -64,15 +64,15 @@ Rectangle {
     }
 
     function hint(app) {
-        return (Config.statClickValue() === "left" ? "Left: " : "Right: ") + app
+        return (StatsSettings.clickValue() === "left" ? "Left: " : "Right: ") + app
     }
 
     function launch(app, button) {
-        const left = Config.statClickValue() === "left"
+        const left = StatsSettings.clickValue() === "left"
         const match = left ? button === Qt.LeftButton : button === Qt.RightButton
         if (!match)
             return
-        const command = Config.statLaunchArgv(app)
+        const command = StatsSettings.launchArgv(app)
         if (!command || !command.length)
             return
         Quickshell.execDetached(command)
