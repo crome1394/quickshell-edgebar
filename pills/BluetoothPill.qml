@@ -6,7 +6,9 @@ import qs.components
 import qs.services
 import qs.theme
 
-// Bluetooth icon. Left click opens the menu. Right click toggles adapter power.
+// Bluetooth icon, plus the battery of a connected device that reports one
+// (the lowest, when several do). Left click opens the menu. Right click
+// toggles adapter power.
 // Loaded only while the Bluetooth widget is on the bar.
 Rectangle {
     id: root
@@ -23,6 +25,10 @@ Rectangle {
     readonly property real ui: WidgetService.uiScale
     readonly property int cell: Math.max(1, Math.round((Theme.barHeight - Theme.barPad) * root.ui))
     readonly property int icon: Math.max(1, Math.round(root.theme.iconPx * root.ui * root.widthFactor))
+    readonly property int textPx: Theme.barTextPx(root.ui, root.widthFactor)
+    readonly property int pad: Math.max(1, Math.round(Theme.tabGap * root.ui))
+    readonly property var batteries: root.adapter && root.adapter.enabled ? BluetoothService.batteryDevices() : []
+    readonly property string batteryText: root.batteries.length ? root.batteries[0].percent + "%" : ""
 
     function faceIcon() {
         const adapter = root.adapter
@@ -35,18 +41,8 @@ Rectangle {
         return "󰂯"
     }
 
-    function deviceValues() {
-        const adapter = root.adapter
-        if (!adapter)
-            return []
-        // qmllint disable missing-property
-        const rows = adapter.devices ? adapter.devices.values : null
-        // qmllint enable missing-property
-        return rows || []
-    }
-
     function connectedCount() {
-        const rows = root.deviceValues()
+        const rows = BluetoothService.deviceValues()
         let count = 0
         for (let i = 0; i < rows.length; i++) {
             if (rows[i] && rows[i].connected)
@@ -64,9 +60,12 @@ Rectangle {
         if (adapter.discovering)
             return "Scanning"
         const count = root.connectedCount()
-        if (count > 0)
-            return count === 1 ? "1 connected" : (count + " connected")
-        return "Bluetooth"
+        if (count < 1)
+            return "Bluetooth"
+        const lines = [count === 1 ? "1 connected" : (count + " connected")]
+        for (let i = 0; i < root.batteries.length; i++)
+            lines.push(root.batteries[i].name + ": " + root.batteries[i].percent + "%")
+        return lines.join("\n")
     }
 
     function togglePower() {
@@ -110,7 +109,7 @@ Rectangle {
         // qmllint enable missing-property
     }
 
-    implicitWidth: root.cell
+    implicitWidth: Math.max(root.cell, faceRow.implicitWidth + root.pad * 2)
     implicitHeight: root.cell
     radius: Theme.radiusSm
     color: btMouse.containsMouse || root.menuOpen ? root.theme.colHover : root.theme.colSurface
@@ -132,12 +131,31 @@ Rectangle {
         hovered: btMouse.containsMouse
     }
 
-    Text {
+    Row {
+        id: faceRow
         anchors.centerIn: parent
-        text: root.faceIcon()
-        color: btMouse.containsMouse || root.menuOpen ? root.theme.colAccent : root.theme.colFg
-        font.family: root.theme.iconFont
-        font.pixelSize: root.icon
+        spacing: root.pad
+
+        Text {
+            width: root.icon
+            height: root.cell
+            verticalAlignment: Text.AlignVCenter
+            horizontalAlignment: Text.AlignHCenter
+            text: root.faceIcon()
+            color: btMouse.containsMouse || root.menuOpen ? root.theme.colAccent : root.theme.colFg
+            font.family: root.theme.iconFont
+            font.pixelSize: root.icon
+        }
+
+        Text {
+            visible: root.batteryText.length > 0
+            height: root.cell
+            verticalAlignment: Text.AlignVCenter
+            text: root.batteryText
+            color: root.theme.colFg
+            font.family: root.theme.fontFamily
+            font.pixelSize: root.textPx
+        }
     }
 
     MouseArea {

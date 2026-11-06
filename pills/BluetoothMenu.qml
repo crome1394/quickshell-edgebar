@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import qs.config
+import qs.services
 import qs.settings
 import qs.theme
 
@@ -33,20 +34,11 @@ Item {
         return list || []
     }
 
-    function batteryPercent(device) {
-        if (!device || !device.batteryAvailable)
-            return -1
-        const value = Number(device.battery)
-        if (isNaN(value) || value < 0)
-            return -1
-        if (value <= 1.01)
-            return Math.round(value * 100)
-        return Math.max(0, Math.min(100, Math.round(value)))
-    }
-
     function subtitle(device) {
         const parts = []
-        const battery = root.batteryPercent(device)
+        if (device.pairing)
+            parts.push("Pairing…")
+        const battery = BluetoothService.batteryPercent(device)
         if (battery >= 0)
             parts.push(battery + "%")
         if (device.blocked)
@@ -65,8 +57,10 @@ Item {
             out.push({ id: "disconnect", label: "Disconnect", device: device })
         else if (device.paired)
             out.push({ id: "connect", label: "Connect", device: device })
+        else if (device.pairing)
+            out.push({ id: "cancel", label: "Cancel", device: device })
         else
-            out.push({ id: "pair", label: device.pairing ? "Pairing…" : "Pair", device: device })
+            out.push({ id: "pair", label: "Pair", device: device })
         if (device.paired) {
             out.push({ id: "trust", label: device.trusted ? "Trusted" : "Trust", device: device })
             out.push({ id: "block", label: device.blocked ? "Blocked" : "Block", device: device })
@@ -86,13 +80,14 @@ Item {
             return
         const id = String(action || "")
         if (id === "connect")
-            device.connect()
+            BluetoothService.connect(device)
         else if (id === "disconnect")
             device.disconnect()
-        else if (id === "pair") {
-            if (!device.pairing)
-                device.pair()
-        } else if (id === "trust")
+        else if (id === "pair")
+            BluetoothService.pair(device)
+        else if (id === "cancel")
+            BluetoothService.cancelPair(device)
+        else if (id === "trust")
             device.trusted = !device.trusted
         else if (id === "block")
             device.blocked = !device.blocked
@@ -116,23 +111,6 @@ Item {
             return
         device.name = name
         root.renameAddress = ""
-    }
-
-    function stopScan() {
-        scanTimer.stop()
-        if (root.adapter && root.adapter.discovering)
-            root.adapter.discovering = false
-    }
-
-    function toggleScan() {
-        if (!root.adapter || !root.adapter.enabled)
-            return
-        if (root.adapter.discovering) {
-            root.stopScan()
-            return
-        }
-        root.adapter.discovering = true
-        scanTimer.restart()
     }
 
     function rebuild() {
@@ -198,7 +176,7 @@ Item {
         }
         root.focusCount = 0
         if (root.wasOpen)
-            root.stopScan()
+            BluetoothService.stopScan()
         root.wasOpen = false
         root.forgetAddress = ""
         root.renameAddress = ""
@@ -207,13 +185,6 @@ Item {
     Keys.onEscapePressed: (event) => {
         event.accepted = true
         root.closeRequested()
-    }
-
-    Timer {
-        id: scanTimer
-        interval: Math.max(1, Config.bluetoothScanSeconds) * 1000
-        repeat: false
-        onTriggered: root.stopScan()
     }
 
     Timer {
@@ -511,7 +482,7 @@ Item {
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
-                onClicked: root.toggleScan()
+                onClicked: BluetoothService.toggleScan()
 
                 HoverTip {
                     message: "Scan for nearby devices. Stops after " + Config.bluetoothScanSeconds + " seconds."
