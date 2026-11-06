@@ -26,6 +26,7 @@ Rectangle {
     readonly property bool showGpu: Config.showStatGpu
     readonly property bool showVram: Config.showStatVram
     readonly property bool showGauges: Config.showStatGauges
+    readonly property int gaugeWidth: StatsSettings.gaugeWidthValue()
     readonly property color face: root.theme.colFg
     readonly property string faceFont: Config.fontClamp(Config.statFont)
     readonly property bool faceBold: Config.statBold !== false
@@ -116,6 +117,7 @@ Rectangle {
             faceItalic: root.faceItalic
             facePercent: root.facePercent
             showGauge: root.showGauges
+            gaugeWidth: root.gaugeWidth
             known: true
             fraction: root.cpuUtil / 100
             sectionHeight: root.sectionHeight
@@ -156,6 +158,7 @@ Rectangle {
             faceItalic: root.faceItalic
             facePercent: root.facePercent
             showGauge: root.showGauges
+            gaugeWidth: root.gaugeWidth
             known: true
             fraction: root.memUtil / 100
             sectionHeight: root.sectionHeight
@@ -196,6 +199,7 @@ Rectangle {
             faceItalic: root.faceItalic
             facePercent: root.facePercent
             showGauge: root.showGauges
+            gaugeWidth: root.gaugeWidth
             known: root.gpuKnown
             fraction: root.gpuUtil / 100
             sectionHeight: root.sectionHeight
@@ -236,6 +240,7 @@ Rectangle {
             faceItalic: root.faceItalic
             facePercent: root.facePercent
             showGauge: root.showGauges
+            gaugeWidth: root.gaugeWidth
             known: root.vramKnown
             fraction: root.vramUtil / 100
             sectionHeight: root.sectionHeight

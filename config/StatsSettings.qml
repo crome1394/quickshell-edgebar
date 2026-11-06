@@ -33,6 +33,23 @@ Singleton {
         return Config.fontPercentNorm(Config.statFontPercent)
     }
 
+    // Bar graph width in pixels, before the bar's scale.
+    function gaugeWidthNorm(px) {
+        const step = Math.max(1, Theme.statGaugeWidthStep)
+        let n = Math.round(Number(px) / step) * step
+        if (isNaN(n))
+            n = Theme.statGaugeWidth
+        if (n < Theme.statGaugeWidthMin)
+            n = Theme.statGaugeWidthMin
+        if (n > Theme.statGaugeWidthMax)
+            n = Theme.statGaugeWidthMax
+        return n
+    }
+
+    function gaugeWidthValue() {
+        return root.gaugeWidthNorm(Config.statGaugeWidth)
+    }
+
     function anyShown() {
         return !!Config.showStatCpu || !!Config.showStatMem || !!Config.showStatGpu || !!Config.showStatVram
     }
@@ -280,6 +297,7 @@ Singleton {
             gpu: !!src.gpu,
             vram: !!src.vram,
             gauges: !!src.gauges,
+            gaugeWidth: root.gaugeWidthNorm(src.gaugeWidth),
             terminal: root.terminalNorm(src.terminal),
             actions: root.actionsNorm(src.actions),
             font: Config.fontClamp(src.font),
@@ -297,6 +315,7 @@ Singleton {
             gpu: Config.showStatGpu,
             vram: Config.showStatVram,
             gauges: Config.showStatGauges,
+            gaugeWidth: Config.statGaugeWidth,
             terminal: Config.statTerminal,
             actions: root.savedActions(),
             font: Config.statFont,
@@ -314,6 +333,7 @@ Singleton {
             gpu: true,
             vram: true,
             gauges: true,
+            gaugeWidth: Theme.statGaugeWidth,
             terminal: "kitty",
             actions: root.actionsNorm({ cpuLeft: { cmd: "btop", term: true }, gpuLeft: { cmd: "nvtop", term: true } }),
             font: "",
@@ -332,6 +352,7 @@ Singleton {
             Config.showStatGpu = clean.gpu
             Config.showStatVram = clean.vram
             Config.showStatGauges = clean.gauges
+            Config.statGaugeWidth = clean.gaugeWidth
             Config.statTerminal = clean.terminal
             Config.statActionsJson = JSON.stringify(clean.actions)
             Config.statFont = clean.font

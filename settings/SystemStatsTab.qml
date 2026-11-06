@@ -191,6 +191,31 @@ Item {
                         checked: StatsSettings.editor.value.gauges
                         onToggled: StatsSettings.editor.set("gauges", !StatsSettings.editor.value.gauges)
                     }
+
+                    Column {
+                        visible: StatsSettings.editor.value.gauges
+                        width: parent.width
+                        spacing: Theme.tabGap
+
+                        Text {
+                            width: parent.width
+                            text: "Bar graph width"
+                            color: Theme.text
+                            font.family: Theme.uiFont
+                            font.pixelSize: Theme.fontPx
+                        }
+
+                        IntSlider {
+                            width: parent.width
+                            from: Theme.statGaugeWidthMin
+                            to: Theme.statGaugeWidthMax
+                            step: Theme.statGaugeWidthStep
+                            value: StatsSettings.editor.value.gaugeWidth
+                            readout: StatsSettings.editor.value.gaugeWidth + " px"
+                            tip: "Width of each bar graph, from " + Theme.statGaugeWidthMin + " to " + Theme.statGaugeWidthMax + " px. Default " + Theme.statGaugeWidth + "."
+                            onChanged: (value) => StatsSettings.editor.set("gaugeWidth", value)
+                        }
+                    }
                 }
             }
 

@@ -142,6 +142,10 @@ Singleton {
     readonly property int statGaugeHeight: 7
     readonly property int statGaugeRadius: 3
     readonly property int statGaugeMinWidth: 18
+    // Bar graph width choices under Widgets → System Stats.
+    readonly property int statGaugeWidthMin: 20
+    readonly property int statGaugeWidthMax: 120
+    readonly property int statGaugeWidthStep: 4
     readonly property int statGaugeMinHeight: 4
     readonly property int statRowGap: 5
     readonly property int statValGap: 3

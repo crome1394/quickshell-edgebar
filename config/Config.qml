@@ -78,6 +78,7 @@ Singleton {
     property alias showStatGpu: data.showStatGpu
     property alias showStatVram: data.showStatVram
     property alias showStatGauges: data.showStatGauges
+    property alias statGaugeWidth: data.statGaugeWidth
     property alias statTerminal: data.statTerminal
     property alias statClick: data.statClick
     property alias statActionsJson: data.statActionsJson
@@ -437,6 +438,7 @@ Singleton {
             property bool showStatGpu: true
             property bool showStatVram: true
             property bool showStatGauges: true
+            property int statGaugeWidth: 56
             property string statTerminal: "kitty"
             property string statClick: "left"
             property string statActionsJson: ""
