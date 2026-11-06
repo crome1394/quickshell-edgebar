@@ -2,12 +2,14 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell.Services.Pipewire
 import qs.components
+import qs.config
 import qs.services
 import qs.settings
 import qs.theme
 
 // Playback or Recording in the audio menu: pick a detected device, its card
-// profile, volume and mute, each channel's level, and a live meter.
+// profile, volume and mute, each channel's level, and a live meter. The
+// title collapses it to one line showing the chosen device and its volume.
 Column {
     id: root
 
@@ -17,6 +19,10 @@ Column {
     required property var devices
     required property var current
     property bool live: true
+    property bool expanded: true
+    property bool meter: true
+
+    signal toggleRequested()
 
     readonly property var card: AudioCardService.cardFor(root.current)
     readonly property var profileChoices: AudioCardService.choicesFor(root.card)
@@ -45,7 +51,7 @@ Column {
     function setMaster(pct) {
         if (!root.ready)
             return
-        const target = Math.max(0, Math.min(Theme.volumeMax, pct)) / 100
+        const target = Math.max(0, Math.min(Theme.volumeMax, AudioSettings.limitRaise(root.masterPercent(), pct))) / 100
         const now = root.volumes.slice()
         const top = Math.max(...now.map(v => Number(v) || 0), 0)
         root.current.audio.volumes = top > 0 ? now.map(v => (Number(v) || 0) * target / top) : now.map(() => target)
@@ -55,7 +61,7 @@ Column {
         if (!root.ready)
             return
         const next = root.volumes.slice()
-        next[index] = Math.max(0, Math.min(Theme.volumeMax, pct)) / 100
+        next[index] = Math.max(0, Math.min(Theme.volumeMax, AudioSettings.limitRaise(root.percent(next[index]), pct))) / 100
         root.current.audio.volumes = next
     }
 
@@ -74,19 +80,76 @@ Column {
             Pipewire.preferredDefaultAudioSource = node
     }
 
+    function summary() {
+        if (!root.current)
+            return root.sink ? "No output" : "No input"
+        const level = root.ready ? (root.current.audio.muted ? "Muted" : root.masterPercent() + "%") : ""
+        return root.label(root.current) + (level.length ? "  ·  " + level : "")
+    }
+
     spacing: Theme.tabGap
 
-    Text {
+    // Title row: click to collapse or expand.
+    Rectangle {
         width: parent.width
-        text: root.title
-        color: root.theme.colAccent
-        font.family: root.theme.uiFont
-        font.pixelSize: root.theme.fontPx
-        font.bold: true
+        height: Theme.chip
+        radius: Theme.radiusSm
+        color: headerMouse.containsMouse ? root.theme.colHover : "transparent"
+
+        Text {
+            id: chevron
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            width: Theme.chip / 2 + Theme.tabGap
+            text: root.expanded ? "▾" : "▸"
+            color: root.theme.colAccent
+            font.family: root.theme.uiFont
+            font.pixelSize: root.theme.fontPx
+        }
+
+        Text {
+            id: titleText
+            anchors.left: chevron.right
+            anchors.verticalCenter: parent.verticalCenter
+            text: root.title
+            color: root.theme.colAccent
+            font.family: root.theme.uiFont
+            font.pixelSize: root.theme.fontPx
+            font.bold: true
+        }
+
+        Text {
+            visible: !root.expanded
+            anchors.left: titleText.right
+            anchors.leftMargin: Theme.space * 2
+            anchors.right: parent.right
+            anchors.rightMargin: Theme.tabGap
+            anchors.verticalCenter: parent.verticalCenter
+            horizontalAlignment: Text.AlignRight
+            elide: Text.ElideRight
+            textFormat: Text.PlainText
+            text: root.summary()
+            color: root.theme.colFgMuted
+            font.family: root.theme.uiFont
+            font.pixelSize: root.theme.smallPx
+        }
+
+        MouseArea {
+            id: headerMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: root.toggleRequested()
+
+            HoverTip {
+                message: root.expanded ? "Collapse " + root.title : "Expand " + root.title
+                show: headerMouse.containsMouse
+            }
+        }
     }
 
     Text {
-        visible: root.devices.length === 0
+        visible: root.expanded && root.devices.length === 0
         width: parent.width
         text: root.sink ? "No playback devices found." : "No recording devices found."
         color: root.theme.colFgMuted
@@ -96,7 +159,7 @@ Column {
 
     // Detected devices only. The chosen one is the default.
     Repeater {
-        model: root.devices
+        model: root.expanded ? root.devices : []
         delegate: Rectangle {
             id: deviceRow
             required property var modelData
@@ -147,7 +210,7 @@ Column {
 
     // Controls for the chosen device.
     Column {
-        visible: root.ready
+        visible: root.expanded && root.ready
         width: parent.width
         spacing: Theme.tabGap
 
@@ -181,9 +244,9 @@ Column {
             IntSlider {
                 width: parent.width - muteChip.width - Theme.tabGap
                 from: 0
-                to: Theme.volumeMax
+                to: AudioSettings.volumeCap()
                 step: Theme.volumeStep
-                value: root.masterPercent()
+                value: Math.min(root.masterPercent(), AudioSettings.volumeCap())
                 readout: root.masterPercent() + "%"
                 tip: "Volume. Moves every channel together, keeping the balance."
                 onChanged: (value) => root.setMaster(value)
@@ -211,9 +274,9 @@ Column {
                 IntSlider {
                     width: parent.width - channelLabel.width - Theme.tabGap
                     from: 0
-                    to: Theme.volumeMax
+                    to: AudioSettings.volumeCap()
                     step: Theme.volumeStep
-                    value: root.percent(root.volumes[channelRow.index])
+                    value: Math.min(root.percent(root.volumes[channelRow.index]), AudioSettings.volumeCap())
                     readout: root.percent(root.volumes[channelRow.index]) + "%"
                     tip: root.channelName(channelRow.index) + " channel only"
                     onChanged: (value) => root.setChannel(channelRow.index, value)
@@ -222,10 +285,11 @@ Column {
         }
 
         LevelMeter {
+            visible: root.meter
             width: parent.width
             theme: root.theme
             node: root.current
-            live: root.live && !(root.ready && root.current.audio.muted)
+            live: root.meter && root.expanded && root.live && !(root.ready && root.current.audio.muted)
         }
     }
 }

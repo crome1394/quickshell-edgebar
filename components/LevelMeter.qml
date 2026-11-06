@@ -3,14 +3,28 @@ import QtQuick
 import Quickshell.Services.Pipewire
 import qs.theme
 
-// A live level meter for one PipeWire node, one bar per channel. Peaks come
-// from PipeWire itself (PwNodePeakMonitor); it runs only while `live`.
+// A live level meter for one PipeWire node, one bar per channel, or one bar
+// for the loudest channel when `combined`. Peaks come from PipeWire itself
+// (PwNodePeakMonitor); it runs only while `live`.
 Column {
     id: root
 
     required property var node
     required property var theme
     property bool live: true
+    property bool combined: false
+
+    readonly property int channels: monitor.peaks ? monitor.peaks.length : 0
+
+    function peakAt(index) {
+        const peaks = monitor.peaks || []
+        if (!root.combined)
+            return Number(peaks[index]) || 0
+        let top = 0
+        for (let i = 0; i < peaks.length; i++)
+            top = Math.max(top, Number(peaks[i]) || 0)
+        return top
+    }
 
     spacing: Theme.borderWidth
 
@@ -21,11 +35,11 @@ Column {
     }
 
     Repeater {
-        model: monitor.peaks ? monitor.peaks.length : 0
+        model: root.combined ? Math.min(1, root.channels) : root.channels
         delegate: Rectangle {
             id: bar
             required property int index
-            readonly property real level: Math.max(0, Math.min(1, Number(monitor.peaks[bar.index]) || 0))
+            readonly property real level: Math.max(0, Math.min(1, root.peakAt(bar.index)))
             width: root.width
             height: Theme.audioMeterHeight
             radius: height / 2

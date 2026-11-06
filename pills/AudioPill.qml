@@ -15,7 +15,7 @@ Rectangle {
     property real widthFactor: 1
 
     property string tipText: "Audio"
-    property bool menuOpen: false
+    readonly property bool menuOpen: AudioMenuService.open
     property bool dockHot: dock.mag > 1.01 || Math.abs(dock.jumpY) > 0.5
 
     readonly property real ui: WidgetService.uiScale
@@ -140,7 +140,7 @@ Rectangle {
                 onClicked: (mouse) => {
                     dock.play()
                     if (mouse.button === Qt.LeftButton)
-                        root.menuOpen = !root.menuOpen
+                        AudioMenuService.toggle()
                     else
                         levels.toggleMute("out")
                 }
@@ -224,7 +224,7 @@ Rectangle {
                 onClicked: (mouse) => {
                     dock.play()
                     if (mouse.button === Qt.LeftButton)
-                        root.menuOpen = !root.menuOpen
+                        AudioMenuService.toggle()
                     else
                         levels.toggleMute("in")
                 }
@@ -291,7 +291,7 @@ Rectangle {
         anchor.item: root
         anchor.adjustment: PopupAdjustment.Slide
         // qmllint enable missing-property
-        onClosed: root.menuOpen = false
+        onClosed: AudioMenuService.hide()
 
         Rectangle {
             anchors.fill: parent
@@ -305,7 +305,7 @@ Rectangle {
                 anchors.fill: parent
                 theme: root.theme
                 open: root.menuOpen
-                onCloseRequested: root.menuOpen = false
+                onCloseRequested: AudioMenuService.hide()
             }
         }
     }
