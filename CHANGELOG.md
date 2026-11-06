@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- The Bluetooth pill shows the battery of a connected device next to the icon (the lowest one when several report a battery). The tooltip lists each device's charge.
+- Bluetooth pairing is more reliable. Pairing and connecting stop any running scan first. A newly paired device is trusted and connected right away, so headsets and speakers reconnect on their own later. A pairing in progress can be cancelled.
+- Settings → Bluetooth: Discover devices stops after the scan length instead of running until turned off. Clicking a device that is not paired now pairs it instead of forcing a raw connect.
+- `services/BluetoothService.qml` holds the shared scan timer, the pair → trust → connect flow, and the battery helper.
+
 ## 0.1.5 — 2026-11-05
 
 - Tailscale is a bar widget. The pill shows the Tailscale mark, dim when off. Right-click turns Tailscale on or off. Left-click opens a menu with an on/off switch, this device's name, IPv4, IPv6, and DNS name with copy buttons, the tailnet and version, health warnings while connected, a login button when needed, an account switcher when there is more than one, the exit node (with search for long lists, such as Mullvad), options for Use Tailscale DNS, Accept subnet routes, Allow LAN with exit node, Shields up, Tailscale SSH, and Offer as exit node, and the machines on the tailnet with their OS, address, direct or relay connection, last seen, exit-node badge, copy buttons, and Taildrop send (through a zenity file picker). The status check runs every 30 seconds while the pill is on the bar, and every 3 seconds while its menu is open. Turn it on under Widgets.

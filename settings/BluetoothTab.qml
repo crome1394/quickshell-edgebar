@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell.Bluetooth
 import qs.config
+import qs.services
 import qs.theme
 
 Item {
@@ -145,12 +146,9 @@ Item {
                         width: parent.width
                         title: "Discover devices"
                         detail: root.adapter && root.adapter.discovering ? "Scanning" : "Idle"
-                        tip: "Scan for nearby devices"
+                        tip: "Scan for nearby devices. Stops after " + Config.bluetoothScanSeconds + " seconds."
                         checked: !!(root.adapter && root.adapter.discovering)
-                        onToggled: {
-                            if (root.adapter)
-                                root.adapter.discovering = !root.adapter.discovering
-                        }
+                        onToggled: BluetoothService.toggleScan()
                     }
 
                     Repeater {
@@ -162,10 +160,18 @@ Item {
                             visible: !device.modelData.paired
                             width: btCol.width
                             title: String(device.modelData.name || device.modelData.deviceName || device.modelData.address || "Device")
-                            detail: device.modelData.connected ? "Connected" : "Available"
-                            tip: device.modelData.connected ? "Disconnect this device" : "Connect this device"
+                            detail: device.modelData.pairing ? "Pairing…" : (device.modelData.connected ? "Connected" : "Available")
+                            tip: device.modelData.pairing ? "Cancel pairing" : (device.modelData.connected ? "Disconnect this device" : "Pair and connect this device")
                             checked: !!device.modelData.connected
-                            onToggled: device.modelData.connected = !device.modelData.connected
+                            onToggled: {
+                                const target = device.modelData
+                                if (target.pairing)
+                                    BluetoothService.cancelPair(target)
+                                else if (target.connected)
+                                    target.disconnect()
+                                else
+                                    BluetoothService.pair(target)
+                            }
                         }
                     }
                 }
@@ -208,7 +214,13 @@ Item {
                             detail: pairedDevice.modelData.connected ? "Connected" : "Paired"
                             tip: pairedDevice.modelData.connected ? "Disconnect this device" : "Connect this device"
                             checked: !!pairedDevice.modelData.connected
-                            onToggled: pairedDevice.modelData.connected = !pairedDevice.modelData.connected
+                            onToggled: {
+                                const target = pairedDevice.modelData
+                                if (target.connected)
+                                    target.disconnect()
+                                else
+                                    BluetoothService.connect(target)
+                            }
                         }
                     }
                 }
