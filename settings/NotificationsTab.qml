@@ -15,7 +15,6 @@ Item {
         { id: "bottomRight", label: "Bottom right", tip: "Toasts stack upward from the bottom right" }
     ]
 
-    Component.onCompleted: Config.ensureNotiEditor()
 
     Flickable {
         id: scroll
@@ -89,7 +88,7 @@ Item {
                                         required property var modelData
                                         required property int index
                                         readonly property string cornerId: String(cornerChip.modelData.id || "")
-                                        readonly property bool chosen: Config.notiCornerNorm(Config.editorNotiCorner) === cornerChip.cornerId
+                                        readonly property bool chosen: NotificationSettings.editor.value.corner === cornerChip.cornerId
 
                                         width: cornerLabel.implicitWidth + Theme.space * 2
                                         height: Theme.fieldHeight
@@ -113,7 +112,7 @@ Item {
                                             anchors.fill: parent
                                             hoverEnabled: true
                                             cursorShape: Qt.PointingHandCursor
-                                            onClicked: Config.editNotiCorner(cornerChip.cornerId)
+                                            onClicked: NotificationSettings.editor.set("corner", cornerChip.cornerId)
 
                                             HoverTip {
                                                 message: String(cornerChip.modelData.tip || "")
@@ -137,10 +136,10 @@ Item {
                                 from: 0
                                 to: Theme.notificationTimeoutMax
                                 step: 1
-                                value: Config.editorNotiTimeout
-                                readout: Config.editorNotiTimeout + "s"
+                                value: NotificationSettings.editor.value.timeout
+                                readout: NotificationSettings.editor.value.timeout + "s"
                                 tip: "How long a normal toast stays. 0 keeps it up until you close it."
-                                onChanged: (value) => Config.editNotiTimeout(value)
+                                onChanged: (value) => NotificationSettings.editor.set("timeout", value)
                             }
                         }
                     }
@@ -174,8 +173,8 @@ Item {
                                 title: "Keep messages expanded"
                                 detail: "The list opens fully expanded. New messages stay expanded."
                                 tip: "Open the history list with every message expanded"
-                                checked: Config.editorNotiExpand
-                                onToggled: Config.editNotiExpand(!Config.editorNotiExpand)
+                                checked: NotificationSettings.editor.value.expand
+                                onToggled: NotificationSettings.editor.set("expand", !NotificationSettings.editor.value.expand)
                             }
 
                             CheckRow {
@@ -183,8 +182,8 @@ Item {
                                 title: "Stagger row colors"
                                 detail: "Alternate a modest shade between notifications."
                                 tip: "Alternate the row background. The selected row still uses the accent."
-                                checked: Config.editorNotiStagger
-                                onToggled: Config.editNotiStagger(!Config.editorNotiStagger)
+                                checked: NotificationSettings.editor.value.stagger
+                                onToggled: NotificationSettings.editor.set("stagger", !NotificationSettings.editor.value.stagger)
                             }
 
                             CheckRow {
@@ -192,8 +191,8 @@ Item {
                                 title: "Clear history at boot"
                                 detail: "Empties the list the next time the computer starts."
                                 tip: "A reload in the same boot keeps the list"
-                                checked: Config.editorNotiClearBoot
-                                onToggled: Config.editNotiClearBoot(!Config.editorNotiClearBoot)
+                                checked: NotificationSettings.editor.value.clearBoot
+                                onToggled: NotificationSettings.editor.set("clearBoot", !NotificationSettings.editor.value.clearBoot)
                             }
 
                             CheckRow {
@@ -201,8 +200,8 @@ Item {
                                 title: "Show counter"
                                 detail: "The number on the bell. The list still shows how many are kept."
                                 tip: "Show the count badge on the bell"
-                                checked: Config.editorNotiShowCount
-                                onToggled: Config.editNotiShowCount(!Config.editorNotiShowCount)
+                                checked: NotificationSettings.editor.value.showCount
+                                onToggled: NotificationSettings.editor.set("showCount", !NotificationSettings.editor.value.showCount)
                             }
                         }
                     }
@@ -216,13 +215,13 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        applyEnabled: Config.notiEditorDirty
-        undoEnabled: Config.canUndoNoti()
+        applyEnabled: NotificationSettings.editor.dirty
+        undoEnabled: NotificationSettings.editor.canUndo
         applyTip: "Save the toast corner, the timeout, and the history options"
         undoTip: "Drop an unsaved draft, or put back the last applied one"
         resetTip: "Restore bottom right, 8 seconds, staggered rows, and the counter. Apply saves it."
-        onApplyClicked: Config.applyNotiEditor()
-        onUndoClicked: Config.undoNotiEditor()
-        onResetClicked: Config.resetNotiEditor()
+        onApplyClicked: NotificationSettings.editor.apply()
+        onUndoClicked: NotificationSettings.editor.undo()
+        onResetClicked: NotificationSettings.editor.reset()
     }
 }
