@@ -48,7 +48,7 @@ Singleton {
     readonly property int headerHeight: 40
     readonly property int tabHeight: 32
     readonly property int tabGap: 6
-    readonly property int tabMinWidth: 108
+    readonly property int tabMinWidth: 100
     readonly property int fieldHeight: 30
     readonly property int slotMinHeight: 112
     readonly property int sliderHeight: 22
@@ -156,6 +156,14 @@ Singleton {
     readonly property int barRevealDelayMin: 0
     readonly property int barRevealDelayMax: 1000
     readonly property int barDelayStep: 50
+
+    // Settings → Tools. Longest path or program name a page accepts.
+    readonly property int toolPathMax: 1024
+
+    // Settings → Tools → Screensaver. Minutes of idle before it starts.
+    readonly property int screensaverMinutesMin: 1
+    readonly property int screensaverMinutesMax: 180
+    readonly property int screensaverMinutesDefault: 10
 
     // Settings → System → Display.
     readonly property int displayConfirmSeconds: 15

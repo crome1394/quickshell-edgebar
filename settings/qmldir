@@ -48,3 +48,7 @@ ChipButton 1.0 ChipButton.qml
 ResolutionTile 1.0 ResolutionTile.qml
 TransparencyTab 1.0 TransparencyTab.qml
 OpacityOverrideCard 1.0 OpacityOverrideCard.qml
+ScreensaverTab 1.0 ScreensaverTab.qml
+CaptureTab 1.0 CaptureTab.qml
+ToolsTab 1.0 ToolsTab.qml
+PathField 1.0 PathField.qml

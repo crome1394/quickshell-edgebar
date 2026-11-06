@@ -153,7 +153,7 @@
             "pkg": "zenity",
             "area": "Tailscale",
             "need": "optional",
-            "use": "File picker for Taildrop"
+            "use": "File pickers for Taildrop, the screensaver, and capture"
         },
         {
             "name": "hyprpaper",
@@ -168,6 +168,62 @@
             "area": "Region",
             "need": "optional",
             "use": "Change the time zone"
+        },
+        {
+            "name": "grim",
+            "pkg": "grim",
+            "area": "Capture",
+            "need": "optional",
+            "use": "Screenshots and OCR capture"
+        },
+        {
+            "name": "slurp",
+            "pkg": "slurp",
+            "area": "Capture",
+            "need": "optional",
+            "use": "Select a region to capture"
+        },
+        {
+            "name": "hyprpicker",
+            "pkg": "hyprpicker",
+            "area": "Capture",
+            "need": "optional",
+            "use": "Freeze the screen while selecting"
+        },
+        {
+            "name": "jq",
+            "pkg": "jq",
+            "area": "Capture",
+            "need": "optional",
+            "use": "Window outlines for screenshots"
+        },
+        {
+            "name": "tesseract",
+            "pkg": "tesseract",
+            "area": "Capture",
+            "need": "optional",
+            "use": "Read text for OCR capture (plus tesseract-data-<language>)"
+        },
+        {
+            "name": "satty",
+            "pkg": "satty",
+            "area": "Capture",
+            "need": "optional",
+            "use": "Edit a screenshot from its toast"
+        },
+        {
+            "name": "hypridle",
+            "pkg": "hypridle",
+            "area": "Screensaver",
+            "need": "optional",
+            "use": "Starts the screensaver after idle"
+        },
+        {
+            "name": "ddcutil",
+            "pkg": "ddcutil",
+            "area": "Screensaver",
+            "need": "optional",
+            "use": "Dim the monitor while the screensaver runs"
         },
         {
             "name": "hyprlock",

@@ -14,3 +14,5 @@ singleton DependencyService 1.0 DependencyService.qml
 singleton AudioCardService 1.0 AudioCardService.qml
 singleton BluetoothService 1.0 BluetoothService.qml
 singleton DisplayService 1.0 DisplayService.qml
+singleton ScreensaverService 1.0 ScreensaverService.qml
+singleton CaptureService 1.0 CaptureService.qml

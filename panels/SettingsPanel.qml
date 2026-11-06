@@ -86,7 +86,7 @@ FloatingWindow {
     // qs ipc call settings open
     // qs ipc call settings openTab applications menu
     // Tab ids: bar, widgets, wallpaper, applications, connectivity, audio,
-    // notifications, region, system. The section is optional ("" for none)
+    // notifications, region, system, tools. The section is optional ("" for none)
     // and each tab ignores sections it does not have.
     IpcHandler {
         target: "settings"
@@ -126,6 +126,7 @@ FloatingWindow {
         window.pushReveal(applicationsPage, "applications")
         window.pushReveal(connectivityPage, "connectivity")
         window.pushReveal(systemPage, "system")
+        window.pushReveal(toolsPage, "tools")
     }
 
     Shortcut {
@@ -339,6 +340,19 @@ FloatingWindow {
             onLoaded: window.pushReveal(systemPage, "system")
         }
 
+        Loader {
+            id: toolsPage
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: header.bottom
+            anchors.bottom: tabs.top
+            anchors.margins: Theme.space
+            active: window.visible && window.currentTab === "tools"
+            visible: window.currentTab === "tools"
+            source: toolsPage.active ? Qt.resolvedUrl("../settings/ToolsTab.qml") : ""
+            onLoaded: window.pushReveal(toolsPage, "tools")
+        }
+
         Connections {
             target: regionPage.item
             function onCloseRequested() {
@@ -361,7 +375,8 @@ FloatingWindow {
                 { id: "audio", label: "Audio" },
                 { id: "notifications", label: "Notifications" },
                 { id: "region", label: "Region & Clock" },
-                { id: "system", label: "System" }
+                { id: "system", label: "System" },
+                { id: "tools", label: "Tools" }
             ]
             currentId: window.currentTab
             onSelected: (tabId) => { window.currentTab = tabId }
