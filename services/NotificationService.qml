@@ -176,8 +176,8 @@ Singleton {
         toastProc.command = [
             "python3",
             Quickshell.shellDir + "/scripts/swaync-corner.py",
-            Config.notiCornerValue(),
-            String(Config.notiTimeoutValue())
+            NotificationSettings.cornerValue(),
+            String(NotificationSettings.timeoutValue())
         ]
         toastProc.running = true
     }
@@ -341,8 +341,12 @@ Singleton {
             if (Config.ready)
                 root.applyToast()
         }
-        function onNotiApplySerialChanged() {
-            if (Config.notiApplySerial > 0)
+    }
+
+    Connections {
+        target: NotificationSettings
+        function onApplySerialChanged() {
+            if (NotificationSettings.applySerial > 0)
                 root.applyToast()
         }
     }
