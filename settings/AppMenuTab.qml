@@ -19,11 +19,11 @@ Item {
 
     readonly property int scrollGutter: Theme.space + Theme.tabGap
     readonly property int styleWidth: Theme.chip + Theme.borderWidth * 4
-    readonly property int displayPx: Config.editorMenuFontPx >= Theme.menuFontMin
-        ? Config.editorMenuFontPx
+    readonly property int displayPx: MenuSettings.editor.value.px >= Theme.menuFontMin
+        ? MenuSettings.editor.value.px
         : Theme.iconPx
-    readonly property color previewColor: Config.editorMenuColor.length ? Config.editorMenuColor : Theme.text
-    readonly property string fontLabel: Config.editorMenuFont.length ? Config.editorMenuFont : "Icon font"
+    readonly property color previewColor: MenuSettings.editor.value.color.length ? MenuSettings.editor.value.color : Theme.text
+    readonly property string fontLabel: MenuSettings.editor.value.font.length ? MenuSettings.editor.value.font : "Icon font"
 
     function takeFonts(text) {
         const lines = String(text || "").split("\n")
@@ -84,29 +84,29 @@ Item {
     }
 
     function applyPage() {
-        if (Config.applyMenuEditor())
+        if (MenuSettings.apply())
             root.formError = ""
         else
             root.formError = "The command needs a program and arguments, with no shell characters."
     }
 
     Component.onCompleted: {
-        Config.ensureMenuEditor()
-        symbolField.text = Config.editorMenuSymbol
-        commandField.text = Config.editorMenuCommand
+        symbolField.text = MenuSettings.editor.value.symbol
+        commandField.text = MenuSettings.editor.value.command
         root.formReady = true
         fontList.running = true
     }
 
+    // Undo, Reset, and Apply change the draft; keep the text fields in step.
     Connections {
-        target: Config
-        function onEditorMenuSymbolChanged() {
-            if (root.formReady && symbolField.text !== Config.editorMenuSymbol)
-                symbolField.text = Config.editorMenuSymbol
-        }
-        function onEditorMenuCommandChanged() {
-            if (root.formReady && commandField.text !== Config.editorMenuCommand)
-                commandField.text = Config.editorMenuCommand
+        target: MenuSettings.editor
+        function onValueChanged() {
+            if (!root.formReady)
+                return
+            if (symbolField.text !== MenuSettings.editor.value.symbol)
+                symbolField.text = MenuSettings.editor.value.symbol
+            if (commandField.text !== MenuSettings.editor.value.command)
+                commandField.text = MenuSettings.editor.value.command
         }
     }
 
@@ -123,7 +123,7 @@ Item {
     ColorDialog {
         id: colors
         title: "Application Menu color"
-        onAccepted: Config.editMenuColor(selectedColor)
+        onAccepted: MenuSettings.editor.set("color", String(selectedColor))
     }
 
     Flickable {
@@ -199,10 +199,10 @@ Item {
                             leftPadding: Theme.space
                             color: root.previewColor
                             placeholderTextColor: Theme.subtext
-                            font.family: Config.editorMenuFont.length ? Config.editorMenuFont : Theme.iconFont
+                            font.family: MenuSettings.editor.value.font.length ? MenuSettings.editor.value.font : Theme.iconFont
                             font.pixelSize: Theme.fontPx
-                            font.bold: Config.editorMenuBold
-                            font.italic: Config.editorMenuItalic
+                            font.bold: MenuSettings.editor.value.bold
+                            font.italic: MenuSettings.editor.value.italic
                             background: Rectangle {
                                 radius: Theme.radiusSm
                                 color: symbolField.activeFocus ? Theme.hover : Theme.fieldBg
@@ -215,8 +215,8 @@ Item {
                                 const next = Config.symbolClamp(text)
                                 if (text !== next)
                                     text = next
-                                if (next !== Config.editorMenuSymbol)
-                                    Config.editMenuSymbol(next)
+                                if (next !== MenuSettings.editor.value.symbol)
+                                    MenuSettings.editor.set("symbol", next)
                             }
 
                             HoverHandler {
@@ -286,11 +286,11 @@ Item {
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: (mouse) => {
                                         if (mouse.button === Qt.RightButton) {
-                                            Config.editMenuColor("")
+                                            MenuSettings.editor.set("color", "")
                                             return
                                         }
-                                        if (Config.editorMenuColor.length)
-                                            colors.selectedColor = Config.editorMenuColor
+                                        if (MenuSettings.editor.value.color.length)
+                                            colors.selectedColor = MenuSettings.editor.value.color
                                         colors.open()
                                     }
 
@@ -305,9 +305,9 @@ Item {
                                 width: root.styleWidth
                                 height: Theme.fieldHeight
                                 radius: Theme.radiusSm
-                                color: Config.editorMenuBold ? Theme.accentDim : Theme.fieldBg
+                                color: MenuSettings.editor.value.bold ? Theme.accentDim : Theme.fieldBg
                                 border.width: Theme.borderWidth
-                                border.color: Config.editorMenuBold ? Theme.accent : Theme.border
+                                border.color: MenuSettings.editor.value.bold ? Theme.accent : Theme.border
 
                                 Text {
                                     anchors.centerIn: parent
@@ -323,7 +323,7 @@ Item {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: Config.editMenuBold(!Config.editorMenuBold)
+                                    onClicked: MenuSettings.editor.set("bold", !MenuSettings.editor.value.bold)
 
                                     HoverTip {
                                         message: "Bold the symbol"
@@ -336,9 +336,9 @@ Item {
                                 width: root.styleWidth
                                 height: Theme.fieldHeight
                                 radius: Theme.radiusSm
-                                color: Config.editorMenuItalic ? Theme.accentDim : Theme.fieldBg
+                                color: MenuSettings.editor.value.italic ? Theme.accentDim : Theme.fieldBg
                                 border.width: Theme.borderWidth
-                                border.color: Config.editorMenuItalic ? Theme.accent : Theme.border
+                                border.color: MenuSettings.editor.value.italic ? Theme.accent : Theme.border
 
                                 Text {
                                     anchors.centerIn: parent
@@ -354,7 +354,7 @@ Item {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: Config.editMenuItalic(!Config.editorMenuItalic)
+                                    onClicked: MenuSettings.editor.set("italic", !MenuSettings.editor.value.italic)
 
                                     HoverTip {
                                         message: "Italic the symbol"
@@ -384,7 +384,7 @@ Item {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: Config.editMenuFontPx(Math.max(Theme.menuFontMin, root.displayPx - 1))
+                                    onClicked: MenuSettings.setFontPx(root.displayPx - 1)
 
                                     HoverTip {
                                         message: "Smaller symbol"
@@ -434,7 +434,7 @@ Item {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: Config.editMenuFontPx(Math.min(Theme.menuFontMax, root.displayPx + 1))
+                                    onClicked: MenuSettings.setFontPx(root.displayPx + 1)
 
                                     HoverTip {
                                         message: "Larger symbol"
@@ -485,8 +485,8 @@ Item {
                         onTextChanged: {
                             if (!root.formReady)
                                 return
-                            if (text !== Config.editorMenuCommand)
-                                Config.editMenuCommand(text)
+                            if (text !== MenuSettings.editor.value.command)
+                                MenuSettings.editor.set("command", text)
                             if (root.formError.length)
                                 root.formError = ""
                         }
@@ -535,9 +535,9 @@ Item {
                 readonly property string action: String(button.modelData.id || "")
                 readonly property bool enabledAction: {
                     if (button.action === "apply")
-                        return Config.menuEditorDirty
+                        return MenuSettings.editor.dirty
                     if (button.action === "undo")
-                        return Config.canUndoMenu()
+                        return MenuSettings.editor.canUndo
                     return true
                 }
                 readonly property bool applyReady: button.action === "apply" && button.enabledAction
@@ -572,10 +572,10 @@ Item {
                         if (button.action === "apply")
                             root.applyPage()
                         else if (button.action === "undo") {
-                            Config.undoMenuEditor()
+                            MenuSettings.editor.undo()
                             root.formError = ""
                         } else {
-                            Config.resetMenuEditor()
+                            MenuSettings.editor.reset()
                             root.formError = ""
                         }
                     }
@@ -604,7 +604,7 @@ Item {
                 height: parent.height
                 families: root.fontNames
                 onChosen: (family) => {
-                    Config.editMenuFont(family)
+                    MenuSettings.editor.set("font", family)
                     root.fontOpen = false
                 }
                 onDismiss: root.fontOpen = false

@@ -5,3 +5,4 @@ Draft 1.0 Draft.qml
 singleton NetworkSettings 1.0 NetworkSettings.qml
 singleton NotificationSettings 1.0 NotificationSettings.qml
 singleton ActiveWindowSettings 1.0 ActiveWindowSettings.qml
+singleton MenuSettings 1.0 MenuSettings.qml

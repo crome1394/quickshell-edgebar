@@ -20,15 +20,15 @@ Rectangle {
 
     readonly property real ui: WidgetService.uiScale
     readonly property bool side: root.edge === "left" || root.edge === "right"
-    readonly property string symbol: Config.menuSymbolValue(Config.menuSymbol)
-    readonly property int symbolPx: Math.max(1, Math.round(Config.menuPxValue() * root.ui * root.widthFactor))
+    readonly property string symbol: MenuSettings.symbolValue(Config.menuSymbol)
+    readonly property int symbolPx: Math.max(1, Math.round(MenuSettings.pxValue() * root.ui * root.widthFactor))
     readonly property string fontName: Config.menuFont.length ? Config.menuFont : root.theme.iconFont
     readonly property color ink: Config.menuColor.length
         ? Config.menuColor
         : (menuMouse.containsMouse ? root.theme.colAccent : root.theme.colFg)
 
     function launch() {
-        const command = Config.menuArgvFromLine(Config.menuCommandLine(Config.menuCommand))
+        const command = MenuSettings.savedArgv()
         if (!command || !command.length)
             return
         Quickshell.execDetached(command)
