@@ -33,6 +33,14 @@ The old bar is at <~/Projects/qs-old-bar>
 - Colors, sizes, fonts, and intervals come from the Theme and Config singletons. No hardcoded values in widgets.
 - Shell scripts are a last resort. Prefer Quickshell's native modules and D-Bus services. Any script must quote variables, validate input, write files atomically, and never build commands from untrusted text.
 
+## Testing
+- Check changes in the running bar. Open pages with
+  `qs ipc call settings openTab <tab> <section>`.
+- You may add IPC calls when a change can't be checked otherwise. Each
+  must call the same function its button calls, validate its arguments,
+  and be listed in a comment beside its IPC handler.
+- A hot reload doesn't register new QML files; restart with `qs kill; qs -d -n`.
+
 ## Goals
 Goals, in priority order:
 1. Lean at runtime: low idle CPU and memory, few child processes, fast
