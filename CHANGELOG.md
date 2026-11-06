@@ -6,6 +6,7 @@
 - Bluetooth pairing is more reliable. Pairing and connecting stop any running scan first. A newly paired device is trusted and connected right away, so headsets and speakers reconnect on their own later. A pairing in progress can be cancelled.
 - Settings → Bluetooth: Discover devices stops after the scan length instead of running until turned off. Clicking a device that is not paired now pairs it instead of forcing a raw connect.
 - `services/BluetoothService.qml` holds the shared scan timer, the pair → trust → connect flow, and the battery helper.
+- Widgets → System Stats: a Bar graph width slider (20–120 px, default 56) sits under Show Bar Graphs. Apply saves it.
 
 ## 0.1.5 — 2026-11-05
 

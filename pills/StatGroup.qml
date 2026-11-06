@@ -17,6 +17,7 @@ Rectangle {
     required property color valueColor
     required property color gaugeColor
     required property bool showGauge
+    required property int gaugeWidth
     required property bool known
     required property real fraction
     required property int sectionHeight
@@ -39,7 +40,7 @@ Rectangle {
     readonly property int innerPad: Math.max(3, Math.round(Theme.statInnerPad * root.faceScale))
     readonly property int rowGap: Math.max(3, Math.round(Theme.statRowGap * root.faceScale))
     readonly property int valGap: Math.max(2, Math.round(Theme.statValGap * root.faceScale))
-    readonly property int gaugeW: Math.max(Theme.statGaugeMinWidth, Math.round(Theme.statGaugeWidth * root.faceScale))
+    readonly property int gaugeW: Math.max(Theme.statGaugeMinWidth, Math.round(root.gaugeWidth * root.faceScale))
     readonly property int gaugeH: Math.max(Theme.statGaugeMinHeight, Math.round(Theme.statGaugeHeight * root.faceScale))
     readonly property int gaugeR: Math.max(1, Math.round(Theme.statGaugeRadius * root.faceScale))
 
