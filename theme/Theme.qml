@@ -133,6 +133,10 @@ Singleton {
     readonly property string menuSymbolDefault: "󰀻"
     readonly property int menuFontMin: 8
     readonly property int menuFontMax: 32
+    readonly property int menuImagePathMax: 1024
+    readonly property int menuPreviewSize: 64
+    // Width of the label column on form-style settings pages.
+    readonly property int formLabelWidth: 96
     readonly property int menuCommandMax: 400
 
     // System Stats face. The poll matches the old bar: one sample about every 2s.

@@ -4,9 +4,12 @@ import QtQuick.Controls
 import QtQuick.Dialogs
 import Quickshell
 import Quickshell.Io
+import qs.components
 import qs.config
 import qs.theme
 
+// Applications → Application Menu: the pill icon (a symbol or an image),
+// its size and color, and the command a click runs.
 Item {
     id: root
 
@@ -16,14 +19,18 @@ Item {
     property var fontNames: []
     property bool fontReady: false
     property string formError: ""
+    property string imageError: ""
 
+    readonly property var draft: MenuSettings.editor.value
+    readonly property bool imageMode: root.draft.mode === "image"
     readonly property int scrollGutter: Theme.space + Theme.tabGap
-    readonly property int styleWidth: Theme.chip + Theme.borderWidth * 4
-    readonly property int displayPx: MenuSettings.editor.value.px >= Theme.menuFontMin
-        ? MenuSettings.editor.value.px
-        : Theme.iconPx
-    readonly property color previewColor: MenuSettings.editor.value.color.length ? MenuSettings.editor.value.color : Theme.text
-    readonly property string fontLabel: MenuSettings.editor.value.font.length ? MenuSettings.editor.value.font : "Icon font"
+    readonly property int displayPx: root.draft.px >= Theme.menuFontMin ? root.draft.px : Theme.iconPx
+    readonly property color previewColor: root.draft.color.length ? root.draft.color : Theme.text
+    readonly property string symbolFont: root.draft.font.length ? root.draft.font : Theme.iconFont
+    readonly property string fontLabel: root.draft.font.length ? root.draft.font : "Icon font (default)"
+    readonly property string previewUrl: root.imageMode ? MenuSettings.imageUrl(root.draft.image) : ""
+    readonly property bool previewImage: previewLoader.item !== null && previewLoader.item.ready
+    readonly property bool previewFailed: previewLoader.item !== null && previewLoader.item.failed
 
     function takeFonts(text) {
         const lines = String(text || "").split("\n")
@@ -83,6 +90,20 @@ Item {
         root.fontOpen = true
     }
 
+    function openImage() {
+        const path = root.draft.image
+        const folder = path.length ? path.substring(0, path.lastIndexOf("/")) : Quickshell.env("HOME")
+        if (folder && folder.length)
+            imageDialog.currentFolder = "file://" + folder
+        imageDialog.open()
+    }
+
+    function openColor() {
+        if (root.draft.color.length)
+            colors.selectedColor = root.draft.color
+        colors.open()
+    }
+
     function applyPage() {
         if (MenuSettings.apply())
             root.formError = ""
@@ -91,8 +112,8 @@ Item {
     }
 
     Component.onCompleted: {
-        symbolField.text = MenuSettings.editor.value.symbol
-        commandField.text = MenuSettings.editor.value.command
+        symbolField.text = root.draft.symbol
+        commandField.text = root.draft.command
         root.formReady = true
         fontList.running = true
     }
@@ -103,10 +124,10 @@ Item {
         function onValueChanged() {
             if (!root.formReady)
                 return
-            if (symbolField.text !== MenuSettings.editor.value.symbol)
-                symbolField.text = MenuSettings.editor.value.symbol
-            if (commandField.text !== MenuSettings.editor.value.command)
-                commandField.text = MenuSettings.editor.value.command
+            if (symbolField.text !== root.draft.symbol)
+                symbolField.text = root.draft.symbol
+            if (commandField.text !== root.draft.command)
+                commandField.text = root.draft.command
         }
     }
 
@@ -124,6 +145,14 @@ Item {
         id: colors
         title: "Application Menu color"
         onAccepted: MenuSettings.editor.set("color", String(selectedColor))
+    }
+
+    FileDialog {
+        id: imageDialog
+        title: "Application Menu image"
+        fileMode: FileDialog.OpenFile
+        nameFilters: ["Icons (*.svg *.svgz *.png)", "SVG (*.svg *.svgz)", "PNG (*.png)"]
+        onAccepted: root.imageError = MenuSettings.setImage(String(selectedFile)) ? "" : "Pick an .svg, .svgz, or .png file."
     }
 
     Flickable {
@@ -160,7 +189,7 @@ Item {
             Text {
                 width: parent.width
                 wrapMode: Text.WordWrap
-                text: "The icon sits on the bar. A click runs the command. Apply saves this page. The widget stays off the bar until you enable Application Menu under Widgets and press Apply."
+                text: "The icon sits on the bar. A click runs the command. Apply saves this page. Turn the widget on under Widgets."
                 color: Theme.subtext
                 font.family: Theme.uiFont
                 font.pixelSize: Theme.smallPx
@@ -169,40 +198,140 @@ Item {
             SectionHeader {
                 width: parent.width
                 title: "Icon"
-                hint: "The symbol is at most 3 characters. Empty uses the nine-square icon. Empty font uses the icon font. Right-click the color to clear it."
+                hint: "Show a symbol from a font, or an SVG or PNG image. If the image cannot be loaded, the bar shows the symbol."
             }
 
-            Item {
-                width: parent.width
-                implicitHeight: iconCol.implicitHeight
-                height: iconCol.implicitHeight
+            Column {
+                x: Theme.sectionInset
+                width: parent.width - Theme.sectionInset * 2
+                spacing: Theme.space
 
-                Column {
-                    id: iconCol
-                    x: Theme.sectionInset
-                    width: parent.width - Theme.sectionInset * 2
-                    spacing: Theme.tabGap
+                // Preview and the symbol/image switch.
+                Row {
+                    width: parent.width
+                    spacing: Theme.space * 2
+
+                    Rectangle {
+                        id: preview
+                        width: Theme.menuPreviewSize
+                        height: Theme.menuPreviewSize
+                        radius: Theme.radius
+                        color: Theme.pillBg
+                        border.width: Theme.borderWidth
+                        border.color: Theme.border
+
+                        Loader {
+                            id: previewLoader
+                            anchors.centerIn: parent
+                            active: root.previewUrl.length > 0
+                            sourceComponent: Component {
+                                MenuIconImage {
+                                    source: root.previewUrl
+                                    px: root.displayPx
+                                    ink: root.previewColor
+                                    tint: root.draft.tint
+                                }
+                            }
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            visible: !root.previewImage
+                            text: MenuSettings.symbolValue(root.draft.symbol)
+                            color: root.previewColor
+                            font.family: root.symbolFont
+                            font.pixelSize: root.displayPx
+                            font.bold: root.draft.bold
+                            font.italic: root.draft.italic
+                        }
+
+                        HoverHandler {
+                            id: previewHover
+                        }
+
+                        HoverTip {
+                            message: "How the icon looks on the bar"
+                            show: previewHover.hovered
+                        }
+                    }
+
+                    Column {
+                        width: parent.width - preview.width - parent.spacing
+                        spacing: Theme.tabGap
+
+                        Text {
+                            text: "Show"
+                            color: Theme.subtext
+                            font.family: Theme.uiFont
+                            font.pixelSize: Theme.fontPx
+                        }
+
+                        Row {
+                            spacing: Theme.tabGap
+
+                            ChipButton {
+                                label: "Symbol"
+                                minWidth: Theme.fieldHeight * 3
+                                active: !root.imageMode
+                                tip: "Use a character from a font"
+                                onClicked: MenuSettings.editor.set("mode", "symbol")
+                            }
+
+                            ChipButton {
+                                label: "Image"
+                                minWidth: Theme.fieldHeight * 3
+                                active: root.imageMode
+                                tip: "Use an SVG or PNG file"
+                                onClicked: {
+                                    if (root.draft.image.length)
+                                        MenuSettings.editor.set("mode", "image")
+                                    else
+                                        root.openImage()
+                                }
+                            }
+                        }
+                    }
+                }
+
+                FormRow {
+                    width: parent.width
+                    label: "Size"
+
+                    IntSlider {
+                        width: parent.width
+                        from: Theme.menuFontMin
+                        to: Theme.menuFontMax
+                        value: root.displayPx
+                        readout: root.displayPx + " px"
+                        tip: "Icon size, from " + Theme.menuFontMin + " to " + Theme.menuFontMax + " px"
+                        onChanged: (value) => MenuSettings.setFontPx(value)
+                    }
+                }
+
+                // Symbol mode.
+                FormRow {
+                    visible: !root.imageMode
+                    width: parent.width
+                    label: "Symbol"
 
                     Row {
                         width: parent.width
-                        height: Theme.fieldHeight
-                        spacing: Theme.tabGap
+                        spacing: Theme.space
 
                         TextField {
                             id: symbolField
-                            width: Theme.iconPx * 3 + Theme.chip + Theme.space
+                            width: Theme.fieldHeight * 3
                             height: Theme.fieldHeight
                             verticalAlignment: Text.AlignVCenter
                             horizontalAlignment: Text.AlignHCenter
                             selectByMouse: true
                             placeholderText: Theme.menuSymbolDefault
-                            leftPadding: Theme.space
                             color: root.previewColor
                             placeholderTextColor: Theme.subtext
-                            font.family: MenuSettings.editor.value.font.length ? MenuSettings.editor.value.font : Theme.iconFont
+                            font.family: root.symbolFont
                             font.pixelSize: Theme.fontPx
-                            font.bold: MenuSettings.editor.value.bold
-                            font.italic: MenuSettings.editor.value.italic
+                            font.bold: root.draft.bold
+                            font.italic: root.draft.italic
                             background: Rectangle {
                                 radius: Theme.radiusSm
                                 color: symbolField.activeFocus ? Theme.hover : Theme.fieldBg
@@ -215,7 +344,7 @@ Item {
                                 const next = Config.symbolClamp(text)
                                 if (text !== next)
                                     text = next
-                                if (next !== MenuSettings.editor.value.symbol)
+                                if (next !== root.draft.symbol)
                                     MenuSettings.editor.set("symbol", next)
                             }
 
@@ -224,14 +353,35 @@ Item {
                             }
 
                             HoverTip {
-                                message: "Symbol on the icon, up to 3 characters"
+                                message: "Up to 3 characters. Empty uses the nine-square icon."
                                 show: symbolHover.hovered
                             }
                         }
 
+                        Text {
+                            width: parent.width - symbolField.width - parent.spacing
+                            height: Theme.fieldHeight
+                            verticalAlignment: Text.AlignVCenter
+                            elide: Text.ElideRight
+                            text: "Up to 3 characters"
+                            color: Theme.subtext
+                            font.family: Theme.uiFont
+                            font.pixelSize: Theme.smallPx
+                        }
+                    }
+                }
+
+                FormRow {
+                    visible: !root.imageMode
+                    width: parent.width
+                    label: "Font"
+
+                    Row {
+                        width: parent.width
+                        spacing: Theme.tabGap
+
                         Rectangle {
-                            id: fontButton
-                            width: Math.max(Theme.fieldHeight * 4, parent.width - symbolField.width - styleRow.implicitWidth - Theme.tabGap * 2)
+                            width: parent.width - fontDefault.width - parent.spacing
                             height: Theme.fieldHeight
                             radius: Theme.radiusSm
                             color: fontMouse.containsMouse ? Theme.hover : Theme.fieldBg
@@ -239,11 +389,10 @@ Item {
                             border.color: Theme.border
 
                             Text {
-                                anchors.left: parent.left
-                                anchors.right: parent.right
+                                anchors.fill: parent
                                 anchors.leftMargin: Theme.space
                                 anchors.rightMargin: Theme.space
-                                anchors.verticalCenter: parent.verticalCenter
+                                verticalAlignment: Text.AlignVCenter
                                 elide: Text.ElideRight
                                 text: root.fontLabel
                                 color: Theme.text
@@ -259,192 +408,190 @@ Item {
                                 onClicked: root.openFont()
 
                                 HoverTip {
-                                    message: "Font for the symbol. Empty uses the icon font."
+                                    message: "Choose the font for the symbol"
                                     show: fontMouse.containsMouse
                                 }
                             }
                         }
 
-                        Row {
-                            id: styleRow
-                            height: Theme.fieldHeight
-                            spacing: Theme.wsGap
-
-                            Rectangle {
-                                width: root.styleWidth
-                                height: Theme.fieldHeight
-                                radius: Theme.radiusSm
-                                color: root.previewColor
-                                border.width: Theme.borderWidth
-                                border.color: Theme.border
-
-                                MouseArea {
-                                    id: colorMouse
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    acceptedButtons: Qt.LeftButton | Qt.RightButton
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: (mouse) => {
-                                        if (mouse.button === Qt.RightButton) {
-                                            MenuSettings.editor.set("color", "")
-                                            return
-                                        }
-                                        if (MenuSettings.editor.value.color.length)
-                                            colors.selectedColor = MenuSettings.editor.value.color
-                                        colors.open()
-                                    }
-
-                                    HoverTip {
-                                        message: "Symbol color. Right-click clears it."
-                                        show: colorMouse.containsMouse
-                                    }
-                                }
-                            }
-
-                            Rectangle {
-                                width: root.styleWidth
-                                height: Theme.fieldHeight
-                                radius: Theme.radiusSm
-                                color: MenuSettings.editor.value.bold ? Theme.accentDim : Theme.fieldBg
-                                border.width: Theme.borderWidth
-                                border.color: MenuSettings.editor.value.bold ? Theme.accent : Theme.border
-
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "B"
-                                    color: Theme.text
-                                    font.bold: true
-                                    font.family: Theme.uiFont
-                                    font.pixelSize: Theme.fontPx
-                                }
-
-                                MouseArea {
-                                    id: boldMouse
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: MenuSettings.editor.set("bold", !MenuSettings.editor.value.bold)
-
-                                    HoverTip {
-                                        message: "Bold the symbol"
-                                        show: boldMouse.containsMouse
-                                    }
-                                }
-                            }
-
-                            Rectangle {
-                                width: root.styleWidth
-                                height: Theme.fieldHeight
-                                radius: Theme.radiusSm
-                                color: MenuSettings.editor.value.italic ? Theme.accentDim : Theme.fieldBg
-                                border.width: Theme.borderWidth
-                                border.color: MenuSettings.editor.value.italic ? Theme.accent : Theme.border
-
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "I"
-                                    color: Theme.text
-                                    font.italic: true
-                                    font.family: Theme.uiFont
-                                    font.pixelSize: Theme.fontPx
-                                }
-
-                                MouseArea {
-                                    id: italicMouse
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: MenuSettings.editor.set("italic", !MenuSettings.editor.value.italic)
-
-                                    HoverTip {
-                                        message: "Italic the symbol"
-                                        show: italicMouse.containsMouse
-                                    }
-                                }
-                            }
-
-                            Rectangle {
-                                width: Theme.chip
-                                height: Theme.fieldHeight
-                                radius: Theme.radiusSm
-                                color: sizeDownMouse.containsMouse ? Theme.hover : Theme.fieldBg
-                                border.width: Theme.borderWidth
-                                border.color: Theme.border
-
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "−"
-                                    color: Theme.text
-                                    font.family: Theme.uiFont
-                                    font.pixelSize: Theme.fontPx
-                                }
-
-                                MouseArea {
-                                    id: sizeDownMouse
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: MenuSettings.setFontPx(root.displayPx - 1)
-
-                                    HoverTip {
-                                        message: "Smaller symbol"
-                                        show: sizeDownMouse.containsMouse
-                                    }
-                                }
-                            }
-
-                            Text {
-                                width: Theme.chip
-                                height: Theme.fieldHeight
-                                verticalAlignment: Text.AlignVCenter
-                                horizontalAlignment: Text.AlignHCenter
-                                text: String(root.displayPx)
-                                color: Theme.subtext
-                                font.family: Theme.uiFont
-                                font.pixelSize: Theme.smallPx
-
-                                HoverHandler {
-                                    id: sizeHover
-                                }
-
-                                HoverTip {
-                                    message: "Symbol size, from " + Theme.menuFontMin + " to " + Theme.menuFontMax
-                                    show: sizeHover.hovered
-                                }
-                            }
-
-                            Rectangle {
-                                width: Theme.chip
-                                height: Theme.fieldHeight
-                                radius: Theme.radiusSm
-                                color: sizeUpMouse.containsMouse ? Theme.hover : Theme.fieldBg
-                                border.width: Theme.borderWidth
-                                border.color: Theme.border
-
-                                Text {
-                                    anchors.centerIn: parent
-                                    text: "+"
-                                    color: Theme.text
-                                    font.family: Theme.uiFont
-                                    font.pixelSize: Theme.fontPx
-                                }
-
-                                MouseArea {
-                                    id: sizeUpMouse
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: MenuSettings.setFontPx(root.displayPx + 1)
-
-                                    HoverTip {
-                                        message: "Larger symbol"
-                                        show: sizeUpMouse.containsMouse
-                                    }
-                                }
-                            }
+                        ChipButton {
+                            id: fontDefault
+                            label: "Default"
+                            enabled: root.draft.font.length > 0
+                            tip: "Use the icon font"
+                            onClicked: MenuSettings.editor.set("font", "")
                         }
                     }
                 }
+
+                FormRow {
+                    visible: !root.imageMode
+                    width: parent.width
+                    label: "Style"
+
+                    Row {
+                        spacing: Theme.tabGap
+
+                        ChipButton {
+                            label: "B"
+                            bold: true
+                            active: root.draft.bold
+                            tip: "Bold the symbol"
+                            onClicked: MenuSettings.editor.set("bold", !root.draft.bold)
+                        }
+
+                        ChipButton {
+                            label: "I"
+                            italic: true
+                            active: root.draft.italic
+                            tip: "Italic the symbol"
+                            onClicked: MenuSettings.editor.set("italic", !root.draft.italic)
+                        }
+                    }
+                }
+
+                // Image mode.
+                FormRow {
+                    visible: root.imageMode
+                    width: parent.width
+                    label: "File"
+
+                    Row {
+                        width: parent.width
+                        spacing: Theme.tabGap
+
+                        Rectangle {
+                            width: parent.width - chooseButton.width - parent.spacing
+                            height: Theme.fieldHeight
+                            radius: Theme.radiusSm
+                            color: fileMouse.containsMouse ? Theme.hover : Theme.fieldBg
+                            border.width: Theme.borderWidth
+                            border.color: root.previewFailed ? Theme.danger : Theme.border
+
+                            Text {
+                                anchors.fill: parent
+                                anchors.leftMargin: Theme.space
+                                anchors.rightMargin: Theme.space
+                                verticalAlignment: Text.AlignVCenter
+                                elide: Text.ElideMiddle
+                                text: root.draft.image.length ? root.draft.image : "No image chosen"
+                                color: root.draft.image.length ? Theme.text : Theme.subtext
+                                font.family: Theme.uiFont
+                                font.pixelSize: Theme.fontPx
+                            }
+
+                            MouseArea {
+                                id: fileMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.openImage()
+
+                                HoverTip {
+                                    message: root.draft.image.length ? root.draft.image : "Choose an SVG or PNG file"
+                                    show: fileMouse.containsMouse
+                                }
+                            }
+                        }
+
+                        ChipButton {
+                            id: chooseButton
+                            label: "Choose…"
+                            tip: "Choose an SVG or PNG file"
+                            onClicked: root.openImage()
+                        }
+                    }
+                }
+
+                Text {
+                    visible: root.imageMode && (root.imageError.length > 0 || root.previewFailed)
+                    x: Theme.formLabelWidth + Theme.space
+                    width: parent.width - x
+                    wrapMode: Text.WordWrap
+                    text: root.imageError.length ? root.imageError : "This image could not be loaded. The bar shows the symbol instead."
+                    color: Theme.danger
+                    font.family: Theme.uiFont
+                    font.pixelSize: Theme.smallPx
+                }
+
+                FormRow {
+                    visible: root.imageMode
+                    width: parent.width
+                    label: "Tint"
+
+                    CheckRow {
+                        width: parent.width
+                        title: "Fill with the color"
+                        detail: "For one-color SVGs. Off keeps the image's own colors."
+                        tip: "Paint the image's shape with the color below"
+                        checked: root.draft.tint
+                        onToggled: MenuSettings.editor.set("tint", !root.draft.tint)
+                    }
+                }
+
+                // Shared by both modes; in image mode it only shows with Tint on.
+                FormRow {
+                    visible: !root.imageMode || root.draft.tint
+                    width: parent.width
+                    label: "Color"
+
+                    Row {
+                        width: parent.width
+                        spacing: Theme.tabGap
+
+                        Rectangle {
+                            width: Theme.fieldHeight * 2
+                            height: Theme.fieldHeight
+                            radius: Theme.radiusSm
+                            color: root.previewColor
+                            border.width: Theme.borderWidth
+                            border.color: swatchMouse.containsMouse ? Theme.accent : Theme.border
+
+                            MouseArea {
+                                id: swatchMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: (mouse) => {
+                                    if (mouse.button === Qt.RightButton)
+                                        MenuSettings.editor.set("color", "")
+                                    else
+                                        root.openColor()
+                                }
+
+                                HoverTip {
+                                    message: "Choose the icon color. Right-click clears it."
+                                    show: swatchMouse.containsMouse
+                                }
+                            }
+                        }
+
+                        ChipButton {
+                            id: colorDefault
+                            label: "Default"
+                            enabled: root.draft.color.length > 0
+                            tip: "Follow the theme: text color, accent on hover"
+                            onClicked: MenuSettings.editor.set("color", "")
+                        }
+
+                        Text {
+                            width: Math.max(0, parent.width - Theme.fieldHeight * 2 - colorDefault.width - parent.spacing * 2)
+                            height: Theme.fieldHeight
+                            verticalAlignment: Text.AlignVCenter
+                            elide: Text.ElideRight
+                            text: root.draft.color.length ? root.draft.color : "Theme color"
+                            color: Theme.subtext
+                            font.family: Theme.uiFont
+                            font.pixelSize: Theme.smallPx
+                        }
+                    }
+                }
+            }
+
+            Item {
+                width: parent.width
+                height: Theme.space
             }
 
             SectionHeader {
@@ -453,145 +600,81 @@ Item {
                 hint: "Program and arguments, separated by spaces. A shell is not used, and shell characters are rejected. Empty does nothing on click."
             }
 
-            Item {
-                width: parent.width
-                implicitHeight: commandCol.implicitHeight
-                height: commandCol.implicitHeight
+            Column {
+                x: Theme.sectionInset
+                width: parent.width - Theme.sectionInset * 2
+                spacing: Theme.tabGap
 
-                Column {
-                    id: commandCol
-                    x: Theme.sectionInset
-                    width: parent.width - Theme.sectionInset * 2
-                    spacing: Theme.tabGap
-
-                    TextField {
-                        id: commandField
-                        width: parent.width
-                        height: Theme.fieldHeight
-                        verticalAlignment: Text.AlignVCenter
-                        selectByMouse: true
-                        placeholderText: "rofi -show drun"
-                        leftPadding: Theme.space
-                        color: Theme.text
-                        placeholderTextColor: Theme.subtext
-                        font.family: Theme.uiFont
-                        font.pixelSize: Theme.fontPx
-                        background: Rectangle {
-                            radius: Theme.radiusSm
-                            color: commandField.activeFocus ? Theme.hover : Theme.fieldBg
-                            border.width: Theme.borderWidth
-                            border.color: root.formError.length ? Theme.danger : (commandField.activeFocus ? Theme.accent : Theme.border)
-                        }
-                        onTextChanged: {
-                            if (!root.formReady)
-                                return
-                            if (text !== MenuSettings.editor.value.command)
-                                MenuSettings.editor.set("command", text)
-                            if (root.formError.length)
-                                root.formError = ""
-                        }
-
-                        HoverHandler {
-                            id: commandHover
-                        }
-
-                        HoverTip {
-                            message: "Program and arguments. For example rofi -show drun"
-                            show: commandHover.hovered
-                        }
+                TextField {
+                    id: commandField
+                    width: parent.width
+                    height: Theme.fieldHeight
+                    verticalAlignment: Text.AlignVCenter
+                    selectByMouse: true
+                    placeholderText: "rofi -show drun"
+                    leftPadding: Theme.space
+                    color: Theme.text
+                    placeholderTextColor: Theme.subtext
+                    font.family: Theme.uiFont
+                    font.pixelSize: Theme.fontPx
+                    background: Rectangle {
+                        radius: Theme.radiusSm
+                        color: commandField.activeFocus ? Theme.hover : Theme.fieldBg
+                        border.width: Theme.borderWidth
+                        border.color: root.formError.length ? Theme.danger : (commandField.activeFocus ? Theme.accent : Theme.border)
+                    }
+                    onTextChanged: {
+                        if (!root.formReady)
+                            return
+                        if (text !== root.draft.command)
+                            MenuSettings.editor.set("command", text)
+                        if (root.formError.length)
+                            root.formError = ""
                     }
 
-                    Text {
-                        visible: root.formError.length > 0
-                        width: parent.width
-                        wrapMode: Text.WordWrap
-                        text: root.formError
-                        color: Theme.danger
-                        font.family: Theme.uiFont
-                        font.pixelSize: Theme.smallPx
+                    HoverHandler {
+                        id: commandHover
                     }
+
+                    HoverTip {
+                        message: "Program and arguments. For example rofi -show drun"
+                        show: commandHover.hovered
+                    }
+                }
+
+                Text {
+                    visible: root.formError.length > 0
+                    width: parent.width
+                    wrapMode: Text.WordWrap
+                    text: root.formError
+                    color: Theme.danger
+                    font.family: Theme.uiFont
+                    font.pixelSize: Theme.smallPx
                 }
             }
         }
     }
 
-    Row {
+    DraftFooter {
         id: footer
+        anchors.left: parent.left
         anchors.right: parent.right
-        anchors.rightMargin: Theme.sectionInset
         anchors.bottom: parent.bottom
-        spacing: Theme.tabGap
-
-        Repeater {
-            model: [
-                { id: "apply", label: "Apply" },
-                { id: "undo", label: "Undo" },
-                { id: "reset", label: "Reset" }
-            ]
-            delegate: Rectangle {
-                id: button
-                required property var modelData
-                required property int index
-                readonly property string action: String(button.modelData.id || "")
-                readonly property bool enabledAction: {
-                    if (button.action === "apply")
-                        return MenuSettings.editor.dirty
-                    if (button.action === "undo")
-                        return MenuSettings.editor.canUndo
-                    return true
-                }
-                readonly property bool applyReady: button.action === "apply" && button.enabledAction
-
-                implicitWidth: buttonLabel.implicitWidth + Theme.space * 2
-                implicitHeight: Theme.fieldHeight
-                radius: Theme.radiusSm
-                opacity: button.enabledAction ? 1 : Theme.widgetOffOpacity
-                color: button.applyReady && buttonMouse.containsMouse
-                    ? Theme.accentDim
-                    : (buttonMouse.containsMouse && button.enabledAction ? Theme.hover : Theme.pillBg)
-                border.width: Theme.borderWidth
-                border.color: button.applyReady ? Theme.accent : Theme.border
-
-                Text {
-                    id: buttonLabel
-                    anchors.centerIn: parent
-                    text: String(button.modelData.label || "")
-                    color: button.applyReady ? Theme.wsActiveText : Theme.subtext
-                    font.family: Theme.uiFont
-                    font.pixelSize: Theme.smallPx
-                    font.bold: button.action === "apply"
-                }
-
-                MouseArea {
-                    id: buttonMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    enabled: button.enabledAction
-                    cursorShape: button.enabledAction ? Qt.PointingHandCursor : Qt.ArrowCursor
-                    onClicked: {
-                        if (button.action === "apply")
-                            root.applyPage()
-                        else if (button.action === "undo") {
-                            MenuSettings.editor.undo()
-                            root.formError = ""
-                        } else {
-                            MenuSettings.editor.reset()
-                            root.formError = ""
-                        }
-                    }
-
-                    HoverTip {
-                        message: {
-                            if (button.action === "apply")
-                                return "Save the icon and the command"
-                            if (button.action === "undo")
-                                return "Drop an unsaved draft, or put back the last applied one"
-                            return "Restore the nine-square icon and clear the command. Apply saves it."
-                        }
-                        show: buttonMouse.containsMouse
-                    }
-                }
-            }
+        applyEnabled: MenuSettings.editor.dirty
+        undoEnabled: MenuSettings.editor.canUndo
+        applyTip: "Save the icon and the command"
+        undoTip: "Drop an unsaved draft, or put back the last applied one"
+        resetTip: "Restore the nine-square symbol and clear the command. Apply saves it."
+        onApplyClicked: root.applyPage()
+        onUndoClicked: {
+            MenuSettings.editor.undo()
+            root.formError = ""
+            root.imageError = ""
+        }
+        onResetClicked: {
+            MenuSettings.editor.reset()
+            root.formError = ""
+            root.imageError = ""
         }
     }
 

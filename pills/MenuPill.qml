@@ -5,8 +5,10 @@ import qs.config
 import qs.services
 import qs.theme
 
-// Application Menu icon. Loaded only while that widget is on the bar.
-// BarSlot rotates a side-bar pill 90° clockwise. The symbol turns 90° the
+// Application Menu icon: a font symbol, or an SVG/PNG image. The image is
+// loaded only in image mode, and the symbol shows if it fails to load.
+// Loaded only while that widget is on the bar.
+// BarSlot rotates a side-bar pill 90° clockwise. The icon turns 90° the
 // other way so it stays upright.
 Rectangle {
     id: root
@@ -23,6 +25,8 @@ Rectangle {
     readonly property string symbol: MenuSettings.symbolValue(Config.menuSymbol)
     readonly property int symbolPx: Math.max(1, Math.round(MenuSettings.pxValue() * root.ui * root.widthFactor))
     readonly property string fontName: Config.menuFont.length ? Config.menuFont : root.theme.iconFont
+    readonly property string imageUrl: MenuSettings.modeValue() === "image" ? MenuSettings.imageUrl(MenuSettings.imageValue()) : ""
+    readonly property bool showImage: imageLoader.item !== null && imageLoader.item.ready
     readonly property color ink: Config.menuColor.length
         ? Config.menuColor
         : (menuMouse.containsMouse ? root.theme.colAccent : root.theme.colFg)
@@ -59,13 +63,28 @@ Rectangle {
 
     Item {
         anchors.centerIn: parent
-        width: glyph.implicitWidth
-        height: glyph.implicitHeight
+        width: root.showImage ? root.symbolPx : glyph.implicitWidth
+        height: root.showImage ? root.symbolPx : glyph.implicitHeight
         rotation: root.side ? -90 : 0
         transformOrigin: Item.Center
 
+        Loader {
+            id: imageLoader
+            anchors.centerIn: parent
+            active: root.imageUrl.length > 0
+            sourceComponent: Component {
+                MenuIconImage {
+                    source: root.imageUrl
+                    px: root.symbolPx
+                    ink: root.ink
+                    tint: Config.menuImageTint
+                }
+            }
+        }
+
         Text {
             id: glyph
+            visible: !root.showImage
             anchors.centerIn: parent
             text: root.symbol
             color: root.ink

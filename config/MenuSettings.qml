@@ -3,9 +3,9 @@ import QtQuick
 import Quickshell
 import qs.theme
 
-// Applications → Application Menu: the pill symbol, its font, and the
-// command it runs. The command is split on spaces and never run through
-// a shell.
+// Applications → Application Menu: the pill icon (a font symbol or an
+// SVG/PNG image), its look, and the command it runs. The command is split
+// on spaces and never run through a shell.
 Singleton {
     id: root
 
@@ -16,6 +16,45 @@ Singleton {
     function symbolValue(raw) {
         const text = Config.symbolClamp(raw)
         return text.length ? text : Theme.menuSymbolDefault
+    }
+
+    function modeNorm(value) {
+        return String(value || "") === "image" ? "image" : "symbol"
+    }
+
+    // An absolute path to an .svg, .svgz, or .png file, or "".
+    // Accepts a file:// URL from a file dialog.
+    function imagePathNorm(raw) {
+        let path = String(raw || "").trim()
+        if (path.indexOf("file://") === 0) {
+            try {
+                path = decodeURIComponent(path.substring(7))
+            } catch (e) {
+                return ""
+            }
+        }
+        if (!path.length || path.charAt(0) !== "/" || path.length > Theme.menuImagePathMax)
+            return ""
+        if (/[\r\n\0]/.test(path) || !/\.(svg|svgz|png)$/i.test(path))
+            return ""
+        return path
+    }
+
+    // A file:// URL for an Image, with each path part escaped.
+    function imageUrl(path) {
+        const clean = root.imagePathNorm(path)
+        if (!clean.length)
+            return ""
+        return "file://" + clean.split("/").map(encodeURIComponent).join("/")
+    }
+
+    // Saved values, for the pill.
+    function modeValue() {
+        return root.modeNorm(Config.menuIconMode)
+    }
+
+    function imageValue() {
+        return root.imagePathNorm(Config.menuImagePath)
     }
 
     function pxNorm(value) {
@@ -70,6 +109,9 @@ Singleton {
             bold: !!src.bold,
             italic: !!src.italic,
             color: Config.colorNorm(src.color),
+            mode: root.modeNorm(src.mode),
+            image: root.imagePathNorm(src.image),
+            tint: !!src.tint,
             command: command
         }
     }
@@ -89,12 +131,26 @@ Singleton {
             bold: Config.menuBold,
             italic: Config.menuItalic,
             color: Config.menuColor,
+            mode: Config.menuIconMode,
+            image: Config.menuImagePath,
+            tint: Config.menuImageTint,
             command: root.commandLine(Config.menuCommand)
         })
     }
 
     function defaults() {
-        return { symbol: Theme.menuSymbolDefault, font: "", px: 0, bold: false, italic: false, color: "", command: "" }
+        return {
+            symbol: Theme.menuSymbolDefault,
+            font: "",
+            px: 0,
+            bold: false,
+            italic: false,
+            color: "",
+            mode: "symbol",
+            image: "",
+            tint: false,
+            command: ""
+        }
     }
 
     function commit(snap) {
@@ -107,6 +163,9 @@ Singleton {
             Config.menuBold = clean.bold
             Config.menuItalic = clean.italic
             Config.menuColor = clean.color
+            Config.menuIconMode = clean.mode
+            Config.menuImagePath = clean.image
+            Config.menuImageTint = clean.tint
             Config.menuCommand = JSON.stringify(argv)
         })
     }
@@ -118,6 +177,15 @@ Singleton {
         if (root.argvFromLine(root.editor.draft.command) === null)
             return false
         root.editor.apply()
+        return true
+    }
+
+    // From a file dialog. A file that is not SVG or PNG is ignored.
+    function setImage(url) {
+        const path = root.imagePathNorm(url)
+        if (!path.length)
+            return false
+        root.editor.edit({ image: path, mode: "image" })
         return true
     }
 
