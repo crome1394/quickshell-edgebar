@@ -35,7 +35,7 @@ Each screen edge can show a bar. The widgets drawn today are workspaces, the clo
 - **Connectivity** has Network and Bluetooth pages. Network chooses the address text on the pill (full IPv4, last octet, or adapter name) and lists active connections. Apply saves the address text. The connection list is a live read. Bluetooth sets how long a scan runs, then shows adapter power, devices that are not paired, and a Paired Devices section. Apply saves the scan length. Power, discovery, and connect still change immediately. The bar's Network menu is a left click. A connected Wi-Fi network stays at the top of the list. Connection editor, Refresh IP, and Flush DNS stay at the bottom. Right-click toggles Wi-Fi. The Bluetooth menu keeps Scan, Discoverable, and power at the bottom. Right-click toggles adapter power.
 - **Audio** has On the bar, Thresholds, Output, and Input. On the bar sets the scroll step and whether the pill shows a percent. Thresholds sets the speaker and microphone color steps. A color chip sits to the left of each step's buttons. Apply stores the scroll step, the percent, and those steps and colors. The steps and colors go in `theme/theme.json`. Output and Input set the live device, mute, and volume. The bar pill shows a speaker, a level bar, a divider, a microphone, and a level bar. Both colors follow the level. Right-click mutes that side. The scroll wheel changes that side's volume and plays the same volume sound and swayOSD popup as the volume key. The pill stays off until you enable Audio under Widgets and press Apply.
 - **Notifications** sets toast position and timeout, and the history options: keep expanded, stagger row colors, clear at boot, and show the counter. Apply saves that page and updates SwayNC when the corner or the timeout changes. The bell stays off until you enable Notifications under Widgets and press Apply. Left-click opens the history list beside the bar: under a top bar, over a bottom bar, and beside a side bar. Right-click toggles do not disturb. The badge counts saved messages. `qs ipc call notificationBell toggleHistory` opens that list while the shell is running. `showHistory`, `hideHistory`, and `toggleDoNotDisturb` are the other calls.
-- **Transparency**, on the bar, overrides the Quickshell and Satty opacity numbers in `theme/DefaultTheme.qml`. Fullscreen windows and this Settings window stay solid.
+- **System → Transparency** sets one opacity for every application and per-application overrides, each with a focused and an unfocused level. Add an app from the open windows or by typing its window class (as `hyprctl clients` shows it). The Transparency pill on the bar has quick sliders for All applications and each override. Fullscreen windows and the Settings window always stay solid. The default All applications level is `opacityQuickshell` in `theme/DefaultTheme.qml`.
 - Bar tooltips open outside the bar: below a top widget, above a bottom widget, to the right of a left widget, and to the left of a right widget.
 - **Applications → Application Menu** sets the menu icon: a symbol from a font, or an SVG or PNG image with an optional tint, plus its size, color, and the command a click runs.
 - **System → Display** sets each monitor's resolution, refresh rate, and color depth from the modes the monitor reports. Apply tries the mode and asks you to keep it; with no answer in 15 seconds the old mode comes back. Keep saves to a monitors file only when it carries a `Managed by Quickshell` comment (`$XDG_CONFIG_HOME/hypr/config/monitors.lua` or `hypr/monitors.lua`); otherwise the change lasts until Hyprland restarts. A mode Hyprland will not keep at 10-bit is remembered and greyed out.
@@ -49,3 +49,21 @@ Settings are stored in `state/bar-layout.json`.
 ## License
 
 MIT. See [LICENSE](LICENSE). The map pictures in `assets/gnome-tz` are GPL-2.0-or-later. See [assets/gnome-tz/README.md](assets/gnome-tz/README.md).
+
+## Hyprland setup
+
+The bar changes two Hyprland files and reloads them live. Neither needs editing by hand.
+
+**Transparency: `$XDG_CONFIG_HOME/hypr/opacity.lua`** (usually `~/.config/hypr/opacity.lua`). The bar rewrites it on every change and swaps the live rules with `hyprctl repl`. Hyprland only reads it at startup if `hyprland.lua` loads it. Put this line last, after your own window rules, so the bar's levels win:
+
+```lua
+-- Quickshell transparency. Last so these named rules win.
+require("opacity")
+```
+
+The rules use `override`, so while All applications is below 100% it replaces opacity from your own rules (for example HyprGlass's `opacity = 0.90`). To keep an app at its own level, add it as an override. The file `opacity.state` and `opacity.lock` next to it came from the old `scripts/opacity.py`; nothing reads them now, and they can be deleted.
+
+**Display: a monitors file with the `Managed by Quickshell` marker.** System → Display saves a kept mode only to `$XDG_CONFIG_HOME/hypr/config/monitors.lua` or `$XDG_CONFIG_HOME/hypr/monitors.lua`, and only when that file already contains the comment `-- Managed by Quickshell`. Load it from `hyprland.lua`, for example `require("config.monitors")`. Without it, display changes last until Hyprland restarts.
+
+New files the bar adds are picked up by a full restart of the bar (`qs kill; qs -d -n`), not always by a hot reload.
+
