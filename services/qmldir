@@ -17,3 +17,6 @@ singleton DisplayService 1.0 DisplayService.qml
 singleton ScreensaverService 1.0 ScreensaverService.qml
 singleton CaptureService 1.0 CaptureService.qml
 singleton AudioMenuService 1.0 AudioMenuService.qml
+singleton InspectorService 1.0 InspectorService.qml
+singleton BindingsService 1.0 BindingsService.qml
+singleton SystemInfoService 1.0 SystemInfoService.qml

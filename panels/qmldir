@@ -7,3 +7,4 @@ OverviewLayer 1.0 OverviewLayer.qml
 OverviewPreview 1.0 OverviewPreview.qml
 NotificationHistory 1.0 NotificationHistory.qml
 NotificationHost 1.0 NotificationHost.qml
+InspectorPanel 1.0 InspectorPanel.qml

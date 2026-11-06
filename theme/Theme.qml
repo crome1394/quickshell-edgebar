@@ -44,6 +44,21 @@ Singleton {
     readonly property int settingsHeight: 760
     readonly property int settingsMinWidth: 760
     readonly property int settingsMinHeight: 480
+    // Inspector window (Bindings, System Info).
+    readonly property int inspectorWidth: 1000
+    readonly property int inspectorHeight: 720
+    readonly property int inspectorMinWidth: 560
+    readonly property int inspectorMinHeight: 360
+    readonly property int inspectorKeyWidth: 240
+    readonly property int inspectorLabelWidth: 200
+    // Bindings columns: as many as fit at this width, up to the max.
+    readonly property int inspectorColumnMin: 440
+    readonly property int inspectorColumnsMax: 3
+    readonly property int inspectorRowHeight: 28
+    readonly property int inspectorKeyHeight: 20
+    // A clicked binding runs this long after the Inspector closes, so it
+    // acts on the window you had focused.
+    readonly property int inspectorRunDelayMs: 200
     readonly property int settingsTwoColMin: 860
     readonly property int headerHeight: 40
     readonly property int tabHeight: 32
@@ -255,6 +270,16 @@ Singleton {
     readonly property color wsActiveBg: root.palette.colWsActive
     readonly property color wsActiveText: root.palette.colWsActiveFg
     readonly property color wsInactiveText: root.palette.colWsIdleFg
+    // Inspector → Bindings key chips: one fixed color per key type, so no
+    // two types match whatever the theme accent is.
+    readonly property color keySuper: "#facc15"
+    readonly property color keyAlt: "#2dd4bf"
+    readonly property color keyShift: "#fb7185"
+    readonly property color keyCtrl: "#a78bfa"
+    readonly property color keyMouse: "#38bdf8"
+    readonly property color keyOther: "#64748b"
+    readonly property color keyText: "#111418"
+    readonly property color keyOtherText: "#f1f5f9"
 
     // Text size for every bar pill: the bar text size, scaled with the UI
     // and the widget's width, times the widget's own percent override when it

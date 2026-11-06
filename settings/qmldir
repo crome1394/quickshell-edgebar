@@ -52,3 +52,4 @@ ScreensaverTab 1.0 ScreensaverTab.qml
 CaptureTab 1.0 CaptureTab.qml
 ToolsTab 1.0 ToolsTab.qml
 PathField 1.0 PathField.qml
+FooterButton 1.0 FooterButton.qml
