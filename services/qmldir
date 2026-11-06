@@ -9,3 +9,6 @@ singleton WorkspaceService 1.0 WorkspaceService.qml
 singleton OverviewService 1.0 OverviewService.qml
 singleton NotificationService 1.0 NotificationService.qml
 singleton IconService 1.0 IconService.qml
+singleton TailscaleService 1.0 TailscaleService.qml
+singleton DependencyService 1.0 DependencyService.qml
+singleton AudioCardService 1.0 AudioCardService.qml

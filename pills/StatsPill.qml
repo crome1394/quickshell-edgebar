@@ -66,19 +66,15 @@ Rectangle {
         return (Math.round(n * 10) / 10).toFixed(1) + "G"
     }
 
-    function hint(app) {
-        return (StatsSettings.clickValue() === "left" ? "Left: " : "Right: ") + app
+    // group is "cpu" (CPU and Memory) or "gpu" (GPU and VRAM).
+    function hint(group) {
+        return StatsSettings.actionHint(group)
     }
 
-    function launch(app, button) {
-        const left = StatsSettings.clickValue() === "left"
-        const match = left ? button === Qt.LeftButton : button === Qt.RightButton
-        if (!match)
-            return
-        const command = StatsSettings.launchArgv(app)
-        if (!command || !command.length)
-            return
-        Quickshell.execDetached(command)
+    function launch(group, button) {
+        const command = StatsSettings.actionArgv(group, button === Qt.RightButton ? "right" : "left")
+        if (command.length)
+            Quickshell.execDetached(command)
     }
 
     implicitWidth: cluster.implicitWidth + root.pad * 2
@@ -125,8 +121,8 @@ Rectangle {
             sectionHeight: root.sectionHeight
             ui: root.ui
             widthFactor: root.widthFactor
-            tip: root.hint("btop")
-            onActivated: (button) => root.launch("btop", button)
+            tip: root.hint("cpu")
+            onActivated: (button) => root.launch("cpu", button)
         }
 
         Item {
@@ -165,8 +161,8 @@ Rectangle {
             sectionHeight: root.sectionHeight
             ui: root.ui
             widthFactor: root.widthFactor
-            tip: root.hint("btop")
-            onActivated: (button) => root.launch("btop", button)
+            tip: root.hint("cpu")
+            onActivated: (button) => root.launch("cpu", button)
         }
 
         Item {
@@ -205,8 +201,8 @@ Rectangle {
             sectionHeight: root.sectionHeight
             ui: root.ui
             widthFactor: root.widthFactor
-            tip: root.hint("nvtop")
-            onActivated: (button) => root.launch("nvtop", button)
+            tip: root.hint("gpu")
+            onActivated: (button) => root.launch("gpu", button)
         }
 
         Item {
@@ -245,8 +241,8 @@ Rectangle {
             sectionHeight: root.sectionHeight
             ui: root.ui
             widthFactor: root.widthFactor
-            tip: root.hint("nvtop")
-            onActivated: (button) => root.launch("nvtop", button)
+            tip: root.hint("gpu")
+            onActivated: (button) => root.launch("gpu", button)
         }
     }
 }

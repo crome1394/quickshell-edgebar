@@ -64,12 +64,10 @@ Rectangle {
         }
         const anchor = historyPopup.anchor
         // qmllint disable missing-property
-        anchor.item = root
         anchor.edges = edgeFlags
         anchor.gravity = grow
         anchor.rect = Qt.rect(x + 3, y + 3, 1, 1)
         anchor.rect = Qt.rect(x, y, 1, 1)
-        anchor.adjustment = PopupAdjustment.Slide
         // qmllint enable missing-property
     }
 
@@ -162,6 +160,12 @@ Rectangle {
         implicitWidth: Theme.notificationPanelWidth
         implicitHeight: Theme.notificationPanelHeight
         onClosed: NotificationService.hideHistory()
+        // A popup only shows once it has an anchor, so set it up front;
+        // placeHistory() then fine-tunes the edge and position.
+        // qmllint disable missing-property
+        anchor.item: root
+        anchor.adjustment: PopupAdjustment.Slide
+        // qmllint enable missing-property
         onVisibleChanged: {
             if (visible) {
                 root.placeHistory()

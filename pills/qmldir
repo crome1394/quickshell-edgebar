@@ -17,3 +17,12 @@ StatsPill 1.0 StatsPill.qml
 TrayPill 1.0 TrayPill.qml
 WorkspaceButton 1.0 WorkspaceButton.qml
 WorkspacesPill 1.0 WorkspacesPill.qml
+TailscalePill 1.0 TailscalePill.qml
+MenuChip 1.0 MenuChip.qml
+TailscaleSwitch 1.0 TailscaleSwitch.qml
+TailscaleExitRow 1.0 TailscaleExitRow.qml
+TailscalePeerRow 1.0 TailscalePeerRow.qml
+TailscaleMenu 1.0 TailscaleMenu.qml
+AudioMenu 1.0 AudioMenu.qml
+AudioDeviceSection 1.0 AudioDeviceSection.qml
+AudioStreamRow 1.0 AudioStreamRow.qml

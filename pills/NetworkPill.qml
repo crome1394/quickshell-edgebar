@@ -20,7 +20,7 @@ Rectangle {
     readonly property real ui: WidgetService.uiScale
     readonly property int cell: Math.max(1, Math.round((Theme.barHeight - Theme.barPad) * root.ui))
     readonly property int icon: Math.max(1, Math.round(root.theme.iconPx * root.ui * root.widthFactor))
-    readonly property int textPx: Math.max(1, Math.min(root.cell - 4, Math.round(root.theme.smallPx * root.ui * root.widthFactor)))
+    readonly property int textPx: Theme.barTextPx(root.ui, root.widthFactor)
     readonly property int pad: Math.max(1, Math.round(Theme.tabGap * root.ui))
     readonly property string addressText: {
         if (!NetworkService.primaryLabel().length && !NetworkService.primaryAddress().length)
@@ -158,7 +158,7 @@ Rectangle {
             verticalAlignment: Text.AlignVCenter
             text: root.addressText
             color: root.theme.colFg
-            font.family: root.theme.uiFont
+            font.family: root.theme.fontFamily
             font.pixelSize: root.textPx
         }
     }

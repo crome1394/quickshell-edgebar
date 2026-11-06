@@ -27,10 +27,12 @@ Item {
             { tab: "audio", section: "", title: "Audio · On the bar", keys: "audio speaker microphone volume scroll percent mute" },
             { tab: "audio", section: "", title: "Audio · Output", keys: "speaker output sink volume mute device" },
             { tab: "audio", section: "", title: "Audio · Input", keys: "microphone input source volume mute device" },
-            { tab: "region", section: "region", title: "Region & Clock · Region", keys: "timezone region map city" },
             { tab: "region", section: "clock", title: "Region & Clock · Clock", keys: "clock font format calendar time date" },
+            { tab: "region", section: "region", title: "Region & Clock · Region", keys: "timezone region map city" },
             { tab: "notifications", section: "", title: "Notifications · Toasts", keys: "notification toast corner timeout swaync popup" },
-            { tab: "notifications", section: "", title: "Notifications · History", keys: "notification history bell counter dnd expand stagger boot" }
+            { tab: "notifications", section: "", title: "Notifications · History", keys: "notification history bell counter dnd expand stagger boot" },
+            { tab: "system", section: "dependencies", title: "System · Dependencies", keys: "dependencies packages programs fonts services missing install reinstall check" },
+            { tab: "system", section: "display", title: "System · Display", keys: "display monitor resolution screen" }
         ]
     }
 

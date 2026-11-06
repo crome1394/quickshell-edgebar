@@ -80,6 +80,7 @@ FloatingWindow {
     onRevealSerialChanged: {
         window.pushReveal(applicationsPage, "applications")
         window.pushReveal(connectivityPage, "connectivity")
+        window.pushReveal(systemPage, "system")
     }
 
     Shortcut {
@@ -280,6 +281,19 @@ FloatingWindow {
             source: notificationsPage.active ? Qt.resolvedUrl("../settings/NotificationsTab.qml") : ""
         }
 
+        Loader {
+            id: systemPage
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: header.bottom
+            anchors.bottom: tabs.top
+            anchors.margins: Theme.space
+            active: window.visible && window.currentTab === "system"
+            visible: window.currentTab === "system"
+            source: systemPage.active ? Qt.resolvedUrl("../settings/SystemTab.qml") : ""
+            onLoaded: window.pushReveal(systemPage, "system")
+        }
+
         Connections {
             target: regionPage.item
             function onCloseRequested() {
@@ -301,7 +315,8 @@ FloatingWindow {
                 { id: "connectivity", label: "Connectivity" },
                 { id: "audio", label: "Audio" },
                 { id: "notifications", label: "Notifications" },
-                { id: "region", label: "Region & Clock" }
+                { id: "region", label: "Region & Clock" },
+                { id: "system", label: "System" }
             ]
             currentId: window.currentTab
             onSelected: (tabId) => { window.currentTab = tabId }

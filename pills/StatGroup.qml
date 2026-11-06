@@ -35,7 +35,7 @@ Rectangle {
 
     readonly property real faceScale: Math.max(0.5, root.ui * root.widthFactor)
     readonly property string faceFamily: root.faceFont.length ? root.faceFont : root.theme.fontFamily
-    readonly property int px: Math.max(Theme.statFontMin, Math.round(Theme.fontPx * root.faceScale * Math.max(1, root.facePercent) / 100))
+    readonly property int px: Theme.barTextPx(root.ui, root.widthFactor, root.facePercent)
     readonly property int innerPad: Math.max(3, Math.round(Theme.statInnerPad * root.faceScale))
     readonly property int rowGap: Math.max(3, Math.round(Theme.statRowGap * root.faceScale))
     readonly property int valGap: Math.max(2, Math.round(Theme.statValGap * root.faceScale))

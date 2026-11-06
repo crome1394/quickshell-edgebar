@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.5 — 2026-11-05
+
+- Tailscale is a bar widget. The pill shows the Tailscale mark, dim when off. Right-click turns Tailscale on or off. Left-click opens a menu with an on/off switch, this device's name, IPv4, IPv6, and DNS name with copy buttons, the tailnet and version, health warnings while connected, a login button when needed, an account switcher when there is more than one, the exit node (with search for long lists, such as Mullvad), options for Use Tailscale DNS, Accept subnet routes, Allow LAN with exit node, Shields up, Tailscale SSH, and Offer as exit node, and the machines on the tailnet with their OS, address, direct or relay connection, last seen, exit-node badge, copy buttons, and Taildrop send (through a zenity file picker). The status check runs every 30 seconds while the pill is on the bar, and every 3 seconds while its menu is open. Turn it on under Widgets.
+- Every text pill uses one default font and size (`Theme.barTextPx`) unless the widget has its own override.
+- The App Launcher's running-app dot is centered under the icon.
+- The notification bell opens its history again. The popup now has its anchor before it is shown.
+- The calendar's seven columns fill the whole popup instead of sitting in the middle.
+- System Stats: each group (CPU · Memory, GPU · VRAM) has a left-click and a right-click command, set under Widgets → System Stats → Misc. Each runs on its own or inside the chosen terminal, split on spaces and never through a shell. Terminal windows keep the terminal's own class, so its window rules apply. The defaults are btop and nvtop on left click.
+- Region & Clock opens on Clock, now the first tab.
+- Settings has a System tab. Dependencies checks every program, font, and service the bar uses, plus the programs your own settings name, and shows one `pacman -S` line for anything missing. Display is a placeholder for monitor settings.
+- Left-click on the audio pill opens a menu: Active Streams (each app, what it plays, its own volume, mute, and a live meter), Playback and Recording (detected devices only, the card's sound profile, volume, mute, left and right levels, and a live meter), and pw-top and Restart Audio pinned along the bottom. Right-click still mutes and the wheel still changes the volume.
+
 ## 0.1.4 — 2026-11-05
 
 - The Mac-style dock hover now covers every bar widget. Clock and Audio grow as one pill; System Stats grows only the section under the pointer.
