@@ -16,8 +16,8 @@ PanelWindow {
     required property var theme
 
     readonly property real ui: WidgetService.uiScale
-    readonly property string corner: WidgetService.activeWindowCorner()
-    readonly property var excludeList: WidgetService.normalizeExcludes(WidgetService.parseList(Config.activeWindowExcludesJson))
+    readonly property string corner: ActiveWindowSettings.cornerValue()
+    readonly property var excludeList: ActiveWindowSettings.savedExcludes()
     readonly property bool atTop: root.corner === "topLeft" || root.corner === "topRight"
     readonly property bool atLeft: root.corner === "topLeft" || root.corner === "bottomLeft"
     readonly property int thickness: Math.max(1, Math.round(Theme.barHeight * root.ui))
@@ -28,7 +28,7 @@ PanelWindow {
     readonly property int iconPx: Math.max(1, Math.round(root.theme.iconPx * root.ui))
     readonly property int hPad: Math.max(1, Math.round(Theme.wsInnerPad * root.ui))
     readonly property int textGap: Math.max(1, Math.round(Theme.space * root.ui))
-    readonly property int pillMax: Math.max(1, Math.round(WidgetService.activeWindowWidth() * root.ui))
+    readonly property int pillMax: Math.max(1, Math.round(ActiveWindowSettings.widthValue() * root.ui))
     readonly property bool showTitle: root.winTitle.length > 0 && root.winTitle !== root.classLabel
     // Room left for the title after padding, the icon, and the whole class name.
     readonly property int titleLimit: {

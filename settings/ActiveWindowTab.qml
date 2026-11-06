@@ -56,11 +56,11 @@ Item {
 
     function commit() {
         const which = root.excludeKind === "title" ? "title" : "class"
-        const cleaned = WidgetService.normalizeExcludes([{ text: excludeField.text, kind: which }])
+        const cleaned = ActiveWindowSettings.normalizeExcludes([{ text: excludeField.text, kind: which }])
         if (!cleaned.length)
             return
-        const cur = Config.awDraftList()
-        if (cur.length >= 40)
+        const cur = ActiveWindowSettings.draftExcludes()
+        if (cur.length >= ActiveWindowSettings.excludeMax)
             return
         const text = cleaned[0].text.toLowerCase()
         for (let i = 0; i < cur.length; i++) {
@@ -69,11 +69,9 @@ Item {
         }
         const next = cur.slice()
         next.push(cleaned[0])
-        Config.editAwExcludes(JSON.stringify(next))
+        ActiveWindowSettings.editor.set("excludes", JSON.stringify(next))
         excludeField.text = ""
     }
-
-    Component.onCompleted: Config.ensureAwEditor()
 
     Flickable {
         id: scroll
@@ -234,7 +232,7 @@ Item {
             }
 
             Text {
-                visible: Config.awDraftList().length === 0
+                visible: ActiveWindowSettings.draftExcludes().length === 0
                 width: parent.width
                 wrapMode: Text.WordWrap
                 text: "Nothing is excluded. Every focused window shows on the pill."
@@ -244,7 +242,7 @@ Item {
             }
 
             Item {
-                visible: Config.awDraftList().length > 0
+                visible: ActiveWindowSettings.draftExcludes().length > 0
                 width: parent.width
                 height: Theme.badgeHeight
 
@@ -282,7 +280,7 @@ Item {
             }
 
             Repeater {
-                model: Config.awDraftList()
+                model: ActiveWindowSettings.draftExcludes()
                 delegate: Rectangle {
                     id: entry
                     required property var modelData
@@ -355,14 +353,14 @@ Item {
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    const cur = Config.awDraftList()
+                                    const cur = ActiveWindowSettings.draftExcludes()
                                     const next = []
                                     for (let i = 0; i < cur.length; i++) {
                                         if (cur[i].kind === entry.kind && String(cur[i].text || "") === entry.pattern)
                                             continue
                                         next.push(cur[i])
                                     }
-                                    Config.editAwExcludes(JSON.stringify(next))
+                                    ActiveWindowSettings.editor.set("excludes", JSON.stringify(next))
                                 }
 
                                 HoverTip {
@@ -411,8 +409,8 @@ Item {
 
                     Rectangle {
                         id: activeCard
-                        readonly property bool shown: Config.editorAwShow
-                        readonly property string corner: Config.editorAwCorner
+                        readonly property bool shown: ActiveWindowSettings.editor.value.show
+                        readonly property string corner: ActiveWindowSettings.editor.value.corner
 
                         width: parent.width
                         implicitHeight: activeRow.implicitHeight + Theme.space
@@ -450,7 +448,7 @@ Item {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: Config.editAwShow(!Config.editorAwShow)
+                                    onClicked: ActiveWindowSettings.editor.set("show", !ActiveWindowSettings.editor.value.show)
 
                                     HoverTip {
                                         message: "Show the focused window in the chosen corner"
@@ -504,7 +502,7 @@ Item {
                                             anchors.fill: parent
                                             hoverEnabled: true
                                             cursorShape: Qt.PointingHandCursor
-                                            onClicked: Config.editAwCorner(String(cornerChip.modelData.id || ""))
+                                            onClicked: ActiveWindowSettings.editor.set("corner", String(cornerChip.modelData.id || ""))
 
                                             HoverTip {
                                                 message: "Place the popup at the " + String(cornerChip.modelData.label || "").toLowerCase()
@@ -554,10 +552,10 @@ Item {
                             from: Theme.activeWindowWidthMin
                             to: Theme.activeWindowWidthMax
                             step: Theme.activeWindowWidthStep
-                            value: Config.editorAwWidth
-                            readout: Config.editorAwWidth + " px"
+                            value: ActiveWindowSettings.editor.value.width
+                            readout: ActiveWindowSettings.editor.value.width + " px"
                             tip: "How wide the popup can grow. The class name stays whole. A longer title is cut off."
-                            onChanged: (value) => Config.editAwWidth(value)
+                            onChanged: (value) => ActiveWindowSettings.editor.set("width", value)
                         }
                     }
                 }
@@ -571,13 +569,13 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        applyEnabled: Config.awEditorDirty
-        undoEnabled: Config.canUndoAw()
+        applyEnabled: ActiveWindowSettings.editor.dirty
+        undoEnabled: ActiveWindowSettings.editor.canUndo
         applyTip: "Save the show switch, the corner, the width, and the excludes"
         undoTip: "Drop an unsaved draft, or put back the last applied one"
         resetTip: "Restore the show switch, top left, the default width, and the screensaver exclude. Apply saves it."
-        onApplyClicked: Config.applyAwEditor()
-        onUndoClicked: Config.undoAwEditor()
-        onResetClicked: Config.resetAwEditor()
+        onApplyClicked: ActiveWindowSettings.editor.apply()
+        onUndoClicked: ActiveWindowSettings.editor.undo()
+        onResetClicked: ActiveWindowSettings.editor.reset()
     }
 }
