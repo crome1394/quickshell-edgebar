@@ -49,28 +49,28 @@ Item {
     readonly property bool canUndo: root.canApply || root.undoReady
 
     function seed() {
-        root.draft = Config.effectiveSlots()
-        root.special = Config.specialObject()
+        root.draft = WorkspaceSettings.effectiveSlots()
+        root.special = WorkspaceSettings.specialObject()
         root.draftTick++
     }
 
     function slotsDirty() {
-        return Config.slotsSignature(root.draft) !== Config.slotsSignature(Config.effectiveSlots())
+        return WorkspaceSettings.slotsSignature(root.draft) !== WorkspaceSettings.slotsSignature(WorkspaceSettings.effectiveSlots())
     }
 
     function specialDirty() {
-        return Config.specialSignature(root.special) !== Config.specialSignature(Config.specialObject())
+        return WorkspaceSettings.specialSignature(root.special) !== WorkspaceSettings.specialSignature(WorkspaceSettings.specialObject())
     }
 
     function mutate(fn) {
-        const cur = Config.sanitizeSlots(root.draft)
+        const cur = WorkspaceSettings.sanitizeSlots(root.draft)
         fn(cur)
         root.draft = cur
         root.draftTick++
     }
 
     function mutateSpecial(fn) {
-        const cur = Config.copySpecial(root.special)
+        const cur = WorkspaceSettings.copySpecial(root.special)
         fn(cur)
         root.special = cur
         root.draftTick++
@@ -105,15 +105,15 @@ Item {
     }
 
     function setDraftCount(count) {
-        const n = Config.clampCount(count)
+        const n = WorkspaceSettings.clampCount(count)
         root.mutate(function(cur) {
             while (cur.length > n)
                 cur.pop()
             while (cur.length < n) {
-                const id = Config.nextFreeId(cur)
+                const id = WorkspaceSettings.nextFreeId(cur)
                 if (id < 0)
                     break
-                cur.push(Config.blankSlot(id, Config.iconForId(id)))
+                cur.push(WorkspaceSettings.blankSlot(id, WorkspaceSettings.iconForId(id)))
             }
         })
     }
@@ -272,15 +272,15 @@ Item {
         root.mutate(function(cur) {
             if (cur.length >= 10)
                 return
-            const id = Config.nextFreeId(cur)
+            const id = WorkspaceSettings.nextFreeId(cur)
             if (id < 0)
                 return
-            cur.push(Config.blankSlot(id, Config.iconForId(id)))
+            cur.push(WorkspaceSettings.blankSlot(id, WorkspaceSettings.iconForId(id)))
         })
     }
 
     function setSpecialName(name) {
-        root.mutateSpecial(function(cur) { cur.name = Config.nameNorm(name) })
+        root.mutateSpecial(function(cur) { cur.name = WorkspaceSettings.nameNorm(name) })
     }
     function setSpecialSymbol(text) {
         root.mutateSpecial(function(cur) { cur.label = Config.symbolClamp(text) })
@@ -399,10 +399,10 @@ Item {
     function applyDraft() {
         if (!root.canApply)
             return
-        root.undoSlots = Config.effectiveSlots()
-        root.undoSpecial = Config.specialObject()
+        root.undoSlots = WorkspaceSettings.effectiveSlots()
+        root.undoSpecial = WorkspaceSettings.specialObject()
         root.undoReady = true
-        Config.commit(root.draft, root.special)
+        WorkspaceSettings.commit(root.draft, root.special)
         root.seed()
     }
 
@@ -413,7 +413,7 @@ Item {
         }
         if (!root.undoReady)
             return
-        Config.commit(root.undoSlots, root.undoSpecial)
+        WorkspaceSettings.commit(root.undoSlots, root.undoSpecial)
         root.undoReady = false
         root.seed()
     }

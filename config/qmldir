@@ -14,3 +14,4 @@ singleton OverviewSettings 1.0 OverviewSettings.qml
 singleton LauncherSettings 1.0 LauncherSettings.qml
 singleton OpacitySettings 1.0 OpacitySettings.qml
 singleton WallpaperSettings 1.0 WallpaperSettings.qml
+singleton WorkspaceSettings 1.0 WorkspaceSettings.qml

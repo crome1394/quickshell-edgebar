@@ -24,7 +24,7 @@ Item {
                 title: "Special workspace pill"
                 tip: "Show the special workspace on the bar"
                 checked: Config.showSpecial
-                onToggled: Config.setShowSpecial(!Config.showSpecial)
+                onToggled: WorkspaceSettings.setShowSpecial(!Config.showSpecial)
             }
             CheckRow {
                 width: parent.width
@@ -32,7 +32,7 @@ Item {
                 detail: "Hide empty numbered pills"
                 tip: "Hide an empty numbered pill until that workspace is focused or has a window"
                 checked: Config.showOnlyActive
-                onToggled: Config.setShowOnlyActive(!Config.showOnlyActive)
+                onToggled: WorkspaceSettings.setShowOnlyActive(!Config.showOnlyActive)
             }
             CheckRow {
                 width: parent.width
@@ -40,7 +40,7 @@ Item {
                 detail: "Off leaves the symbol and label"
                 tip: "Show the workspace number. Off leaves the symbol and label."
                 checked: Config.showNumbers
-                onToggled: Config.setShowNumbers(!Config.showNumbers)
+                onToggled: WorkspaceSettings.setShowNumbers(!Config.showNumbers)
             }
             CheckRow {
                 width: parent.width
@@ -48,7 +48,7 @@ Item {
                 detail: "Only when startup workspace is above 0"
                 tip: "Close the special workspace on startup when startup workspace is above 0"
                 checked: Config.startupCloseSpecial
-                onToggled: Config.setStartupCloseSpecial(!Config.startupCloseSpecial)
+                onToggled: WorkspaceSettings.setStartupCloseSpecial(!Config.startupCloseSpecial)
             }
         }
 
@@ -133,7 +133,7 @@ Item {
                         to: 10
                         value: Config.startupWorkspace
                         tip: "Workspace to open on startup. 0 leaves it unchanged."
-                        onChanged: (value) => Config.setStartupWorkspace(value)
+                        onChanged: (value) => WorkspaceSettings.setStartupWorkspace(value)
                     }
                 }
             }

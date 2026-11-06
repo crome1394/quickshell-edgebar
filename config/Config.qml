@@ -11,21 +11,7 @@ import qs.theme
 Singleton {
     id: root
 
-    readonly property string defaultSpecialName: "magic"
     readonly property string storePath: Quickshell.shellDir + "/state/bar-layout.json"
-
-    readonly property string icon1: ""
-    readonly property string icon2: ""
-    readonly property string icon3: "🕹"
-    readonly property string icon4: ""
-    readonly property string icon5: ""
-    readonly property string icon6: ""
-    readonly property string icon7: ""
-    readonly property string icon8: "󰈸"
-    readonly property string icon9: "󰈸"
-    readonly property string icon10: "󰈸"
-    readonly property string iconDefault: "󰈸"
-    readonly property string iconSpecial: "🪄"
 
     property bool ready: false
     property bool applying: false
@@ -187,40 +173,6 @@ Singleton {
     property alias ovExitOnClick: data.ovExitOnClick
     property alias ovExitOnSwitch: data.ovExitOnSwitch
 
-    function iconForId(id) {
-        switch (Math.round(Number(id))) {
-        case 1: return root.icon1
-        case 2: return root.icon2
-        case 3: return root.icon3
-        case 4: return root.icon4
-        case 5: return root.icon5
-        case 6: return root.icon6
-        case 7: return root.icon7
-        case 8: return root.icon8
-        case 9: return root.icon9
-        case 10: return root.icon10
-        default: return root.iconDefault
-        }
-    }
-
-    function clampCount(value) {
-        let n = Math.round(Number(value))
-        if (!(n >= 1))
-            n = 1
-        if (n > 10)
-            n = 10
-        return n
-    }
-
-    function clampStartup(value) {
-        let n = Math.round(Number(value))
-        if (!(n >= 0))
-            n = 0
-        if (n > 10)
-            n = 10
-        return n
-    }
-
     function symbolClamp(value) {
         let text = String(value || "").trim()
         const chars = Array.from(text)
@@ -267,173 +219,6 @@ Singleton {
         if (/^#[0-9a-fA-F]{6}$/.test(c))
             return c.toLowerCase()
         return ""
-    }
-
-    function nameNorm(value) {
-        let s = String(value || "").trim()
-        while (s.length >= 8 && s.substring(0, 8).toLowerCase() === "special:")
-            s = s.substring(8).trim()
-        s = s.replace(/[^A-Za-z0-9_.-]/g, "")
-        if (s.length > 32)
-            s = s.substring(0, 32)
-        if (!s.length || s === root.defaultSpecialName)
-            return ""
-        return s
-    }
-
-    function resolvedSpecialName() {
-        const custom = String(root.specialNameCustom || "")
-        return custom.length ? custom : root.defaultSpecialName
-    }
-
-    function isSpecialName(name) {
-        const n = String(name || "")
-        if (!n.length)
-            return false
-        const special = root.resolvedSpecialName()
-        return n === special || n === ("special:" + special)
-    }
-
-    function blankSlot(id, label) {
-        return {
-            id: id,
-            label: root.symbolClamp(label),
-            font: "",
-            fontPx: 0,
-            text: "",
-            bold: true,
-            italic: false,
-            color: ""
-        }
-    }
-
-    function copySlot(raw) {
-        const src = raw || {}
-        return {
-            id: Math.round(Number(src.id)) || 0,
-            label: root.symbolClamp(src.label),
-            font: root.fontClamp(src.font),
-            fontPx: root.fontPxClamp(src.fontPx),
-            text: root.textClamp(src.text),
-            bold: src.bold === undefined ? true : !!src.bold,
-            italic: !!src.italic,
-            color: root.colorNorm(src.color)
-        }
-    }
-
-    function sanitizeSlots(slots) {
-        const used = {}
-        const out = []
-        const list = slots || []
-        for (let i = 0; i < list.length && out.length < 10; i++) {
-            const slot = root.copySlot(list[i])
-            if (!(slot.id >= 1) || slot.id > 10 || used[slot.id])
-                continue
-            used[slot.id] = true
-            out.push(slot)
-        }
-        return out
-    }
-
-    function sortSlots(slots) {
-        const clean = root.sanitizeSlots(slots)
-        clean.sort(function(a, b) { return a.id - b.id })
-        return clean
-    }
-
-    function defaultSlots(count) {
-        const n = root.clampCount(count)
-        const out = []
-        for (let i = 1; i <= n; i++)
-            out.push(root.blankSlot(i, root.iconForId(i)))
-        return out
-    }
-
-    function effectiveSlots() {
-        void root.revision
-        if (!root.hasSlots)
-            return root.defaultSlots(root.minimumShown)
-        const clean = root.sortSlots(root.slotsJson)
-        if (!clean.length)
-            return root.defaultSlots(root.minimumShown)
-        return clean
-    }
-
-    function nextFreeId(slots) {
-        const used = {}
-        const list = slots || []
-        for (let i = 0; i < list.length; i++)
-            used[Math.round(Number(list[i].id))] = true
-        for (let id = 1; id <= 10; id++) {
-            if (!used[id])
-                return id
-        }
-        return -1
-    }
-
-    function faceForId(id) {
-        const n = Math.round(Number(id))
-        const slots = root.effectiveSlots()
-        for (let i = 0; i < slots.length; i++) {
-            if (slots[i].id === n)
-                return slots[i]
-        }
-        return root.blankSlot(n, "")
-    }
-
-    function specialObject() {
-        void root.revision
-        return {
-            name: String(root.specialNameCustom || ""),
-            label: String(root.specialLabel || ""),
-            font: String(root.specialFont || ""),
-            fontPx: root.fontPxClamp(root.specialFontPx),
-            text: String(root.specialText || ""),
-            bold: root.specialBold !== false,
-            italic: !!root.specialItalic,
-            color: root.colorNorm(root.specialColor)
-        }
-    }
-
-    function specialFace() {
-        const spec = root.specialObject()
-        let symbol = root.symbolClamp(spec.label)
-        if (!symbol.length && !root.textClamp(spec.text).length)
-            symbol = root.iconSpecial
-        return {
-            id: -1,
-            label: symbol,
-            font: spec.font,
-            fontPx: spec.fontPx,
-            text: spec.text,
-            bold: spec.bold,
-            italic: spec.italic,
-            color: spec.color
-        }
-    }
-
-    function copySpecial(raw) {
-        const src = raw || {}
-        return {
-            name: String(src.name || ""),
-            label: root.symbolClamp(src.label),
-            font: root.fontClamp(src.font),
-            fontPx: root.fontPxClamp(src.fontPx),
-            text: root.textClamp(src.text),
-            bold: src.bold === undefined ? true : !!src.bold,
-            italic: !!src.italic,
-            color: root.colorNorm(src.color)
-        }
-    }
-
-    function slotsSignature(slots) {
-        return JSON.stringify(root.sanitizeSlots(slots))
-    }
-
-    function specialSignature(spec) {
-        const src = root.copySpecial(spec)
-        src.name = root.nameNorm(src.name)
-        return JSON.stringify(src)
     }
 
     function touch() {
@@ -503,68 +288,6 @@ Singleton {
         } finally {
             root.applying = false
         }
-        root.touch()
-        root.queueSave()
-    }
-
-    function setShowSpecial(enabled) {
-        const next = !!enabled
-        if (root.showSpecial === next)
-            return
-        root.showSpecial = next
-        root.touch()
-    }
-
-    function setShowOnlyActive(enabled) {
-        const next = !!enabled
-        if (root.showOnlyActive === next)
-            return
-        root.showOnlyActive = next
-        root.touch()
-    }
-
-    function setShowNumbers(enabled) {
-        const next = !!enabled
-        if (root.showNumbers === next)
-            return
-        root.showNumbers = next
-        root.touch()
-    }
-
-    function setStartupWorkspace(workspace) {
-        const next = root.clampStartup(workspace)
-        if (root.startupWorkspace === next)
-            return
-        root.startupWorkspace = next
-        root.touch()
-    }
-
-    function setStartupCloseSpecial(enabled) {
-        const next = !!enabled
-        if (root.startupCloseSpecial === next)
-            return
-        root.startupCloseSpecial = next
-        root.touch()
-    }
-
-    function setMinimumShown(count) {
-        let n = root.clampCount(count)
-        root.applying = true
-        if (root.hasSlots) {
-            const cur = root.sanitizeSlots(root.slotsJson)
-            while (cur.length > n)
-                cur.pop()
-            while (cur.length < n) {
-                const id = root.nextFreeId(cur)
-                if (id < 0)
-                    break
-                cur.push(root.blankSlot(id, root.iconForId(id)))
-            }
-            root.slotsJson = cur
-            n = cur.length || 1
-        }
-        root.minimumShown = n
-        root.applying = false
         root.touch()
         root.queueSave()
     }
@@ -778,28 +501,6 @@ Singleton {
         root.touch()
     }
 
-    function commit(slots, special) {
-        const clean = root.sanitizeSlots(slots)
-        const next = clean.length ? clean : root.defaultSlots(1)
-        const spec = root.copySpecial(special)
-        spec.name = root.nameNorm(spec.name)
-        root.applying = true
-        root.slotsJson = next
-        root.hasSlots = true
-        root.minimumShown = next.length
-        root.specialNameCustom = spec.name
-        root.specialLabel = spec.label
-        root.specialFont = spec.font
-        root.specialFontPx = spec.fontPx
-        root.specialText = spec.text
-        root.specialBold = spec.bold
-        root.specialItalic = spec.italic
-        root.specialColor = spec.color
-        root.applying = false
-        root.touch()
-        root.queueSave()
-    }
-
     function programOk(text) {
         const program = String(text || "").trim()
         if (program.length < 1 || program.length > 240)
@@ -859,7 +560,9 @@ Singleton {
             if (!root.writing)
                 store.reload()
         }
+        // qmllint disable unresolved-type
         JsonAdapter {
+        // qmllint enable unresolved-type
             id: data
             property bool wsShowSpecialPill: true
             property bool wsShowOnlyActive: false
@@ -1035,25 +738,25 @@ Singleton {
     IpcHandler {
         target: "shell"
         function setShowMagicWorkspacePill(enabled: bool): void {
-            root.setShowSpecial(enabled)
+            WorkspaceSettings.setShowSpecial(enabled)
         }
         function toggleShowMagicWorkspacePill(): void {
-            root.setShowSpecial(!root.showSpecial)
+            WorkspaceSettings.setShowSpecial(!root.showSpecial)
         }
         function setWsMinimumShown(count: string): void {
-            root.setMinimumShown(count)
+            WorkspaceSettings.setMinimumShown(count)
         }
         function setWsShowOnlyActive(enabled: bool): void {
-            root.setShowOnlyActive(enabled)
+            WorkspaceSettings.setShowOnlyActive(enabled)
         }
         function setWsShowNumbers(enabled: bool): void {
-            root.setShowNumbers(enabled)
+            WorkspaceSettings.setShowNumbers(enabled)
         }
         function setWsStartupWorkspace(workspace: string): void {
-            root.setStartupWorkspace(workspace)
+            WorkspaceSettings.setStartupWorkspace(workspace)
         }
         function setWsStartupCloseMagic(enabled: bool): void {
-            root.setStartupCloseSpecial(enabled)
+            WorkspaceSettings.setStartupCloseSpecial(enabled)
         }
     }
 }
