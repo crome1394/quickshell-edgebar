@@ -88,13 +88,6 @@ Singleton {
     property bool editorStatBold: true
     property bool editorStatItalic: false
     property var editorStatBands: null
-    property bool netEditorReady: false
-    property bool netEditorDirty: false
-    property bool netUndoReady: false
-    property var netUndo: null
-    property bool editorNetFull: false
-    property bool editorNetOctet: true
-    property bool editorNetDevice: false
     property bool ovEditorReady: false
     property bool ovEditorDirty: false
     property bool ovUndoReady: false
@@ -763,30 +756,6 @@ Singleton {
         if (root.flushWindowsToBar === next)
             return
         root.flushWindowsToBar = next
-        root.touch()
-    }
-
-    function setShowNetworkFullIp(enabled) {
-        const next = !!enabled
-        if (root.showNetworkFullIp === next)
-            return
-        root.showNetworkFullIp = next
-        root.touch()
-    }
-
-    function setShowNetworkLastOctet(enabled) {
-        const next = !!enabled
-        if (root.showNetworkLastOctet === next)
-            return
-        root.showNetworkLastOctet = next
-        root.touch()
-    }
-
-    function setShowNetworkDeviceName(enabled) {
-        const next = !!enabled
-        if (root.showNetworkDeviceName === next)
-            return
-        root.showNetworkDeviceName = next
         root.touch()
     }
 
@@ -2898,106 +2867,6 @@ Singleton {
 
     function canUndoNoti() {
         return root.notiEditorDirty || root.notiUndoReady
-    }
-
-    function netSnapshot() {
-        return {
-            full: !!root.showNetworkFullIp,
-            octet: !!root.showNetworkLastOctet,
-            device: !!root.showNetworkDeviceName
-        }
-    }
-
-    function netDraft() {
-        return {
-            full: !!root.editorNetFull,
-            octet: !!root.editorNetOctet,
-            device: !!root.editorNetDevice
-        }
-    }
-
-    function writeNetEditor(src) {
-        const snap = src || {}
-        root.editorNetFull = !!snap.full
-        root.editorNetOctet = !!snap.octet
-        root.editorNetDevice = !!snap.device
-    }
-
-    function seedNetEditor() {
-        root.writeNetEditor(root.netSnapshot())
-        root.netEditorReady = true
-        root.netEditorDirty = false
-    }
-
-    function ensureNetEditor() {
-        if (!root.netEditorReady || !root.netEditorDirty)
-            root.seedNetEditor()
-    }
-
-    function touchNetEditor() {
-        root.netEditorDirty = JSON.stringify(root.netDraft()) !== JSON.stringify(root.netSnapshot())
-    }
-
-    function editNetFull(enabled) {
-        root.ensureNetEditor()
-        root.editorNetFull = !!enabled
-        root.touchNetEditor()
-    }
-
-    function editNetOctet(enabled) {
-        root.ensureNetEditor()
-        root.editorNetOctet = !!enabled
-        root.touchNetEditor()
-    }
-
-    function editNetDevice(enabled) {
-        root.ensureNetEditor()
-        root.editorNetDevice = !!enabled
-        root.touchNetEditor()
-    }
-
-    function writeNetState(src) {
-        const snap = src || {}
-        root.applying = true
-        root.showNetworkFullIp = !!snap.full
-        root.showNetworkLastOctet = !!snap.octet
-        root.showNetworkDeviceName = !!snap.device
-        root.applying = false
-        root.touch()
-        root.queueSave()
-    }
-
-    function applyNetEditor() {
-        if (!root.netEditorDirty)
-            return
-        root.netUndo = root.netSnapshot()
-        root.netUndoReady = true
-        root.writeNetState(root.netDraft())
-        root.seedNetEditor()
-    }
-
-    function undoNetEditor() {
-        if (root.netEditorDirty) {
-            root.seedNetEditor()
-            return
-        }
-        if (!root.netUndoReady || !root.netUndo)
-            return
-        const previous = root.netUndo
-        root.netUndo = null
-        root.netUndoReady = false
-        root.writeNetState(previous)
-        root.seedNetEditor()
-    }
-
-    function resetNetEditor() {
-        root.ensureNetEditor()
-        root.writeNetEditor({ full: false, octet: true, device: false })
-        root.touchNetEditor()
-    }
-
-    function canUndoNet() {
-        return root.netEditorDirty || root.netUndoReady
     }
 
     function ovLayoutNorm(value) {

@@ -2,3 +2,4 @@ module config
 singleton Config 1.0 Config.qml
 singleton BluetoothSettings 1.0 BluetoothSettings.qml
 Draft 1.0 Draft.qml
+singleton NetworkSettings 1.0 NetworkSettings.qml
