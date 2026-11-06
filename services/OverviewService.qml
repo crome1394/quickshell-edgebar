@@ -290,7 +290,7 @@ Singleton {
             return card
         }
         if (card.special) {
-            const face = Config.specialFace()
+            const face = WorkspaceSettings.specialFace()
             card.symbol = String(face.label || "")
             card.word = String(face.text || card.name || "")
             card.font = String(face.font || "")
@@ -301,7 +301,7 @@ Singleton {
         }
         const id = Number(card.wsId || card.id) || 0
         card.wsId = id
-        const face = Config.faceForId(id)
+        const face = WorkspaceSettings.faceForId(id)
         card.symbol = String(face.label || "")
         card.word = String(face.text || "")
         card.font = String(face.font || "")
@@ -382,7 +382,7 @@ Singleton {
             const name = String(ws.name || "")
             const id = Number(ws.id) || 0
             if (name.indexOf("special:") === 0) {
-                if (opts.ovShowSpecial && Config.isSpecialName(name)) {
+                if (opts.ovShowSpecial && WorkspaceSettings.isSpecialName(name)) {
                     const key = "s:" + name
                     const count = root.countOn(monName, key)
                     if (Config.showOnlyActive && count <= 0)
@@ -413,7 +413,7 @@ Singleton {
                 count: root.countOn(monName, "w:" + id)
             }
         }
-        const slots = Config.effectiveSlots()
+        const slots = WorkspaceSettings.effectiveSlots()
         const seen = {}
         let body = []
         for (let i = 0; i < slots.length; i++) {

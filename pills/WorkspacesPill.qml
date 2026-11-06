@@ -74,8 +74,8 @@ Rectangle {
                 readonly property var face: {
                     void Config.revision
                     if (button.modelData.isSpecial)
-                        return Config.specialFace()
-                    return Config.faceForId(button.modelData.id)
+                        return WorkspaceSettings.specialFace()
+                    return WorkspaceSettings.faceForId(button.modelData.id)
                 }
 
                 active: button.modelData.isSpecial

@@ -40,7 +40,7 @@ Singleton {
             return
         const sw = mon.lastIpcObject.specialWorkspace
         const name = sw ? (sw.name || "") : ""
-        service.setSpecialActive(name.length > 0 && Config.isSpecialName(name))
+        service.setSpecialActive(name.length > 0 && WorkspaceSettings.isSpecialName(name))
     }
 
     function requestSpecialSync() {
@@ -59,8 +59,8 @@ Singleton {
     }
 
     function toggleSpecial(name) {
-        const safe = Config.nameNorm(name)
-        const resolved = safe.length ? safe : Config.defaultSpecialName
+        const safe = WorkspaceSettings.nameNorm(name)
+        const resolved = safe.length ? safe : WorkspaceSettings.defaultSpecialName
         service.dispatch("hl.dsp.workspace.toggle_special('" + resolved + "')")
     }
 
@@ -77,7 +77,7 @@ Singleton {
 
         const focused = Hyprland.focusedWorkspace
         const focusedId = (focused && focused.id > 0) ? focused.id : 0
-        const slots = Config.effectiveSlots()
+        const slots = WorkspaceSettings.effectiveSlots()
         const inSlot = {}
         const result = []
         if (Config.showSpecial)
@@ -130,7 +130,7 @@ Singleton {
     }
 
     function floorId() {
-        const slots = Config.effectiveSlots()
+        const slots = WorkspaceSettings.effectiveSlots()
         if (!slots.length)
             return 1
         let floor = slots[0].id
@@ -142,7 +142,7 @@ Singleton {
     function activate(entry) {
         if (!entry)
             return
-        const name = Config.resolvedSpecialName()
+        const name = WorkspaceSettings.resolvedSpecialName()
         if (entry.isSpecial) {
             service.toggleSpecial(name)
             return
@@ -160,7 +160,7 @@ Singleton {
     // Same order as ~/.local/bin/cycle-workspace.sh: specials sit in front.
     // Right from the special closes it and leaves the numbered workspace underneath.
     function switchRelative(delta) {
-        const name = Config.resolvedSpecialName()
+        const name = WorkspaceSettings.resolvedSpecialName()
         if (service.specialActive) {
             if (delta > 0)
                 service.toggleSpecial(name)
@@ -205,9 +205,9 @@ Singleton {
             const mon = Hyprland.focusedMonitor
             const sw = (mon && mon.lastIpcObject) ? mon.lastIpcObject.specialWorkspace : null
             const magicName = sw ? (sw.name || "") : ""
-            magicOpen = magicName.length > 0 && Config.isSpecialName(magicName)
+            magicOpen = magicName.length > 0 && WorkspaceSettings.isSpecialName(magicName)
             if (magicOpen)
-                service.toggleSpecial(Config.resolvedSpecialName())
+                service.toggleSpecial(WorkspaceSettings.resolvedSpecialName())
         }
         if (focusedId !== target)
             service.dispatch("hl.dsp.focus({ workspace = " + target + " })")
@@ -235,7 +235,7 @@ Singleton {
             const mon = Hyprland.focusedMonitor
             if (monName && mon && mon.name && monName !== mon.name)
                 return
-            service.setSpecialActive(String(wsName || "").length > 0 && Config.isSpecialName(wsName))
+            service.setSpecialActive(String(wsName || "").length > 0 && WorkspaceSettings.isSpecialName(wsName))
             service.requestSpecialSync()
             return
         }
