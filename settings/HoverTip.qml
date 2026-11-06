@@ -23,6 +23,7 @@ ToolTip {
 
     contentItem: Text {
         text: tip.text
+        textFormat: Text.PlainText
         color: Theme.text
         font.family: Theme.uiFont
         font.pixelSize: Theme.smallPx
