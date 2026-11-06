@@ -33,18 +33,6 @@ Singleton {
     property int revision: 0
 
     // Clock page draft. These are not saved. Apply writes the adapter fields.
-    property bool clockEditorReady: false
-    property bool clockEditorDirty: false
-    property bool clockUndoReady: false
-    property var clockUndo: null
-    property string editorClockFormat: ""
-    property string editorClockFont: ""
-    property int editorClockPercent: 100
-    property bool editorClockBold: true
-    property bool editorClockItalic: false
-    property string editorClockColor: ""
-    property int editorClockWeekStart: 0
-    property string editorClockClick: "right"
     property bool launcherEditorReady: false
     property bool launcherEditorDirty: false
     property bool launcherUndoReady: false
@@ -501,6 +489,17 @@ Singleton {
         saveTimer.restart()
     }
 
+    // A text size percent, on the clock's step and range.
+    function fontPercentNorm(pct) {
+        const step = Math.max(1, Theme.clockFontStep)
+        let n = Math.round(Number(pct) / step) * step
+        if (!(n >= Theme.clockFontMin))
+            n = Theme.clockFontMin
+        if (n > Theme.clockFontMax)
+            n = Theme.clockFontMax
+        return n
+    }
+
     // Write several saved fields as one change: one revision bump, one save.
     function saveFields(write) {
         root.applying = true
@@ -897,129 +896,6 @@ Singleton {
         root.touch()
     }
 
-    function clockFormatText() {
-        const fmt = String(root.clockFormat || "").replace(/[\r\n]/g, " ").trim()
-        if (fmt.length)
-            return fmt
-        return "dddd, MM·dd·yyyy | HH:mm:ss"
-    }
-
-    // True when a Qt date format shows seconds. Quoted text is literal.
-    function clockFormatHasSeconds(format) {
-        return /s/.test(String(format || "").replace(/'[^']*'/g, ""))
-    }
-
-    function clockFontPercentValue() {
-        const n = Math.round(Number(root.clockFontPercent))
-        if (n >= Theme.clockFontMin && n <= Theme.clockFontMax)
-            return n
-        return Theme.clockFontDefault
-    }
-
-    function clockFontFamily(fallback) {
-        const name = root.fontClamp(root.clockFont)
-        return name.length ? name : String(fallback || "")
-    }
-
-    function clockColorValue() {
-        return root.colorNorm(root.clockColor)
-    }
-
-    function clockWeekStartValue() {
-        const n = Math.round(Number(root.clockWeekStart))
-        if (n >= 0 && n <= 6)
-            return n
-        return 0
-    }
-
-    function clockClickValue() {
-        return root.clockClick === "left" ? "left" : "right"
-    }
-
-    function clockPresets() {
-        return [
-            { label: "Full", format: "dddd, MM·dd·yyyy | HH:mm:ss", tip: "Weekday, date, and 24-hour time with seconds" },
-            { label: "Date", format: "ddd MM·dd·yyyy  HH:mm", tip: "Short weekday, date, and time" },
-            { label: "Time", format: "HH:mm:ss", tip: "24-hour time with seconds" },
-            { label: "Short", format: "HH:mm", tip: "24-hour time" },
-            { label: "12h", format: "h:mm AP", tip: "12-hour time with AM or PM" },
-            { label: "US", format: "ddd M/d/yyyy  h:mm AP", tip: "US date and 12-hour time" },
-            { label: "ISO", format: "yyyy-MM-dd HH:mm", tip: "ISO date and 24-hour time" },
-            { label: "ISO seconds", format: "yyyy-MM-dd HH:mm:ss", tip: "ISO date and 24-hour time with seconds" },
-            { label: "Weekday", format: "dddd HH:mm", tip: "Weekday and 24-hour time" }
-        ]
-    }
-
-    function clockFormatNorm(fmt) {
-        let text = String(fmt || "").replace(/[\r\n]/g, " ").trim()
-        if (text.length > Theme.clockFormatMax)
-            text = text.substring(0, Theme.clockFormatMax).trim()
-        if (!text.length)
-            return "dddd, MM·dd·yyyy | HH:mm:ss"
-        return text
-    }
-
-    function clockPercentNorm(pct) {
-        const step = Math.max(1, Theme.clockFontStep)
-        let n = Math.round(Number(pct) / step) * step
-        if (!(n >= Theme.clockFontMin))
-            n = Theme.clockFontMin
-        if (n > Theme.clockFontMax)
-            n = Theme.clockFontMax
-        return n
-    }
-
-    function clockWeekNorm(value) {
-        const n = Math.round(Number(value))
-        if (n >= 0 && n <= 6)
-            return n
-        return 0
-    }
-
-    function clockClickNorm(value) {
-        return String(value || "") === "left" ? "left" : "right"
-    }
-
-    function clockSnapshot() {
-        return {
-            format: root.clockFormatText(),
-            font: root.fontClamp(root.clockFont),
-            percent: root.clockFontPercentValue(),
-            bold: !!root.clockBold,
-            italic: !!root.clockItalic,
-            color: root.clockColorValue(),
-            weekStart: root.clockWeekStartValue(),
-            click: root.clockClickValue()
-        }
-    }
-
-    function writeClockEditor(src) {
-        const snap = src || {}
-        root.editorClockFormat = String(snap.format || "")
-        root.editorClockFont = root.fontClamp(snap.font)
-        root.editorClockPercent = root.clockPercentNorm(snap.percent)
-        root.editorClockBold = !!snap.bold
-        root.editorClockItalic = !!snap.italic
-        root.editorClockColor = root.colorNorm(snap.color)
-        root.editorClockWeekStart = root.clockWeekNorm(snap.weekStart)
-        root.editorClockClick = root.clockClickNorm(snap.click)
-    }
-
-    function seedClockEditor() {
-        root.writeClockEditor(root.clockSnapshot())
-        root.clockEditorReady = true
-        root.clockEditorDirty = false
-    }
-
-    function ensureClockEditor() {
-        if (!root.clockEditorReady || !root.clockEditorDirty)
-            root.seedClockEditor()
-    }
-
-    function canUndoClock() {
-        return root.clockEditorDirty || root.clockUndoReady
-    }
-
     function setClockFormat(fmt) {
         let text = String(fmt || "").replace(/[\r\n]/g, " ").trim()
         if (text.length > Theme.clockFormatMax)
@@ -1039,133 +915,11 @@ Singleton {
     }
 
     function setClockFontPercent(pct) {
-        const n = root.clockPercentNorm(pct)
+        const n = root.fontPercentNorm(pct)
         if (root.clockFontPercent === n)
             return
         root.clockFontPercent = n
         root.touch()
-    }
-
-    function setEditorClockFormat(fmt) {
-        let text = String(fmt || "").replace(/[\r\n]/g, " ")
-        if (text.length > Theme.clockFormatMax)
-            text = text.substring(0, Theme.clockFormatMax)
-        root.ensureClockEditor()
-        if (root.editorClockFormat === text)
-            return
-        root.editorClockFormat = text
-        root.clockEditorDirty = true
-    }
-
-    function setEditorClockFont(name) {
-        const text = root.fontClamp(name)
-        root.ensureClockEditor()
-        if (root.editorClockFont === text)
-            return
-        root.editorClockFont = text
-        root.clockEditorDirty = true
-    }
-
-    function setEditorClockPercent(pct) {
-        const n = root.clockPercentNorm(pct)
-        root.ensureClockEditor()
-        if (root.editorClockPercent === n)
-            return
-        root.editorClockPercent = n
-        root.clockEditorDirty = true
-    }
-
-    function setEditorClockBold(enabled) {
-        const next = !!enabled
-        root.ensureClockEditor()
-        if (root.editorClockBold === next)
-            return
-        root.editorClockBold = next
-        root.clockEditorDirty = true
-    }
-
-    function setEditorClockItalic(enabled) {
-        const next = !!enabled
-        root.ensureClockEditor()
-        if (root.editorClockItalic === next)
-            return
-        root.editorClockItalic = next
-        root.clockEditorDirty = true
-    }
-
-    function setEditorClockColor(color) {
-        const text = root.colorNorm(color)
-        root.ensureClockEditor()
-        if (root.editorClockColor === text)
-            return
-        root.editorClockColor = text
-        root.clockEditorDirty = true
-    }
-
-    function setEditorClockWeekStart(value) {
-        const n = root.clockWeekNorm(value)
-        root.ensureClockEditor()
-        if (root.editorClockWeekStart === n)
-            return
-        root.editorClockWeekStart = n
-        root.clockEditorDirty = true
-    }
-
-    function setEditorClockClick(value) {
-        const text = root.clockClickNorm(value)
-        root.ensureClockEditor()
-        if (root.editorClockClick === text)
-            return
-        root.editorClockClick = text
-        root.clockEditorDirty = true
-    }
-
-    function writeClockState(src) {
-        const snap = src || {}
-        root.applying = true
-        root.clockFormat = root.clockFormatNorm(snap.format)
-        root.clockFont = root.fontClamp(snap.font)
-        root.clockFontPercent = root.clockPercentNorm(snap.percent)
-        root.clockBold = !!snap.bold
-        root.clockItalic = !!snap.italic
-        root.clockColor = root.colorNorm(snap.color)
-        root.clockWeekStart = root.clockWeekNorm(snap.weekStart)
-        root.clockClick = root.clockClickNorm(snap.click)
-        root.applying = false
-        root.touch()
-        root.queueSave()
-    }
-
-    function applyClockEditor() {
-        if (!root.clockEditorDirty)
-            return
-        root.clockUndo = root.clockSnapshot()
-        root.clockUndoReady = true
-        root.writeClockState({
-            format: root.editorClockFormat,
-            font: root.editorClockFont,
-            percent: root.editorClockPercent,
-            bold: root.editorClockBold,
-            italic: root.editorClockItalic,
-            color: root.editorClockColor,
-            weekStart: root.editorClockWeekStart,
-            click: root.editorClockClick
-        })
-        root.seedClockEditor()
-    }
-
-    function undoClockEditor() {
-        if (root.clockEditorDirty) {
-            root.seedClockEditor()
-            return
-        }
-        if (!root.clockUndoReady || !root.clockUndo)
-            return
-        const previous = root.clockUndo
-        root.clockUndo = null
-        root.clockUndoReady = false
-        root.writeClockState(previous)
-        root.seedClockEditor()
     }
 
     function setConnectivityShown(enabled) {
@@ -1778,7 +1532,7 @@ Singleton {
     }
 
     function statFontPercentValue() {
-        return root.clockPercentNorm(root.statFontPercent)
+        return root.fontPercentNorm(root.statFontPercent)
     }
 
     function statBandAt(metric, index) {
@@ -1826,7 +1580,7 @@ Singleton {
             terminal: root.statTermNorm(root.editorStatTerminal),
             click: root.statClickNorm(root.editorStatClick),
             font: root.fontClamp(root.editorStatFont),
-            fontPercent: root.clockPercentNorm(root.editorStatFontPercent),
+            fontPercent: root.fontPercentNorm(root.editorStatFontPercent),
             bold: root.editorStatBold !== false,
             italic: !!root.editorStatItalic,
             bands: root.statBandsFrom(root.editorStatBands)
@@ -1843,7 +1597,7 @@ Singleton {
         root.editorStatTerminal = root.statTermNorm(snap.terminal)
         root.editorStatClick = root.statClickNorm(snap.click)
         root.editorStatFont = root.fontClamp(snap.font)
-        root.editorStatFontPercent = root.clockPercentNorm(snap.fontPercent === undefined ? 100 : snap.fontPercent)
+        root.editorStatFontPercent = root.fontPercentNorm(snap.fontPercent === undefined ? 100 : snap.fontPercent)
         root.editorStatBold = snap.bold !== false
         root.editorStatItalic = !!snap.italic
         root.editorStatBands = root.statBandsFrom(snap.bands)
@@ -1917,7 +1671,7 @@ Singleton {
 
     function editStatFontPercent(pct) {
         root.ensureStatEditor()
-        root.editorStatFontPercent = root.clockPercentNorm(pct)
+        root.editorStatFontPercent = root.fontPercentNorm(pct)
         root.touchStatEditor()
     }
 
@@ -1995,7 +1749,7 @@ Singleton {
         root.statTerminal = root.statTermNorm(snap.terminal)
         root.statClick = root.statClickNorm(snap.click)
         root.statFont = root.fontClamp(snap.font)
-        root.statFontPercent = root.clockPercentNorm(snap.fontPercent === undefined ? 100 : snap.fontPercent)
+        root.statFontPercent = root.fontPercentNorm(snap.fontPercent === undefined ? 100 : snap.fontPercent)
         root.statBold = snap.bold !== false
         root.statItalic = !!snap.italic
         root.statThresholdsJson = ""
