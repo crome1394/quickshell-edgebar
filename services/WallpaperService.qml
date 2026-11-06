@@ -24,7 +24,7 @@ Singleton {
             return
         root.loading = true
         root.error = ""
-        listProc.command = ["python3", root.script(), "list", Config.wallpaperDirValue()]
+        listProc.command = ["python3", root.script(), "list", WallpaperSettings.dirValue()]
         listProc.running = true
     }
 
@@ -75,17 +75,17 @@ Singleton {
             return
         }
         root.status = "Adding…"
-        root.run(["add", Config.wallpaperDirValue()].concat(files))
+        root.run(["add", WallpaperSettings.dirValue()].concat(files))
     }
 
     function rename(name, next) {
         root.status = "Renaming…"
-        root.run(["rename", Config.wallpaperDirValue(), String(name || ""), String(next || "")])
+        root.run(["rename", WallpaperSettings.dirValue(), String(name || ""), String(next || "")])
     }
 
     function remove(name) {
         root.status = "Deleting…"
-        root.run(["delete", Config.wallpaperDirValue(), String(name || "")])
+        root.run(["delete", WallpaperSettings.dirValue(), String(name || "")])
     }
 
     function finish(text, code) {
@@ -103,7 +103,7 @@ Singleton {
         }
         root.error = ""
         if (root.pendingAction === "apply" && parsed.path)
-            Config.setWallpaperCurrent(String(parsed.path))
+            WallpaperSettings.setCurrent(String(parsed.path))
         if (parsed.monitor)
             root.status = "Applied on " + parsed.monitor
         else if (parsed.deleted)

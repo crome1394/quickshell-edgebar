@@ -20,7 +20,7 @@ Singleton {
         if (!Config.ready || root.appliedOnce)
             return
         root.appliedOnce = true
-        root.apply(Config.opacityQuickshellValue(), Config.opacitySattyValue(), true)
+        root.apply(OpacitySettings.quickshellValue(), OpacitySettings.sattyValue(), true)
     }
 
     function apply(quickshell, satty, immediate) {

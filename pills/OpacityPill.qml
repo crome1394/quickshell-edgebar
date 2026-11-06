@@ -57,8 +57,8 @@ Rectangle {
     }
 
     function push(quickshell, satty) {
-        Config.setOpacityLevels(quickshell, satty)
-        OpacityService.apply(Config.opacityQuickshellValue(), Config.opacitySattyValue(), false)
+        OpacitySettings.setLevels(quickshell, satty)
+        OpacityService.apply(OpacitySettings.quickshellValue(), OpacitySettings.sattyValue(), false)
     }
 
     implicitWidth: root.cell
@@ -172,9 +172,9 @@ Rectangle {
                     from: Theme.opacityMin
                     to: Theme.opacityMax
                     step: Theme.opacityStep
-                    value: Config.opacityQuickshellValue()
+                    value: OpacitySettings.quickshellValue()
                     tip: "Quickshell window opacity, " + Theme.opacityMin + " to " + Theme.opacityMax
-                    onChanged: (value) => root.push(value, Config.opacitySattyValue())
+                    onChanged: (value) => root.push(value, OpacitySettings.sattyValue())
                 }
 
                 Text {
@@ -199,9 +199,9 @@ Rectangle {
                     from: Theme.opacityMin
                     to: Theme.opacityMax
                     step: Theme.opacityStep
-                    value: Config.opacitySattyValue()
+                    value: OpacitySettings.sattyValue()
                     tip: "Satty window opacity, " + Theme.opacityMin + " to " + Theme.opacityMax
-                    onChanged: (value) => root.push(Config.opacityQuickshellValue(), value)
+                    onChanged: (value) => root.push(OpacitySettings.quickshellValue(), value)
                 }
 
                 Text {
@@ -249,8 +249,8 @@ Rectangle {
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            Config.clearOpacityOverride()
-                            OpacityService.apply(Config.opacityQuickshellValue(), Config.opacitySattyValue(), true)
+                            OpacitySettings.clearOverride()
+                            OpacityService.apply(OpacitySettings.quickshellValue(), OpacitySettings.sattyValue(), true)
                         }
 
                         HoverTip {

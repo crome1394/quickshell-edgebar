@@ -32,10 +32,6 @@ Singleton {
     property bool writing: false
     property int revision: 0
 
-    // Clock page draft. These are not saved. Apply writes the adapter fields.
-
-    // Page drafts. Apply writes the adapter. The bar keeps reading the saved fields.
-
     property alias showSpecial: data.wsShowSpecialPill
     property alias showOnlyActive: data.wsShowOnlyActive
     property alias showNumbers: data.wsShowNumbers
@@ -802,100 +798,6 @@ Singleton {
         root.applying = false
         root.touch()
         root.queueSave()
-    }
-
-    function opacityClamp(value) {
-        let n = Math.round(Number(value))
-        if (!(n >= Theme.opacityMin))
-            return Theme.opacityMax
-        if (n > Theme.opacityMax)
-            return Theme.opacityMax
-        return n
-    }
-
-    function opacityQuickshellValue() {
-        const stored = Math.round(Number(root.opacityQuickshell))
-        if (stored >= Theme.opacityMin && stored <= Theme.opacityMax)
-            return stored
-        return root.opacityClamp(DefaultTheme.opacityQuickshell)
-    }
-
-    function opacitySattyValue() {
-        const stored = Math.round(Number(root.opacitySatty))
-        if (stored >= Theme.opacityMin && stored <= Theme.opacityMax)
-            return stored
-        return root.opacityClamp(DefaultTheme.opacitySatty)
-    }
-
-    function setOpacityLevels(quickshell, satty) {
-        const nextQuickshell = root.opacityClamp(quickshell)
-        const nextSatty = root.opacityClamp(satty)
-        if (root.opacityQuickshell === nextQuickshell && root.opacitySatty === nextSatty)
-            return
-        root.applying = true
-        root.opacityQuickshell = nextQuickshell
-        root.opacitySatty = nextSatty
-        root.applying = false
-        root.touch()
-        root.queueSave()
-    }
-
-    function clearOpacityOverride() {
-        if (root.opacityQuickshell === 0 && root.opacitySatty === 0)
-            return
-        root.applying = true
-        root.opacityQuickshell = 0
-        root.opacitySatty = 0
-        root.applying = false
-        root.touch()
-        root.queueSave()
-    }
-
-    function wallpaperDirValue() {
-        const saved = String(root.wallpaperDir || "").trim()
-        if (saved.length)
-            return saved
-        const home = String(Quickshell.env("HOME") || "")
-        return home.length ? home + "/Pictures/wallpapers" : ""
-    }
-
-    function setWallpaperDir(path) {
-        const next = String(path || "").trim()
-        if (!next.length || next.indexOf("\n") >= 0 || next.indexOf("\r") >= 0)
-            return
-        if (root.wallpaperDir === next)
-            return
-        root.wallpaperDir = next
-        root.touch()
-    }
-
-    function setWallpaperCurrent(path) {
-        const next = String(path || "").trim()
-        if (next.indexOf("\n") >= 0 || next.indexOf("\r") >= 0)
-            return
-        if (root.wallpaperCurrent === next)
-            return
-        root.wallpaperCurrent = next
-        root.touch()
-    }
-
-    function wallpaperTileValue() {
-        const stored = Math.round(Number(root.wallpaperTileSize))
-        if (stored >= Theme.wallpaperTileMin && stored <= Theme.wallpaperTileMax)
-            return stored
-        return Theme.wallpaperTile
-    }
-
-    function setWallpaperTileSize(value) {
-        let next = Math.round(Number(value))
-        if (next < Theme.wallpaperTileMin)
-            next = Theme.wallpaperTileMin
-        if (next > Theme.wallpaperTileMax)
-            next = Theme.wallpaperTileMax
-        if (root.wallpaperTileSize === next)
-            return
-        root.wallpaperTileSize = next
-        root.touch()
     }
 
     function programOk(text) {
