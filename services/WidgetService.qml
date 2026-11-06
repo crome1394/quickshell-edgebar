@@ -1,0 +1,1122 @@
+pragma Singleton
+import QtQuick
+import Quickshell
+import qs.config
+import qs.theme
+
+// Widget catalog, zone order, width scales, and active-window excludes.
+// The bar draws only the widgets that exist. The rest keep a place in settings.
+Singleton {
+    id: root
+
+    // Launchers 2–4 appear only while launcherCount includes them. Their pins stay stored.
+    readonly property var catalog: root.buildCatalog()
+
+    readonly property var layoutEntries: root.normalizeLayout(
+        root.parseList(Config.widgetLayoutJson),
+        Config.barLayoutMode !== "dual")
+
+    readonly property int screenWidth: {
+        const screens = Quickshell.screens
+        const count = screens ? screens.length : 0
+        if (count < 1)
+            return Theme.uiDesignWidth
+        const width = Number(screens[0].width)
+        return width > 0 ? width : Theme.uiDesignWidth
+    }
+
+    readonly property real uiScale: {
+        const manual = Number(Config.uiScaleManual)
+        const width = root.screenWidth
+        let scale = manual > 0 ? manual : width / Theme.uiDesignWidth
+        if (scale < Theme.uiScaleMin)
+            scale = Theme.uiScaleMin
+        if (scale > Theme.uiScaleMax)
+            scale = Theme.uiScaleMax
+        return scale
+    }
+
+    // Bars page edits stay here until Apply. The bar itself keeps reading Config.
+    property var editorLayout: []
+    property string editorScalesJson: ""
+    property var editorShown: ({})
+    property bool editorShowTop: true
+    property bool editorShowBottom: false
+    property bool editorShowLeft: false
+    property bool editorShowRight: false
+    property string editorAlignTop: "left"
+    property string editorAlignBottom: "left"
+    property string editorAlignLeft: "left"
+    property string editorAlignRight: "left"
+    property bool editorSpanTop: false
+    property bool editorSpanBottom: false
+    property bool editorSpanLeft: false
+    property bool editorSpanRight: false
+    property real editorUiScale: 0
+    property bool editorFlush: false
+    property bool editorReady: false
+    property bool editorDirty: false
+    property bool undoReady: false
+    property var undoState: null
+
+    readonly property bool uiScaleAuto: root.editorReady
+        ? !(Number(root.editorUiScale) > 0)
+        : !(Number(Config.uiScaleManual) > 0)
+    readonly property int uiScalePercent: {
+        if (root.editorReady && Number(root.editorUiScale) > 0)
+            return Math.round(Number(root.editorUiScale) * 100)
+        return Math.round(root.uiScale * 100)
+    }
+    readonly property bool flushWindows: root.editorReady ? root.editorFlush : Config.flushWindowsToBar
+    readonly property int gapsTop: HyprGaps.top
+    readonly property int gapsRight: HyprGaps.right
+    readonly property int gapsBottom: HyprGaps.bottom
+    readonly property int gapsLeft: HyprGaps.left
+
+    function launcherId(n) {
+        const index = Math.round(Number(n))
+        if (index <= 1)
+            return "quickLaunch"
+        return "quickLaunch" + index
+    }
+
+    function launcherLabel(n) {
+        const count = Config.launcherSlots()
+        const index = Math.round(Number(n))
+        if (count <= 1)
+            return "App Launcher"
+        return "App Launcher " + index
+    }
+
+    function isLauncherId(id) {
+        const key = String(id || "")
+        return key === "quickLaunch" || key === "quickLaunch2"
+            || key === "quickLaunch3" || key === "quickLaunch4"
+    }
+
+    function launcherPinCount(id) {
+        const key = String(id || "")
+        let index = 1
+        if (key === "quickLaunch2")
+            index = 2
+        else if (key === "quickLaunch3")
+            index = 3
+        else if (key === "quickLaunch4")
+            index = 4
+        else if (key !== "quickLaunch")
+            return 0
+        const boards = Config.launchBoards()
+        const row = boards[index - 1]
+        if (!row || row.length === undefined)
+            return 0
+        return row.length
+    }
+
+    function statsDrawn() {
+        return Config.statsAnyShown()
+    }
+
+    function buildCatalog() {
+        const count = Config.launcherSlots()
+        const rows = [
+            { id: "launcher", label: "Application Menu" }
+        ]
+        for (let n = 1; n <= count; n++)
+            rows.push({ id: root.launcherId(n), label: root.launcherLabel(n) })
+        rows.push(
+            { id: "freshRss", label: "FreshRSS" },
+            { id: "workspaces", label: "Workspaces" },
+            { id: "stats", label: "System Stats" },
+            { id: "tray", label: "System Tray" },
+            { id: "networkPanel", label: "Network" },
+            { id: "bluetooth", label: "Bluetooth" },
+            { id: "clock", label: "Clock" },
+            { id: "notifications", label: "Notifications" },
+            { id: "volume", label: "Audio" },
+            { id: "hyprInsp", label: "Hypr Inspector" },
+            { id: "controlBar", label: "Config Menu Icon" },
+            { id: "tailscale", label: "Tailscale" },
+            { id: "opacity", label: "Transparency" },
+            { id: "power", label: "Power" }
+        )
+        return rows
+    }
+
+    function defaultLayout() {
+        const rows = [
+            { id: "controlBar", zone: "top" },
+            { id: "workspaces", zone: "top" },
+            { id: "clock", zone: "bottom" },
+            { id: "tray", zone: "bottom" },
+            { id: "notifications", zone: "bottom" },
+            { id: "volume", zone: "bottom" },
+            { id: "power", zone: "bottom" },
+            { id: "hyprInsp", zone: "bottom" },
+            { id: "stats", zone: "bottom" },
+            { id: "launcher", zone: "bottom" }
+        ]
+        const count = Config.launcherSlots()
+        for (let n = 1; n <= count; n++)
+            rows.push({ id: root.launcherId(n), zone: "bottom" })
+        rows.push(
+            { id: "freshRss", zone: "bottom" },
+            { id: "opacity", zone: "bottom" },
+            { id: "networkPanel", zone: "bottom" },
+            { id: "bluetooth", zone: "bottom" },
+            { id: "tailscale", zone: "bottom" }
+        )
+        return rows
+    }
+
+    function parseList(raw) {
+        if (raw === undefined || raw === null)
+            return []
+        if (typeof raw !== "string") {
+            if (raw.length !== undefined)
+                return raw
+            return []
+        }
+        const text = String(raw).trim()
+        if (!text.length)
+            return []
+        try {
+            const parsed = JSON.parse(text)
+            if (parsed && parsed.length !== undefined)
+                return parsed
+        } catch (e) {
+        }
+        return []
+    }
+
+    function parseObject(raw) {
+        if (raw && typeof raw === "object" && raw.length === undefined)
+            return raw
+        const text = String(raw || "").trim()
+        if (!text.length)
+            return null
+        try {
+            const parsed = JSON.parse(text)
+            if (parsed && typeof parsed === "object" && parsed.length === undefined)
+                return parsed
+        } catch (e) {
+        }
+        return null
+    }
+
+    function isDivider(id) {
+        return /^divider[1-8]$/.test(String(id || ""))
+    }
+
+    function isImplemented(id) {
+        const key = String(id || "")
+        return key === "controlBar" || key === "workspaces" || key === "clock"
+            || key === "tray" || key === "power" || key === "opacity"
+            || key === "networkPanel" || key === "bluetooth" || key === "launcher"
+            || key === "stats" || key === "notifications" || key === "volume"
+            || root.isLauncherId(key)
+    }
+
+    function labelFor(id) {
+        const key = String(id || "")
+        const cat = root.catalog
+        for (let i = 0; i < cat.length; i++) {
+            if (cat[i].id === key)
+                return String(cat[i].label || key)
+        }
+        return key
+    }
+
+    function coerceZone(zone, classic) {
+        const z = String(zone || "")
+        if (classic) {
+            if (z === "right" || z === "bottom")
+                return "bottom"
+            return "top"
+        }
+        if (z === "top" || z === "bottom" || z === "left" || z === "right")
+            return z
+        if (z === "center")
+            return "top"
+        return "top"
+    }
+
+    function knownId(id) {
+        const key = String(id || "")
+        if (root.isDivider(key))
+            return true
+        const cat = root.catalog
+        for (let i = 0; i < cat.length; i++) {
+            if (cat[i].id === key)
+                return true
+        }
+        return false
+    }
+
+    function normalizeLayout(arr, classic) {
+        const out = []
+        const seen = {}
+        const list = arr || []
+        for (let i = 0; i < list.length; i++) {
+            const entry = list[i]
+            if (!entry || !entry.id)
+                continue
+            let id = String(entry.id)
+            if (id === "audio")
+                id = "connectivity"
+            if (!root.knownId(id) || seen[id])
+                continue
+            seen[id] = true
+            out.push({ id: id, zone: root.coerceZone(entry.zone, classic) })
+        }
+        const defaults = root.defaultLayout()
+        for (let i = 0; i < defaults.length; i++) {
+            if (!seen[defaults[i].id])
+                out.push({ id: defaults[i].id, zone: defaults[i].zone })
+        }
+        return out
+    }
+
+    function copyLayout(src) {
+        const list = src || []
+        const out = []
+        for (let i = 0; i < list.length; i++)
+            out.push({ id: list[i].id, zone: list[i].zone })
+        return out
+    }
+
+    function editingLayout() {
+        if (root.editorReady)
+            return root.editorLayout
+        return root.layoutEntries
+    }
+
+    function layoutCopy() {
+        return root.copyLayout(root.editingLayout())
+    }
+
+    function writeLayout(layout, turnLeft, turnRight, turnTop, turnBottom) {
+        root.ensureEditor()
+        root.editorLayout = layout
+        if (turnLeft)
+            root.editorShowLeft = true
+        if (turnRight)
+            root.editorShowRight = true
+        if (turnTop)
+            root.editorShowTop = true
+        if (turnBottom)
+            root.editorShowBottom = true
+        root.editorDirty = true
+    }
+
+    function visible(id) {
+        switch (String(id || "")) {
+        case "launcher": return Config.showLauncherPill
+        case "quickLaunch": return Config.showQuickLaunchPill
+        case "quickLaunch2": return Config.showQuickLaunch2Pill
+        case "quickLaunch3": return Config.showQuickLaunch3Pill
+        case "quickLaunch4": return Config.showQuickLaunch4Pill
+        case "freshRss": return Config.showFreshRssPill
+        case "workspaces": return Config.showWorkspacesPill
+        case "stats": return Config.showStatsWidget
+        case "tray": return Config.showTrayPill
+        // The BT · Audio row is not in the catalog. The flag still round-trips.
+        case "connectivity": return Config.showAudioPill
+        case "bluetooth": return Config.showBluetoothPill
+        case "networkPanel": return Config.showNetworkPanel
+        case "clock": return Config.showClockPill
+        case "notifications": return Config.showNotificationPill
+        case "volume": return Config.showVolumePill
+        case "hyprInsp": return Config.showHyprInspPill
+        case "controlBar": return Config.showControlBarPill
+        case "tailscale": return Config.showTailscalePill
+        case "opacity": return Config.showOpacityPill
+        case "power": return Config.showPowerPill
+        case "activeWindow": return Config.showActiveWindowPill
+        default:
+            return root.isDivider(id)
+        }
+    }
+
+    function zoneEntries(zone) {
+        const all = root.editingLayout()
+        const rows = []
+        for (let i = 0; i < all.length; i++) {
+            if (all[i].zone === zone)
+                rows.push(all[i])
+        }
+        const out = []
+        for (let i = 0; i < rows.length; i++) {
+            const id = String(rows[i].id)
+            const divider = root.isDivider(id)
+            const number = divider ? id.substring(7) : ""
+            out.push({
+                id: id,
+                zone: zone,
+                label: divider ? ("|  Divider " + number) : root.labelFor(id),
+                divider: divider
+            })
+        }
+        return out
+    }
+
+    function barEntries(zone) {
+        const all = root.layoutEntries
+        const out = []
+        for (let i = 0; i < all.length; i++) {
+            if (all[i].zone !== zone)
+                continue
+            const id = String(all[i].id)
+            if (root.isDivider(id)) {
+                out.push({ id: id })
+                continue
+            }
+            if (root.isImplemented(id) && root.visible(id))
+                out.push({ id: id })
+        }
+        return out
+    }
+
+    function zoneActive(zone) {
+        const entries = root.barEntries(zone)
+        for (let i = 0; i < entries.length; i++) {
+            if (!root.isDivider(entries[i].id))
+                return true
+        }
+        return false
+    }
+
+    function toggle(id) {
+        const key = String(id || "")
+        if (root.isDivider(key)) {
+            root.removeDivider(key)
+            return
+        }
+        if (key === "activeWindow") {
+            Config.setWidgetShown(key, !root.visible(key))
+            return
+        }
+        root.ensureEditor()
+        const src = root.editorShown || {}
+        const next = {}
+        const names = Object.keys(src)
+        for (let i = 0; i < names.length; i++)
+            next[names[i]] = src[names[i]]
+        next[key] = !root.editorVisible(key)
+        root.editorShown = next
+        root.editorDirty = true
+    }
+
+    function setZone(id, zone) {
+        const key = String(id || "")
+        const z = root.coerceZone(zone, false)
+        const layout = root.layoutCopy()
+        let found = false
+        for (let i = 0; i < layout.length; i++) {
+            if (layout[i].id === key) {
+                layout[i].zone = z
+                found = true
+                break
+            }
+        }
+        if (!found) {
+            if (!root.knownId(key))
+                return
+            layout.push({ id: key, zone: z })
+        }
+        root.writeLayout(
+            layout,
+            z === "left",
+            z === "right",
+            z === "top",
+            z === "bottom")
+    }
+
+    function place(id, zone, index) {
+        const key = String(id || "")
+        const target = root.coerceZone(zone, false)
+        let at = Math.round(Number(index))
+        if (!key.length || isNaN(at))
+            return
+        const layout = root.layoutCopy()
+        let from = -1
+        for (let i = 0; i < layout.length; i++) {
+            if (layout[i].id === key) {
+                from = i
+                break
+            }
+        }
+        if (from < 0)
+            return
+        const fromZone = layout[from].zone
+        const zoneIds = []
+        for (let i = 0; i < layout.length; i++) {
+            if (layout[i].zone === target)
+                zoneIds.push(layout[i].id)
+        }
+        if (at < 0)
+            at = 0
+        if (at > zoneIds.length)
+            at = zoneIds.length
+        let local = at
+        if (fromZone === target) {
+            let localFrom = -1
+            for (let i = 0; i < zoneIds.length; i++) {
+                if (zoneIds[i] === key) {
+                    localFrom = i
+                    break
+                }
+            }
+            if (local === localFrom || local === localFrom + 1)
+                return
+            if (localFrom >= 0 && localFrom < local)
+                local -= 1
+        }
+        const moving = { id: key, zone: target }
+        const next = []
+        for (let i = 0; i < layout.length; i++) {
+            if (i !== from)
+                next.push(layout[i])
+        }
+        let seen = 0
+        let insertAt = next.length
+        for (let i = 0; i < next.length; i++) {
+            if (next[i].zone === target) {
+                if (seen === local) {
+                    insertAt = i
+                    break
+                }
+                seen++
+            }
+        }
+        next.splice(insertAt, 0, moving)
+        const moved = fromZone !== target
+        root.writeLayout(
+            next,
+            moved && target === "left",
+            moved && target === "right",
+            moved && target === "top",
+            moved && target === "bottom")
+    }
+
+    function move(id, delta) {
+        const key = String(id || "")
+        const layout = root.layoutCopy()
+        let idx = -1
+        for (let i = 0; i < layout.length; i++) {
+            if (layout[i].id === key) {
+                idx = i
+                break
+            }
+        }
+        if (idx < 0)
+            return
+        const zone = layout[idx].zone
+        const zoneIdxs = []
+        for (let i = 0; i < layout.length; i++) {
+            if (layout[i].zone === zone)
+                zoneIdxs.push(i)
+        }
+        let pos = -1
+        for (let i = 0; i < zoneIdxs.length; i++) {
+            if (zoneIdxs[i] === idx) {
+                pos = i
+                break
+            }
+        }
+        const next = pos + (delta < 0 ? -1 : 1)
+        if (pos < 0 || next < 0 || next >= zoneIdxs.length)
+            return
+        const swap = zoneIdxs[next]
+        const tmp = layout[idx]
+        layout[idx] = layout[swap]
+        layout[swap] = tmp
+        root.writeLayout(layout, false, false, false, false)
+    }
+
+    function addDivider() {
+        const layout = root.layoutCopy()
+        const used = {}
+        for (let i = 0; i < layout.length; i++)
+            used[layout[i].id] = true
+        let id = ""
+        for (let n = 1; n <= 8; n++) {
+            const cand = "divider" + n
+            if (!used[cand]) {
+                id = cand
+                break
+            }
+        }
+        if (!id.length)
+            return
+        layout.push({ id: id, zone: "bottom" })
+        root.writeLayout(layout, false, false, false, false)
+    }
+
+    function canAddDivider() {
+        const layout = root.editingLayout()
+        let count = 0
+        for (let i = 0; i < layout.length; i++) {
+            if (root.isDivider(layout[i].id))
+                count++
+        }
+        return count < 8
+    }
+
+    function removeDivider(id) {
+        if (!root.isDivider(id))
+            return
+        const layout = root.layoutCopy()
+        const next = []
+        for (let i = 0; i < layout.length; i++) {
+            if (layout[i].id !== id)
+                next.push(layout[i])
+        }
+        root.writeLayout(next, false, false, false, false)
+    }
+
+    function resetLayout() {
+        root.ensureEditor()
+        root.editorLayout = root.defaultLayout()
+        root.editorShowTop = true
+        root.editorDirty = true
+    }
+
+    function barEnabled(edge) {
+        if (!root.editorReady) {
+            switch (String(edge || "")) {
+            case "bottom": return Config.showBottomBar
+            case "left": return Config.showLeftBar
+            case "right": return Config.showRightBar
+            case "top": return Config.showTopBar
+            default: return false
+            }
+        }
+        switch (String(edge || "")) {
+        case "bottom": return root.editorShowBottom
+        case "left": return root.editorShowLeft
+        case "right": return root.editorShowRight
+        case "top": return root.editorShowTop
+        default: return false
+        }
+    }
+
+    function setBarEnabled(edge, on) {
+        root.ensureEditor()
+        const next = !!on
+        switch (String(edge || "")) {
+        case "top":
+            if (root.editorShowTop === next)
+                return
+            root.editorShowTop = next
+            break
+        case "bottom":
+            if (root.editorShowBottom === next)
+                return
+            root.editorShowBottom = next
+            break
+        case "left":
+            if (root.editorShowLeft === next)
+                return
+            root.editorShowLeft = next
+            break
+        case "right":
+            if (root.editorShowRight === next)
+                return
+            root.editorShowRight = next
+            break
+        default:
+            return
+        }
+        root.editorDirty = true
+    }
+
+    function barAlign(edge) {
+        let value = "left"
+        switch (String(edge || "")) {
+        case "bottom":
+            value = root.editorReady ? root.editorAlignBottom : String(Config.bottomBarAlign || "")
+            break
+        case "left":
+            value = root.editorReady ? root.editorAlignLeft : String(Config.leftBarAlign || "")
+            break
+        case "right":
+            value = root.editorReady ? root.editorAlignRight : String(Config.rightBarAlign || "")
+            break
+        case "top":
+            value = root.editorReady ? root.editorAlignTop : String(Config.topBarAlign || "")
+            break
+        }
+        if (value === "left" || value === "right" || value === "center")
+            return value
+        return "left"
+    }
+
+    function setBarAlign(edge, align) {
+        root.ensureEditor()
+        const next = root.normalizeAlign(align)
+        switch (String(edge || "")) {
+        case "top":
+            if (root.editorAlignTop === next)
+                return
+            root.editorAlignTop = next
+            break
+        case "bottom":
+            if (root.editorAlignBottom === next)
+                return
+            root.editorAlignBottom = next
+            break
+        case "left":
+            if (root.editorAlignLeft === next)
+                return
+            root.editorAlignLeft = next
+            break
+        case "right":
+            if (root.editorAlignRight === next)
+                return
+            root.editorAlignRight = next
+            break
+        default:
+            return
+        }
+        root.editorDirty = true
+    }
+
+    function barSpans(edge) {
+        if (!root.editorReady) {
+            switch (String(edge || "")) {
+            case "bottom": return Config.panelSpanFull
+            case "left": return Config.leftBarSpanFull
+            case "right": return Config.rightBarSpanFull
+            case "top": return Config.barSpanFull
+            default: return false
+            }
+        }
+        switch (String(edge || "")) {
+        case "bottom": return root.editorSpanBottom
+        case "left": return root.editorSpanLeft
+        case "right": return root.editorSpanRight
+        case "top": return root.editorSpanTop
+        default: return false
+        }
+    }
+
+    function setBarSpans(edge, on) {
+        root.ensureEditor()
+        const next = !!on
+        switch (String(edge || "")) {
+        case "top":
+            if (root.editorSpanTop === next)
+                return
+            root.editorSpanTop = next
+            break
+        case "bottom":
+            if (root.editorSpanBottom === next)
+                return
+            root.editorSpanBottom = next
+            break
+        case "left":
+            if (root.editorSpanLeft === next)
+                return
+            root.editorSpanLeft = next
+            break
+        case "right":
+            if (root.editorSpanRight === next)
+                return
+            root.editorSpanRight = next
+            break
+        default:
+            return
+        }
+        root.editorDirty = true
+    }
+
+    function barShown(edge) {
+        switch (String(edge || "")) {
+        case "bottom": return Config.showBottomBar
+        case "left": return Config.showLeftBar
+        case "right": return Config.showRightBar
+        case "top": return Config.showTopBar
+        }
+        return false
+    }
+
+    function setUiScaleAuto(on) {
+        root.ensureEditor()
+        if (on) {
+            if (!(Number(root.editorUiScale) > 0))
+                return
+            root.editorUiScale = 0
+            root.editorDirty = true
+            return
+        }
+        if (Number(root.editorUiScale) > 0)
+            return
+        let percent = Math.round(root.uiScale * 100 / 5) * 5
+        const min = Math.round(Theme.uiScaleMin * 100)
+        const max = Math.round(Theme.uiScaleMax * 100)
+        if (percent < min)
+            percent = min
+        if (percent > max)
+            percent = max
+        root.editorUiScale = percent / 100
+        root.editorDirty = true
+    }
+
+    function setUiScalePercent(percent) {
+        root.ensureEditor()
+        let next = Math.round(Number(percent) / 5) * 5
+        const min = Math.round(Theme.uiScaleMin * 100)
+        const max = Math.round(Theme.uiScaleMax * 100)
+        if (!(next >= min))
+            next = min
+        if (next > max)
+            next = max
+        const value = next / 100
+        if (Math.abs(Number(root.editorUiScale) - value) < 0.001)
+            return
+        root.editorUiScale = value
+        root.editorDirty = true
+    }
+
+    function setFlushWindows(on) {
+        root.ensureEditor()
+        const next = !!on
+        if (root.editorFlush === next)
+            return
+        root.editorFlush = next
+        root.editorDirty = true
+    }
+
+    function parseScale(raw) {
+        const parsed = root.parseObject(raw)
+        const out = {}
+        if (!parsed)
+            return out
+        const keys = Object.keys(parsed)
+        for (let i = 0; i < keys.length; i++) {
+            const n = Number(parsed[keys[i]])
+            if (n >= 0.8 && n <= 1.8)
+                out[keys[i]] = Math.round(n * 100) / 100
+        }
+        return out
+    }
+
+    function scaleMap() {
+        return root.parseScale(Config.widgetScalesJson)
+    }
+
+    function scaleOf(id) {
+        const map = root.scaleMap()
+        const n = map[String(id || "")]
+        if (n === undefined || n === null)
+            return 1
+        return n
+    }
+
+    function scalePercent(id) {
+        const map = root.editorReady ? root.parseScale(root.editorScalesJson) : root.scaleMap()
+        const n = map[String(id || "")]
+        if (n === undefined || n === null)
+            return 100
+        return Math.round(Number(n) * 100)
+    }
+
+    function setScale(id, percent) {
+        const key = String(id || "")
+        if (!key.length || !root.knownId(key))
+            return
+        let p = Math.round(Number(percent) / 5) * 5
+        if (!(p >= 80))
+            p = 80
+        if (p > 180)
+            p = 180
+        const factor = Math.round(p) / 100
+        root.ensureEditor()
+        const map = root.parseScale(root.editorScalesJson)
+        const prev = map[key] !== undefined ? Number(map[key]) : 1
+        if (Math.abs(prev - factor) < 0.001)
+            return
+        const next = {}
+        const keys = Object.keys(map)
+        for (let i = 0; i < keys.length; i++) {
+            if (keys[i] !== key)
+                next[keys[i]] = map[keys[i]]
+        }
+        if (Math.abs(factor - 1) >= 0.001)
+            next[key] = factor
+        const names = Object.keys(next)
+        root.editorScalesJson = names.length ? JSON.stringify(next) : ""
+        root.editorDirty = true
+    }
+
+    function resetScales() {
+        root.ensureEditor()
+        if (!String(root.editorScalesJson || "").length)
+            return
+        root.editorScalesJson = ""
+        root.editorDirty = true
+    }
+
+    function activeWindowCorner() {
+        const c = String(Config.activeWindowPillCorner || "")
+        if (c === "topRight" || c === "bottomLeft" || c === "bottomRight")
+            return c
+        return "topLeft"
+    }
+
+    function setActiveWindowCorner(corner) {
+        Config.setActiveWindowCorner(corner)
+    }
+
+    function activeWindowWidth() {
+        const n = Math.round(Number(Config.activeWindowPillWidth))
+        if (n >= Theme.activeWindowWidthMin && n <= Theme.activeWindowWidthMax)
+            return n
+        return Theme.activeWindowWidthDefault
+    }
+
+    function setActiveWindowWidth(px) {
+        Config.setActiveWindowWidth(px)
+    }
+
+    function normalizeExcludes(list) {
+        return Config.normalizeExcludes(list)
+    }
+
+    function excludes() {
+        return root.normalizeExcludes(root.parseList(Config.activeWindowExcludesJson))
+    }
+
+    function addExclude(pattern, kind) {
+        const which = String(kind || "") === "title" ? "title" : "class"
+        const cleaned = root.normalizeExcludes([{ text: pattern, kind: which }])
+        if (!cleaned.length)
+            return false
+        const cur = root.excludes()
+        if (cur.length >= 40)
+            return false
+        const text = cleaned[0].text.toLowerCase()
+        for (let i = 0; i < cur.length; i++) {
+            if (cur[i].kind === which && String(cur[i].text || "").toLowerCase() === text)
+                return false
+        }
+        const next = cur.slice()
+        next.push(cleaned[0])
+        Config.replaceActiveWindowExcludes(JSON.stringify(next))
+        return true
+    }
+
+    function removeExclude(pattern, kind) {
+        const want = String(pattern || "").trim().toLowerCase()
+        const which = String(kind || "") === "title" ? "title" : "class"
+        if (!want.length)
+            return
+        const cur = root.excludes()
+        const next = []
+        let changed = false
+        for (let i = 0; i < cur.length; i++) {
+            if (cur[i].kind === which && String(cur[i].text || "").toLowerCase() === want)
+                changed = true
+            else
+                next.push(cur[i])
+        }
+        if (!changed)
+            return
+        Config.replaceActiveWindowExcludes(JSON.stringify(next))
+    }
+
+    function normalizeAlign(value) {
+        const text = String(value || "")
+        if (text === "left" || text === "right")
+            return text
+        return "center"
+    }
+
+    function shownSnapshot() {
+        return {
+            launcher: Config.showLauncherPill,
+            quickLaunch: Config.showQuickLaunchPill,
+            quickLaunch2: Config.showQuickLaunch2Pill,
+            quickLaunch3: Config.showQuickLaunch3Pill,
+            quickLaunch4: Config.showQuickLaunch4Pill,
+            freshRss: Config.showFreshRssPill,
+            workspaces: Config.showWorkspacesPill,
+            stats: Config.showStatsWidget,
+            tray: Config.showTrayPill,
+            connectivity: Config.showAudioPill,
+            bluetooth: Config.showBluetoothPill,
+            networkPanel: Config.showNetworkPanel,
+            clock: Config.showClockPill,
+            notifications: Config.showNotificationPill,
+            volume: Config.showVolumePill,
+            hyprInsp: Config.showHyprInspPill,
+            controlBar: Config.showControlBarPill,
+            tailscale: Config.showTailscalePill,
+            opacity: Config.showOpacityPill,
+            power: Config.showPowerPill
+        }
+    }
+
+    function editorVisible(id) {
+        const key = String(id || "")
+        if (key === "activeWindow")
+            return Config.showActiveWindowPill
+        if (root.isDivider(key))
+            return true
+        if (!root.editorReady)
+            return root.visible(key)
+        const shown = root.editorShown
+        if (!shown || shown[key] === undefined)
+            return root.visible(key)
+        return !!shown[key]
+    }
+
+    function appliedState() {
+        return {
+            layout: JSON.stringify(root.copyLayout(root.layoutEntries)),
+            scales: String(Config.widgetScalesJson || ""),
+            shown: root.shownSnapshot(),
+            showTopBar: !!Config.showTopBar,
+            showBottomBar: !!Config.showBottomBar,
+            showLeftBar: !!Config.showLeftBar,
+            showRightBar: !!Config.showRightBar,
+            topBarAlign: root.normalizeAlign(Config.topBarAlign),
+            bottomBarAlign: root.normalizeAlign(Config.bottomBarAlign),
+            leftBarAlign: root.normalizeAlign(Config.leftBarAlign),
+            rightBarAlign: root.normalizeAlign(Config.rightBarAlign),
+            barSpanFull: !!Config.barSpanFull,
+            panelSpanFull: !!Config.panelSpanFull,
+            leftBarSpanFull: !!Config.leftBarSpanFull,
+            rightBarSpanFull: !!Config.rightBarSpanFull,
+            uiScaleManual: Number(Config.uiScaleManual) > 0 ? Number(Config.uiScaleManual) : 0,
+            flushWindowsToBar: !!Config.flushWindowsToBar
+        }
+    }
+
+    function editorState() {
+        return {
+            layout: JSON.stringify(root.copyLayout(root.editorLayout)),
+            scales: String(root.editorScalesJson || ""),
+            shown: root.editorShown,
+            showTopBar: !!root.editorShowTop,
+            showBottomBar: !!root.editorShowBottom,
+            showLeftBar: !!root.editorShowLeft,
+            showRightBar: !!root.editorShowRight,
+            topBarAlign: root.normalizeAlign(root.editorAlignTop),
+            bottomBarAlign: root.normalizeAlign(root.editorAlignBottom),
+            leftBarAlign: root.normalizeAlign(root.editorAlignLeft),
+            rightBarAlign: root.normalizeAlign(root.editorAlignRight),
+            barSpanFull: !!root.editorSpanTop,
+            panelSpanFull: !!root.editorSpanBottom,
+            leftBarSpanFull: !!root.editorSpanLeft,
+            rightBarSpanFull: !!root.editorSpanRight,
+            uiScaleManual: Number(root.editorUiScale) > 0 ? Number(root.editorUiScale) : 0,
+            flushWindowsToBar: !!root.editorFlush
+        }
+    }
+
+    function seedEditor() {
+        root.editorLayout = root.copyLayout(root.layoutEntries)
+        root.editorScalesJson = String(Config.widgetScalesJson || "")
+        root.editorShown = root.shownSnapshot()
+        root.editorShowTop = !!Config.showTopBar
+        root.editorShowBottom = !!Config.showBottomBar
+        root.editorShowLeft = !!Config.showLeftBar
+        root.editorShowRight = !!Config.showRightBar
+        root.editorAlignTop = root.normalizeAlign(Config.topBarAlign)
+        root.editorAlignBottom = root.normalizeAlign(Config.bottomBarAlign)
+        root.editorAlignLeft = root.normalizeAlign(Config.leftBarAlign)
+        root.editorAlignRight = root.normalizeAlign(Config.rightBarAlign)
+        root.editorSpanTop = !!Config.barSpanFull
+        root.editorSpanBottom = !!Config.panelSpanFull
+        root.editorSpanLeft = !!Config.leftBarSpanFull
+        root.editorSpanRight = !!Config.rightBarSpanFull
+        root.editorUiScale = Number(Config.uiScaleManual) > 0 ? Number(Config.uiScaleManual) : 0
+        root.editorFlush = !!Config.flushWindowsToBar
+        root.editorReady = true
+        root.editorDirty = false
+    }
+
+    function ensureEditor() {
+        if (!root.editorReady)
+            root.seedEditor()
+    }
+
+    // A clean editor reseeds from layoutEntries when the count changes.
+    // A dirty editor keeps its other rows and only gains or loses launcher ids.
+    function syncLaunchers() {
+        if (!root.editorReady || !root.editorDirty)
+            return
+        const count = Config.launcherSlots()
+        const keep = {}
+        for (let n = 1; n <= count; n++)
+            keep[root.launcherId(n)] = true
+        const next = []
+        const seen = {}
+        let changed = false
+        const cur = root.editorLayout || []
+        for (let i = 0; i < cur.length; i++) {
+            const id = String(cur[i].id || "")
+            if (root.isLauncherId(id) && !keep[id]) {
+                changed = true
+                continue
+            }
+            if (seen[id])
+                continue
+            seen[id] = true
+            next.push({ id: id, zone: cur[i].zone })
+        }
+        for (let n = 1; n <= count; n++) {
+            const id = root.launcherId(n)
+            if (seen[id])
+                continue
+            next.push({ id: id, zone: "bottom" })
+            seen[id] = true
+            changed = true
+        }
+        if (!changed)
+            return
+        root.editorLayout = next
+        root.editorDirty = true
+    }
+
+    function canUndo() {
+        return root.editorDirty || root.undoReady
+    }
+
+    function applyEditor() {
+        if (!root.editorDirty)
+            return
+        root.undoState = root.appliedState()
+        root.undoReady = true
+        const next = root.editorState()
+        root.editorDirty = false
+        Config.applyBarsState(next)
+        root.seedEditor()
+    }
+
+    function undoEditor() {
+        if (root.editorDirty) {
+            root.seedEditor()
+            return
+        }
+        if (!root.undoReady || !root.undoState)
+            return
+        const previous = root.undoState
+        root.undoReady = false
+        root.undoState = null
+        root.editorDirty = false
+        Config.applyBarsState(previous)
+        root.seedEditor()
+    }
+
+    Component.onCompleted: root.seedEditor()
+
+    Connections {
+        target: Config
+        function onRevisionChanged() {
+            if (!root.editorDirty)
+                root.seedEditor()
+        }
+    }
+}

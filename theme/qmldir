@@ -1,0 +1,3 @@
+module theme
+singleton DefaultTheme 1.0 DefaultTheme.qml
+singleton Theme 1.0 Theme.qml

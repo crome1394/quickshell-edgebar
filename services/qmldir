@@ -1,0 +1,11 @@
+module services
+singleton NetworkService 1.0 NetworkService.qml
+singleton HyprGaps 1.0 HyprGaps.qml
+singleton OpacityService 1.0 OpacityService.qml
+singleton RegionService 1.0 RegionService.qml
+singleton WallpaperService 1.0 WallpaperService.qml
+singleton WidgetService 1.0 WidgetService.qml
+singleton WorkspaceService 1.0 WorkspaceService.qml
+singleton OverviewService 1.0 OverviewService.qml
+singleton NotificationService 1.0 NotificationService.qml
+singleton IconService 1.0 IconService.qml

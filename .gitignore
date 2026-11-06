@@ -1,0 +1,8 @@
+.qmlls.ini
+
+# Python bytecode from the helper scripts
+__pycache__/
+*.pyc
+
+# Personal runtime state (layout, pins, saved settings)
+state/
