@@ -5,7 +5,7 @@ import qs.theme
 
 // System → Transparency, and the Transparency pill: one level for every
 // application plus per-application overrides (focused and unfocused).
-// Levels are percents; 100 is solid. The Settings window and fullscreen
+// Levels are percents; 100 is solid. The Settings and Inspector windows and fullscreen
 // windows always stay solid.
 //
 // The overrides are saved as JSON in opacityOverridesJson. An empty field
@@ -219,7 +219,7 @@ Singleton {
                 + root.level(r.active) + " override " + root.level(r.inactive) + " override' })")
         }
         if (level < 100 || rows.length) {
-            lines.push("add({ name = 'qs-opacity-settings', match = { class = [[^org\\.quickshell$]], title = [[^Settings$]] }, opacity = '1 override 1 override 1 override' })")
+            lines.push("add({ name = 'qs-opacity-settings', match = { class = [[^org\\.quickshell$]], title = [[^(Settings|Inspector)$]] }, opacity = '1 override 1 override 1 override' })")
             lines.push("add({ name = 'qs-opacity-fullscreen', match = { fullscreen = true }, opacity = '1 override 1 override 1 override' })")
         }
         lines.push("")

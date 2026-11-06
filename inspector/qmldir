@@ -1,0 +1,3 @@
+module inspector
+BindingsView 1.0 BindingsView.qml
+SystemInfoView 1.0 SystemInfoView.qml

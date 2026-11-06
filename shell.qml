@@ -66,6 +66,15 @@ ShellRoot {
         id: settings
     }
 
+    // Exists only while open (qs ipc call inspector toggle), so a closed
+    // Inspector reads no files and runs nothing.
+    Loader {
+        active: InspectorService.open
+        sourceComponent: Component {
+            InspectorPanel {}
+        }
+    }
+
     // Unloaded while the Active Window switch is off.
     Loader {
         active: Config.showActiveWindowPill

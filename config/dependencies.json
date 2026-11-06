@@ -226,6 +226,13 @@
             "use": "Dim the monitor while the screensaver runs"
         },
         {
+            "name": "fastfetch",
+            "pkg": "fastfetch",
+            "area": "Inspector",
+            "need": "optional",
+            "use": "System Info in the Inspector"
+        },
+        {
             "name": "hyprlock",
             "pkg": "hyprlock",
             "area": "Power",
