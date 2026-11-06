@@ -179,6 +179,7 @@ Singleton {
     property alias ovScrollSwitches: data.ovScrollSwitches
     property alias ovExitOnClick: data.ovExitOnClick
     property alias ovExitOnSwitch: data.ovExitOnSwitch
+    property alias displayRejectedJson: data.displayRejectedJson
 
     function symbolClamp(value) {
         let text = String(value || "").trim()
@@ -537,6 +538,7 @@ Singleton {
             property bool ovScrollSwitches: true
             property bool ovExitOnClick: true
             property bool ovExitOnSwitch: false
+            property string displayRejectedJson: "[]"
             property string dockEffect: "both"
             property string dockScope: "icons"
             property int dockPercent: 128

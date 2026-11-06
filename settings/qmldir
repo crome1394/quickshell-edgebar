@@ -45,3 +45,4 @@ DisplayTab 1.0 DisplayTab.qml
 SystemTab 1.0 SystemTab.qml
 FormRow 1.0 FormRow.qml
 ChipButton 1.0 ChipButton.qml
+ResolutionTile 1.0 ResolutionTile.qml

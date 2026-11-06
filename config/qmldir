@@ -16,3 +16,4 @@ singleton OpacitySettings 1.0 OpacitySettings.qml
 singleton WallpaperSettings 1.0 WallpaperSettings.qml
 singleton WorkspaceSettings 1.0 WorkspaceSettings.qml
 singleton BarSettings 1.0 BarSettings.qml
+singleton DisplaySettings 1.0 DisplaySettings.qml

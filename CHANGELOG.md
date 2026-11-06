@@ -11,6 +11,7 @@
 - The Application Menu settings page is laid out as labeled rows with a live preview, a size slider, and Default buttons for the font and color. New shared pieces: `settings/FormRow.qml`, `settings/ChipButton.qml`, and `components/MenuIconImage.qml`.
 - Settings can be opened over IPC: `qs ipc call settings open`, `close`, `toggle`, and `openTab <tab> <section>` (for example `openTab applications menu`). An unknown tab is refused.
 - Settings search is keyboard friendly: Tab or ↓ moves from the field into the results, ↑/↓ move the highlight (↑ from the top goes back to the field), Enter opens the highlighted result, Tab or Shift+Tab returns to the field, Esc closes, and typing goes back to the field. Hover and click still work.
+- Settings → System → Display sets resolution, refresh rate, and 8/10-bit color for each monitor. Only modes the monitor reports can be picked, refresh rates follow the chosen resolution, and 10-bit shows only when the monitor supports it. Apply checks that Hyprland kept the mode and asks to Keep, going back on its own after 15 seconds. A mode that falls back from 10-bit is remembered and disabled ("Forget failed" clears the list). Nothing about the machine is hard-coded: monitors come from `hyprctl`, the monitors file is found under `$XDG_CONFIG_HOME`, and configs without `hyprctl eval` use `hyprctl keyword monitor`. New: `config/DisplaySettings.qml`, `services/DisplayService.qml`, `settings/ResolutionTile.qml`.
 
 ## 0.1.5 — 2026-11-05
 
