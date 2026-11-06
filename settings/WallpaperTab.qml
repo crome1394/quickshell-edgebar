@@ -100,7 +100,7 @@ Item {
                             height: Theme.fieldHeight
                             verticalAlignment: Text.AlignVCenter
                             selectByMouse: true
-                            text: Config.wallpaperDirValue()
+                            text: WallpaperSettings.dirValue()
                             placeholderText: "Wallpaper folder"
                             leftPadding: Theme.space
                             color: Theme.text
@@ -114,7 +114,7 @@ Item {
                                 border.color: dirField.activeFocus ? Theme.accent : Theme.border
                             }
                             onEditingFinished: {
-                                Config.setWallpaperDir(text)
+                                WallpaperSettings.setDir(text)
                                 WallpaperService.refresh()
                             }
 
@@ -153,7 +153,7 @@ Item {
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    folderDialog.currentFolder = "file://" + Config.wallpaperDirValue()
+                                    folderDialog.currentFolder = "file://" + WallpaperSettings.dirValue()
                                     folderDialog.open()
                                 }
 
@@ -227,7 +227,7 @@ Item {
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    fileDialog.currentFolder = "file://" + Config.wallpaperDirValue()
+                                    fileDialog.currentFolder = "file://" + WallpaperSettings.dirValue()
                                     fileDialog.open()
                                 }
 
@@ -270,10 +270,10 @@ Item {
                             from: Theme.wallpaperTileMin
                             to: Theme.wallpaperTileMax
                             step: Theme.wallpaperTileStep
-                            value: Config.wallpaperTileValue()
-                            readout: Config.wallpaperTileValue() + " px"
+                            value: WallpaperSettings.tileValue()
+                            readout: WallpaperSettings.tileValue() + " px"
                             tip: "Wallpaper preview size, from " + Theme.wallpaperTileMin + " to " + Theme.wallpaperTileMax + " px"
-                            onChanged: (value) => Config.setWallpaperTileSize(value)
+                            onChanged: (value) => WallpaperSettings.setTileSize(value)
                         }
                     }
 
@@ -357,7 +357,7 @@ Item {
                                 required property int index
                                 readonly property string path: String(tile.modelData.path || "")
                                 readonly property string name: String(tile.modelData.name || "")
-                                readonly property int preview: Config.wallpaperTileValue()
+                                readonly property int preview: WallpaperSettings.tileValue()
                                 readonly property bool current: path.length > 0 && path === Config.wallpaperCurrent
                                 readonly property bool picked: path === root.selectedPath
                                 readonly property bool confirming: name === root.confirmName
@@ -504,7 +504,7 @@ Item {
             const path = WallpaperService.urlToPath(selectedFolder)
             if (!path.length)
                 return
-            Config.setWallpaperDir(path)
+            WallpaperSettings.setDir(path)
             WallpaperService.refresh()
         }
     }
