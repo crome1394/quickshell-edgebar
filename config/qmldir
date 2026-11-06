@@ -10,3 +10,4 @@ singleton ClockSettings 1.0 ClockSettings.qml
 singleton AudioSettings 1.0 AudioSettings.qml
 singleton StatsSettings 1.0 StatsSettings.qml
 singleton DockSettings 1.0 DockSettings.qml
+singleton OverviewSettings 1.0 OverviewSettings.qml

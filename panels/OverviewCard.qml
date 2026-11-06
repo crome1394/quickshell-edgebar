@@ -29,7 +29,7 @@ Item {
     readonly property string markText: {
         if (root.card.all)
             return "All"
-        if (root.card.phantom && !Config.ovLive().ovDynamic)
+        if (root.card.phantom && !OverviewSettings.live.ovDynamic)
             return "+"
         return ""
     }

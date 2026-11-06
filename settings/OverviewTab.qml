@@ -40,14 +40,12 @@ Item {
 
     function sliderReadout(entry) {
         const scale = Number(entry.scale) || 1
-        const n = Config.ovEditorInt(String(entry.key || ""), scale)
+        const n = OverviewSettings.draftInt(String(entry.key || ""), scale)
         const suffix = String(entry.suffix || "")
         if (scale === 100)
             return (n / 100).toFixed(2) + suffix
         return String(n) + suffix
     }
-
-    Component.onCompleted: Config.ensureOvEditor()
 
     Text {
         id: labelProbe
@@ -156,7 +154,7 @@ Item {
                                 required property var modelData
                                 required property int index
                                 readonly property string chipId: String(layoutChip.modelData.id || "")
-                                readonly property bool chosen: Config.ovDraft().ovLayout === layoutChip.chipId
+                                readonly property bool chosen: OverviewSettings.editor.value.ovLayout === layoutChip.chipId
                                 readonly property int count: 3
 
                                 x: layoutChip.index * (layoutChip.width + Theme.tabGap)
@@ -181,7 +179,7 @@ Item {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: Config.editOv("ovLayout", layoutChip.chipId)
+                                    onClicked: OverviewSettings.editor.set("ovLayout", layoutChip.chipId)
 
                                     HoverTip {
                                         message: String(layoutChip.modelData.tip || "")
@@ -232,7 +230,7 @@ Item {
                                 required property var modelData
                                 required property int index
                                 readonly property string chipId: String(anchorChip.modelData.id || "")
-                                readonly property bool chosen: Config.ovDraft().ovAnchor === anchorChip.chipId
+                                readonly property bool chosen: OverviewSettings.editor.value.ovAnchor === anchorChip.chipId
                                 readonly property int count: 4
 
                                 x: anchorChip.index * (anchorChip.width + Theme.tabGap)
@@ -257,7 +255,7 @@ Item {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: Config.editOv("ovAnchor", anchorChip.chipId)
+                                    onClicked: OverviewSettings.editor.set("ovAnchor", anchorChip.chipId)
 
                                     HoverTip {
                                         message: String(anchorChip.modelData.tip || "")
@@ -307,10 +305,10 @@ Item {
                                     from: stripCell.modelData.from
                                     to: stripCell.modelData.to
                                     step: stripCell.modelData.step
-                                    value: Config.ovEditorInt(String(stripCell.modelData.key || ""), 1)
+                                    value: OverviewSettings.draftInt(String(stripCell.modelData.key || ""), 1)
                                     readout: root.sliderReadout(stripCell.modelData)
                                     tip: String(stripCell.modelData.tip || "")
-                                    onChanged: (value) => Config.editOvScaled(String(stripCell.modelData.key || ""), value, 1)
+                                    onChanged: (value) => OverviewSettings.setScaled(String(stripCell.modelData.key || ""), value, 1)
                                 }
                             }
                         }
@@ -381,10 +379,10 @@ Item {
                                     from: previewCell.modelData.from
                                     to: previewCell.modelData.to
                                     step: previewCell.modelData.step
-                                    value: Config.ovEditorInt(String(previewCell.modelData.key || ""), previewCell.sliderScale)
+                                    value: OverviewSettings.draftInt(String(previewCell.modelData.key || ""), previewCell.sliderScale)
                                     readout: root.sliderReadout(previewCell.modelData)
                                     tip: String(previewCell.modelData.tip || "")
-                                    onChanged: (value) => Config.editOvScaled(String(previewCell.modelData.key || ""), value, previewCell.sliderScale)
+                                    onChanged: (value) => OverviewSettings.setScaled(String(previewCell.modelData.key || ""), value, previewCell.sliderScale)
                                 }
                             }
                         }
@@ -416,8 +414,8 @@ Item {
                                 title: String(previewFlag.modelData.title || "")
                                 detail: String(previewFlag.modelData.detail || "")
                                 tip: String(previewFlag.modelData.tip || "")
-                                checked: !!Config.ovDraft()[previewFlag.flagKey]
-                                onToggled: Config.editOv(previewFlag.flagKey, !previewFlag.checked)
+                                checked: !!OverviewSettings.editor.value[previewFlag.flagKey]
+                                onToggled: OverviewSettings.editor.set(previewFlag.flagKey, !previewFlag.checked)
                             }
                         }
                     }
@@ -459,10 +457,10 @@ Item {
                         from: 0
                         to: 800
                         step: 1
-                        value: Config.ovEditorInt("ovDuration", 1)
-                        readout: Config.ovEditorInt("ovDuration", 1) + " ms"
+                        value: OverviewSettings.draftInt("ovDuration", 1)
+                        readout: OverviewSettings.draftInt("ovDuration", 1) + " ms"
                         tip: "How long the overview takes to open and close"
-                        onChanged: (value) => Config.editOvScaled("ovDuration", value, 1)
+                        onChanged: (value) => OverviewSettings.setScaled("ovDuration", value, 1)
                     }
 
                     CheckRow {
@@ -470,8 +468,8 @@ Item {
                         title: "Slide between workspaces"
                         detail: "The preview area slides when Tab, the wheel, or a card changes the workspace."
                         tip: "Slide the preview area when the workspace card changes"
-                        checked: !!Config.ovDraft().ovSwitchAnimation
-                        onToggled: Config.editOv("ovSwitchAnimation", !Config.ovDraft().ovSwitchAnimation)
+                        checked: !!OverviewSettings.editor.value.ovSwitchAnimation
+                        onToggled: OverviewSettings.editor.set("ovSwitchAnimation", !OverviewSettings.editor.value.ovSwitchAnimation)
                     }
 
                     Text {
@@ -488,10 +486,10 @@ Item {
                         from: 0
                         to: 800
                         step: 1
-                        value: Config.ovEditorInt("ovSwitchDuration", 1)
-                        readout: Config.ovEditorInt("ovSwitchDuration", 1) + " ms"
+                        value: OverviewSettings.draftInt("ovSwitchDuration", 1)
+                        readout: OverviewSettings.draftInt("ovSwitchDuration", 1) + " ms"
                         tip: "How long the slide between workspaces takes"
-                        onChanged: (value) => Config.editOvScaled("ovSwitchDuration", value, 1)
+                        onChanged: (value) => OverviewSettings.setScaled("ovSwitchDuration", value, 1)
                     }
 
                     CheckRow {
@@ -499,8 +497,8 @@ Item {
                         title: "Fly a dropped window into its card"
                         detail: "The preview shrinks toward the workspace card after a drag."
                         tip: "Animate a dropped window toward the workspace card"
-                        checked: !!Config.ovDraft().ovMoveAnimation
-                        onToggled: Config.editOv("ovMoveAnimation", !Config.ovDraft().ovMoveAnimation)
+                        checked: !!OverviewSettings.editor.value.ovMoveAnimation
+                        onToggled: OverviewSettings.editor.set("ovMoveAnimation", !OverviewSettings.editor.value.ovMoveAnimation)
                     }
 
                     Text {
@@ -517,10 +515,10 @@ Item {
                         from: 0
                         to: 800
                         step: 1
-                        value: Config.ovEditorInt("ovMoveDuration", 1)
-                        readout: Config.ovEditorInt("ovMoveDuration", 1) + " ms"
+                        value: OverviewSettings.draftInt("ovMoveDuration", 1)
+                        readout: OverviewSettings.draftInt("ovMoveDuration", 1) + " ms"
                         tip: "How long the flight into a workspace card takes"
-                        onChanged: (value) => Config.editOvScaled("ovMoveDuration", value, 1)
+                        onChanged: (value) => OverviewSettings.setScaled("ovMoveDuration", value, 1)
                     }
                 }
             }
@@ -570,8 +568,8 @@ Item {
                             title: String(wsFlag.modelData.title || "")
                             detail: String(wsFlag.modelData.detail || "")
                             tip: String(wsFlag.modelData.tip || "")
-                            checked: !!Config.ovDraft()[wsFlag.flagKey]
-                            onToggled: Config.editOv(wsFlag.flagKey, !wsFlag.checked)
+                            checked: !!OverviewSettings.editor.value[wsFlag.flagKey]
+                            onToggled: OverviewSettings.editor.set(wsFlag.flagKey, !wsFlag.checked)
                         }
                     }
                 }
@@ -617,8 +615,8 @@ Item {
                             title: String(inputFlag.modelData.title || "")
                             detail: String(inputFlag.modelData.detail || "")
                             tip: String(inputFlag.modelData.tip || "")
-                            checked: !!Config.ovDraft()[inputFlag.flagKey]
-                            onToggled: Config.editOv(inputFlag.flagKey, !inputFlag.checked)
+                            checked: !!OverviewSettings.editor.value[inputFlag.flagKey]
+                            onToggled: OverviewSettings.editor.set(inputFlag.flagKey, !inputFlag.checked)
                         }
                     }
                 }
@@ -631,13 +629,13 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        applyEnabled: Config.ovEditorDirty
-        undoEnabled: Config.canUndoOv()
+        applyEnabled: OverviewSettings.editor.dirty
+        undoEnabled: OverviewSettings.editor.canUndo
         applyTip: "Save the overview layout, strip, previews, motion, workspaces, and input"
         undoTip: "Drop an unsaved draft, or put back the last applied one"
         resetTip: "Restore the overview options to their defaults. Apply saves them."
-        onApplyClicked: Config.applyOvEditor()
-        onUndoClicked: Config.undoOvEditor()
-        onResetClicked: Config.resetOvEditor()
+        onApplyClicked: OverviewSettings.editor.apply()
+        onUndoClicked: OverviewSettings.editor.undo()
+        onResetClicked: OverviewSettings.editor.reset()
     }
 }

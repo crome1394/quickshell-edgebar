@@ -48,18 +48,18 @@ Variants {
             const focused = Hyprland.focusedMonitor
             return !!focused && focused.name === panel.monName
         }
-        readonly property string anchor: Config.ovLive().ovAnchor
+        readonly property string anchor: OverviewSettings.live.ovAnchor
         readonly property bool stripHorizontal: panel.anchor === "top" || panel.anchor === "bottom"
-        readonly property real thickness: panel.stripHorizontal ? Config.ovLive().ovStripHeight : Config.ovLive().ovStripWidth
-        readonly property real stripOffset: Config.ovLive().ovStripOffset
+        readonly property real thickness: panel.stripHorizontal ? OverviewSettings.live.ovStripHeight : OverviewSettings.live.ovStripWidth
+        readonly property real stripOffset: OverviewSettings.live.ovStripOffset
         readonly property color backdrop: {
-            const opts = Config.ovLive()
+            const opts = OverviewSettings.live
             const dim = Math.max(0, Math.min(1, opts.ovBlur))
             const alpha = opts.ovBackdropBlur ? (0.10 + 0.25 * dim) : (0.28 + 0.50 * dim)
             return Qt.rgba(Theme.pageBg.r, Theme.pageBg.g, Theme.pageBg.b, alpha)
         }
         readonly property string watchKey: {
-            const opts = Config.ovLive()
+            const opts = OverviewSettings.live
             return [
                 OverviewService.refreshSerial, OverviewService.viewMode, panel.anchor,
                 opts.ovLayout, opts.ovGap, opts.ovPadding, opts.ovPaddingTop, opts.ovPaddingBottom,
@@ -72,7 +72,7 @@ Variants {
         }
 
         function pad(edge) {
-            const opts = Config.ovLive()
+            const opts = OverviewSettings.live
             const side = Math.max(0, opts.ovPadding)
             const near = Math.max(0, opts.ovPaddingTop)
             const far = Math.max(0, opts.ovPaddingBottom)
@@ -86,7 +86,7 @@ Variants {
         }
 
         function cardSize() {
-            const opts = Config.ovLive()
+            const opts = OverviewSettings.live
             const margin = Math.max(Theme.barPad, opts.ovStripMargin)
             const labelH = opts.ovShowWsLabels ? (Theme.smallPx + Theme.space) : 0
             const mon = panel.hyprMonitor
@@ -116,7 +116,7 @@ Variants {
         }
 
         function cardPitch() {
-            const opts = Config.ovLive()
+            const opts = OverviewSettings.live
             const size = panel.cardSize()
             const gap = Math.max(0, opts.ovStripGap)
             const label = opts.ovShowWsLabels ? (Theme.fontPx + Theme.space) : 0
@@ -152,7 +152,7 @@ Variants {
         function rebuild(force) {
             if (!panel.monName || !area)
                 return
-            const opts = Config.ovLive()
+            const opts = OverviewSettings.live
             const nextCards = OverviewService.cardsFor(panel.monName)
             let shown = false
             for (let i = 0; i < nextCards.length; i++) {
@@ -243,7 +243,7 @@ Variants {
         function chooseCard(card, fromKey) {
             if (!card)
                 return
-            const opts = Config.ovLive()
+            const opts = OverviewSettings.live
             if (card.all) {
                 OverviewService.viewMode = OverviewService.viewMode === "all" ? "workspace" : "all"
                 panel.rebuild(true)
@@ -369,7 +369,7 @@ Variants {
         }
 
         function finishDrag(item, sx, sy) {
-            const opts = Config.ovLive()
+            const opts = OverviewSettings.live
             const cardHit = panel.cardAtStage(sx, sy)
             if (cardHit && cardHit.card) {
                 const target = cardHit.card
@@ -397,7 +397,7 @@ Variants {
         }
 
         function startFlight(item, target) {
-            if (!Config.ovLive().ovMoveAnimation || !target)
+            if (!OverviewSettings.live.ovMoveAnimation || !target)
                 return
             const drag = panel.drag
             const center = stage.mapFromItem(target, target.width / 2, target.height / 2)
@@ -448,7 +448,7 @@ Variants {
             target: panel
             property: "slideX"
             to: 0
-            duration: Math.max(1, Config.ovLive().ovSwitchDuration)
+            duration: Math.max(1, OverviewSettings.live.ovSwitchDuration)
             easing.type: Easing.OutCubic
         }
         NumberAnimation {
@@ -457,13 +457,13 @@ Variants {
             property: "flyT"
             from: 0
             to: 1
-            duration: Math.max(1, Config.ovLive().ovMoveDuration)
+            duration: Math.max(1, OverviewSettings.live.ovMoveDuration)
             easing.type: Easing.InOutCubic
             onFinished: panel.flying = false
         }
         Timer {
             id: flyDone
-            interval: Math.max(Theme.specialSyncMs, Config.ovLive().ovMoveDuration + Theme.persistDelayMs)
+            interval: Math.max(Theme.specialSyncMs, OverviewSettings.live.ovMoveDuration + Theme.persistDelayMs)
             onTriggered: panel.flying = false
         }
 
@@ -478,7 +478,7 @@ Variants {
             anchors.fill: parent
             acceptedButtons: Qt.LeftButton
             onClicked: {
-                if (Config.ovLive().ovExitOnClick)
+                if (OverviewSettings.live.ovExitOnClick)
                     OverviewService.closeOverview()
             }
         }
@@ -590,7 +590,7 @@ Variants {
 
             WheelHandler {
                 onWheel: function (event) {
-                    if (!OverviewService.open || !Config.ovLive().ovScrollSwitches || !panel.takesKeys)
+                    if (!OverviewService.open || !OverviewSettings.live.ovScrollSwitches || !panel.takesKeys)
                         return
                     if (event.angleDelta.y > 0)
                         panel.stepDisplayed(-1)
@@ -615,10 +615,10 @@ Variants {
                 Flickable {
                     id: stripFlick
                     anchors.fill: parent
-                    anchors.leftMargin: Math.max(Theme.barPad, Config.ovLive().ovStripMargin)
-                    anchors.rightMargin: Math.max(Theme.barPad, Config.ovLive().ovStripMargin)
-                    anchors.topMargin: Math.max(Theme.barPad, Config.ovLive().ovStripMargin)
-                    anchors.bottomMargin: Math.max(Theme.barPad, Config.ovLive().ovStripMargin)
+                    anchors.leftMargin: Math.max(Theme.barPad, OverviewSettings.live.ovStripMargin)
+                    anchors.rightMargin: Math.max(Theme.barPad, OverviewSettings.live.ovStripMargin)
+                    anchors.topMargin: Math.max(Theme.barPad, OverviewSettings.live.ovStripMargin)
+                    anchors.bottomMargin: Math.max(Theme.barPad, OverviewSettings.live.ovStripMargin)
                     clip: true
                     contentWidth: cardBox.width
                     contentHeight: cardBox.height
@@ -649,10 +649,10 @@ Variants {
                                 pitchH: panel.cardPitch().h
                                 cardW: panel.cardSize().w
                                 cardH: panel.cardSize().h
-                                cornerRadius: Config.ovLive().ovStripCardRound
-                                showLabel: Config.ovLive().ovShowWsLabels
-                                numbers: Config.ovLive().ovNumberLabels
-                                livePreview: Config.ovLive().ovLivePreviews && Config.ovLive().ovStripPreviews
+                                cornerRadius: OverviewSettings.live.ovStripCardRound
+                                showLabel: OverviewSettings.live.ovShowWsLabels
+                                numbers: OverviewSettings.live.ovNumberLabels
+                                livePreview: OverviewSettings.live.ovLivePreviews && OverviewSettings.live.ovStripPreviews
                                 onChosen: panel.chooseCard(cardItem.modelData, false)
                             }
                         }
@@ -701,14 +701,14 @@ Variants {
                                 required property int index
                                 placement: modelData
                                 selected: panel.selectedAddr === String(modelData.addr || "")
-                                cornerRadius: Config.ovLive().ovPreviewRound
-                                hoverBorder: Config.ovLive().ovHoverBorder
-                                selectBorder: Config.ovLive().ovSelectBorder
-                                showLabel: Config.ovLive().ovShowWindowLabels
+                                cornerRadius: OverviewSettings.live.ovPreviewRound
+                                hoverBorder: OverviewSettings.live.ovHoverBorder
+                                selectBorder: OverviewSettings.live.ovSelectBorder
+                                showLabel: OverviewSettings.live.ovShowWindowLabels
                                 desktopMode: OverviewService.viewMode === "desktop"
-                                livePreview: Config.ovLive().ovLivePreviews
+                                livePreview: OverviewSettings.live.ovLivePreviews
                                 onHoverOn: {
-                                    if (Config.ovLive().ovFocusFollowsMouse)
+                                    if (OverviewSettings.live.ovFocusFollowsMouse)
                                         panel.selectedAddr = String(modelData.addr || "")
                                 }
                                 onActivate: panel.activateSelected()
@@ -744,7 +744,7 @@ Variants {
                 y: panel.drag ? panel.drag.y : 0
                 width: panel.drag ? panel.drag.w : 0
                 height: panel.drag ? panel.drag.h : 0
-                radius: Config.ovLive().ovPreviewRound
+                radius: OverviewSettings.live.ovPreviewRound
                 color: Theme.fieldBg
                 border.width: Theme.borderWidth * 2
                 border.color: Theme.text
@@ -769,7 +769,7 @@ Variants {
                 y: panel.flyY + (panel.flyTy - panel.flyY) * panel.flyT
                 width: panel.flyW + (panel.flyTw - panel.flyW) * panel.flyT
                 height: panel.flyH + (panel.flyTh - panel.flyH) * panel.flyT
-                radius: Config.ovLive().ovPreviewRound
+                radius: OverviewSettings.live.ovPreviewRound
                 color: Theme.fieldBg
                 border.width: Theme.borderWidth * 2
                 border.color: Theme.accent
