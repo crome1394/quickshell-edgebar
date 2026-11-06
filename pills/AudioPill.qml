@@ -14,6 +14,7 @@ Rectangle {
     property real widthFactor: 1
 
     property string tipText: "Audio"
+    property bool dockHot: dock.mag > 1.01 || Math.abs(dock.jumpY) > 0.5
 
     readonly property real ui: WidgetService.uiScale
     readonly property int cell: Math.max(1, Math.round((Theme.barHeight - Theme.barPad) * root.ui))
@@ -37,6 +38,17 @@ Rectangle {
         return Theme.audioSpeakerColor(level)
     }
 
+    // The whole pill grows as one; either side's click makes it jump.
+    HoverHandler {
+        id: pillHover
+    }
+
+    DockFace {
+        id: dock
+        edge: root.edge
+        hovered: pillHover.hovered
+    }
+
     AudioLevels {
         id: levels
     }
@@ -47,6 +59,15 @@ Rectangle {
     color: root.theme.colSurface
     border.width: Theme.borderWidth
     border.color: outMouse.containsMouse || inMouse.containsMouse ? root.theme.colAccent : root.theme.colBorder
+    transform: [
+        Scale {
+            xScale: dock.mag
+            yScale: dock.mag
+            origin.x: root.width / 2
+            origin.y: dock.growIn ? root.height : 0
+        },
+        Translate { y: dock.jumpY }
+    ]
 
     Row {
         id: row
@@ -114,7 +135,10 @@ Rectangle {
                     if (outMouse.containsMouse)
                         root.tipText = levels.outMute ? "Speaker muted · Right: unmute · Wheel: volume" : "Speaker · Right: mute · Wheel: volume"
                 }
-                onClicked: levels.toggleMute("out")
+                onClicked: {
+                    dock.play()
+                    levels.toggleMute("out")
+                }
                 onWheel: (wheel) => {
                     if (wheel.angleDelta.y === 0)
                         return
@@ -192,7 +216,10 @@ Rectangle {
                     if (inMouse.containsMouse)
                         root.tipText = levels.inMute ? "Microphone muted · Right: unmute · Wheel: volume" : "Microphone · Right: mute · Wheel: volume"
                 }
-                onClicked: levels.toggleMute("in")
+                onClicked: {
+                    dock.play()
+                    levels.toggleMute("in")
+                }
                 onWheel: (wheel) => {
                     if (wheel.angleDelta.y === 0)
                         return

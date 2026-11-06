@@ -14,6 +14,9 @@ Rectangle {
     property string edge: "top"
     property real widthFactor: 1
 
+    // A grown section lifts the pill above its neighbors on the bar.
+    property bool dockHot: cpuGroup.dockHot || memGroup.dockHot || gpuGroup.dockHot || vramGroup.dockHot
+
     readonly property real ui: WidgetService.uiScale
     readonly property int sectionHeight: Math.max(1, Math.round((Theme.barHeight - Theme.barPad) * root.ui))
     readonly property int pad: Math.max(4, Math.round(Theme.statPadH * root.ui * root.widthFactor))
@@ -86,7 +89,8 @@ Rectangle {
     color: root.theme.colSurface
     border.width: Theme.borderWidth
     border.color: root.theme.colBorder
-    clip: true
+    // A grown section may reach past the pill, so clip only while none is.
+    clip: !root.dockHot
 
     SystemStats {
         id: stats
@@ -99,6 +103,7 @@ Rectangle {
         spacing: 0
 
         StatGroup {
+            id: cpuGroup
             visible: root.showCpu
             theme: root.theme
             edge: root.edge
@@ -138,6 +143,7 @@ Rectangle {
         }
 
         StatGroup {
+            id: memGroup
             visible: root.showMem
             theme: root.theme
             edge: root.edge
@@ -177,6 +183,7 @@ Rectangle {
         }
 
         StatGroup {
+            id: gpuGroup
             visible: root.showGpu
             theme: root.theme
             edge: root.edge
@@ -216,6 +223,7 @@ Rectangle {
         }
 
         StatGroup {
+            id: vramGroup
             visible: root.showVram
             theme: root.theme
             edge: root.edge

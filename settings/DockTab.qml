@@ -35,7 +35,7 @@ Item {
             SectionHeader {
                 width: parent.width
                 title: "Dock"
-                hint: "Mac-style hover. Stats and volume stay still. Apply saves this page. The bar keeps the last saved options until then."
+                hint: "Mac-style hover. Apply saves this page. The bar keeps the last saved options until then."
             }
 
             Item {

@@ -30,6 +30,9 @@ Rectangle {
 
     signal activated(int button)
 
+    // True while this section is grown or jumping, so the pill can draw it on top.
+    readonly property bool dockHot: dock.mag > 1.01 || Math.abs(dock.jumpY) > 0.5
+
     readonly property real faceScale: Math.max(0.5, root.ui * root.widthFactor)
     readonly property string faceFamily: root.faceFont.length ? root.faceFont : root.theme.fontFamily
     readonly property int px: Math.max(Theme.statFontMin, Math.round(Theme.fontPx * root.faceScale * Math.max(1, root.facePercent) / 100))
@@ -55,6 +58,23 @@ Rectangle {
     color: hit.containsMouse ? root.theme.colHover : "transparent"
     border.width: hit.containsMouse ? Theme.borderWidth : 0
     border.color: hit.containsMouse ? root.theme.colAccent : "transparent"
+    z: root.dockHot ? 1 : 0
+    transform: [
+        Scale {
+            xScale: dock.mag
+            yScale: dock.mag
+            origin.x: root.width / 2
+            origin.y: dock.growIn ? root.height : 0
+        },
+        Translate { y: dock.jumpY }
+    ]
+
+    // Only the hovered section grows, not the whole pill.
+    DockFace {
+        id: dock
+        edge: root.edge
+        hovered: hit.containsMouse
+    }
 
     Behavior on color {
         ColorAnimation { duration: Theme.colorAnimMs; easing.type: Easing.OutQuad }
@@ -191,7 +211,10 @@ Rectangle {
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-        onClicked: (mouse) => root.activated(mouse.button)
+        onClicked: (mouse) => {
+            dock.play()
+            root.activated(mouse.button)
+        }
     }
 
     BarTip {

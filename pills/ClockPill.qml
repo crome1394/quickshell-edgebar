@@ -14,6 +14,7 @@ Rectangle {
     property string edge: "top"
     property real widthFactor: 1
     property bool calendarOpen: false
+    property bool dockHot: dock.mag > 1.01 || Math.abs(dock.jumpY) > 0.5
 
     readonly property real ui: WidgetService.uiScale
     readonly property int barInner: Math.max(1, Math.round((Theme.barHeight - Theme.barPad) * root.ui))
@@ -72,6 +73,21 @@ Rectangle {
     color: clockMouse.containsMouse ? root.theme.colHover : root.theme.colSurface
     border.width: Theme.borderWidth
     border.color: clockMouse.containsMouse ? root.theme.colAccent : root.theme.colBorder
+    transform: [
+        Scale {
+            xScale: dock.mag
+            yScale: dock.mag
+            origin.x: root.width / 2
+            origin.y: dock.growIn ? root.height : 0
+        },
+        Translate { y: dock.jumpY }
+    ]
+
+    DockFace {
+        id: dock
+        edge: root.edge
+        hovered: clockMouse.containsMouse
+    }
 
     // Ticks on the second only when the format shows seconds, else on the minute.
     SystemClock {
@@ -97,6 +113,7 @@ Rectangle {
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         cursorShape: Qt.PointingHandCursor
         onClicked: (mouse) => {
+            dock.play()
             const right = mouse.button === Qt.RightButton
             if (root.clickSide === "right" ? right : !right)
                 root.calendarOpen = !root.calendarOpen

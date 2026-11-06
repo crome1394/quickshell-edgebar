@@ -3,7 +3,7 @@ import qs.config
 import qs.theme
 
 // Hover magnify and click jump for one icon or one icon cell.
-// The host applies mag and jumpY. Stats and volume do not use this.
+// The host applies mag and jumpY. Every bar pill uses this.
 Item {
     id: root
 
