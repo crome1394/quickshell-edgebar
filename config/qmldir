@@ -11,3 +11,4 @@ singleton AudioSettings 1.0 AudioSettings.qml
 singleton StatsSettings 1.0 StatsSettings.qml
 singleton DockSettings 1.0 DockSettings.qml
 singleton OverviewSettings 1.0 OverviewSettings.qml
+singleton LauncherSettings 1.0 LauncherSettings.qml

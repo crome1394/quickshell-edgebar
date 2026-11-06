@@ -81,7 +81,7 @@ Singleton {
     }
 
     function launcherLabel(n) {
-        const count = Config.launcherSlots()
+        const count = LauncherSettings.slots()
         const index = Math.round(Number(n))
         if (count <= 1)
             return "App Launcher"
@@ -105,7 +105,7 @@ Singleton {
             index = 4
         else if (key !== "quickLaunch")
             return 0
-        const boards = Config.launchBoards()
+        const boards = LauncherSettings.savedBoards()
         const row = boards[index - 1]
         if (!row || row.length === undefined)
             return 0
@@ -117,7 +117,7 @@ Singleton {
     }
 
     function buildCatalog() {
-        const count = Config.launcherSlots()
+        const count = LauncherSettings.slots()
         const rows = [
             { id: "launcher", label: "Application Menu" }
         ]
@@ -155,7 +155,7 @@ Singleton {
             { id: "stats", zone: "bottom" },
             { id: "launcher", zone: "bottom" }
         ]
-        const count = Config.launcherSlots()
+        const count = LauncherSettings.slots()
         for (let n = 1; n <= count; n++)
             rows.push({ id: root.launcherId(n), zone: "bottom" })
         rows.push(
@@ -979,7 +979,7 @@ Singleton {
     function syncLaunchers() {
         if (!root.editorReady || !root.editorDirty)
             return
-        const count = Config.launcherSlots()
+        const count = LauncherSettings.slots()
         const keep = {}
         for (let n = 1; n <= count; n++)
             keep[root.launcherId(n)] = true

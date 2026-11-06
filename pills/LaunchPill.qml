@@ -35,7 +35,7 @@ Rectangle {
     readonly property var runMarks: root.buildMarks()
 
     function boardPins() {
-        const boards = Config.launchBoards()
+        const boards = LauncherSettings.savedBoards()
         const row = boards[root.launcher - 1]
         if (!row || row.length === undefined)
             return []

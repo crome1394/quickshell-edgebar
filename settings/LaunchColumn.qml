@@ -18,7 +18,7 @@ Item {
 
     readonly property var pins: root.boardPins()
     readonly property string title: {
-        const count = Config.editorLauncherSlots()
+        const count = LauncherSettings.draftSlots()
         if (count <= 1)
             return "App Launcher"
         return "App Launcher " + root.launcher
@@ -53,8 +53,7 @@ Item {
     }
 
     function boardPins() {
-        void Config.editorLaunchJson
-        const boards = Config.editorLaunchBoards()
+        const boards = LauncherSettings.draftBoards()
         const row = boards[root.launcher - 1]
         if (!row || row.length === undefined)
             return []
