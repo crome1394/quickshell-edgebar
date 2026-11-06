@@ -17,6 +17,9 @@
 - Transparency: Settings → System → Transparency has All applications and an Overrides section. Each override is one app (picked from the open windows or typed as a window class) with Focused and Unfocused levels, a Same link, an on/off chip, and remove. The old Satty slider becomes the first override, at its saved level. The pill shows All applications plus a slider per override. The Settings window and fullscreen windows stay solid.
 - Transparency is applied without Python: `services/OpacityService.qml` writes `opacity.lua` atomically and reloads it with one `hyprctl repl`, coalescing slider drags. `scripts/opacity.py` is gone. The rules file path follows `$XDG_CONFIG_HOME`. The All applications slider was labeled "Quickshell"; it now says what it does.
 - README: a Hyprland setup section lists the `require("opacity")` line, what the rules override, and the monitors file marker for System → Display.
+- Overview: windows opened, moved, or swapped while the overview is up now show in place. Events and the overview's own move, swap, and close ask Hyprland for fresh window data before redrawing; before, a new window had no size and was left out until the overview was reopened.
+- Overview: a window preview that comes back empty (Hyprland fails a copy while a window re-tiles or has just opened) retries with a fresh capture instead of staying a colored placeholder.
+- Overview: Super+Tab again goes to the workspace you browsed to. The switch used to be undone at once, because closing hands keyboard focus back to the old window and Hyprland followed it to the old workspace; the switch now waits until focus has settled. Esc, a click on empty space, `qs ipc call overview close`, and a workspace change from outside now close without switching.
 
 ## 0.1.5 — 2026-11-05
 
