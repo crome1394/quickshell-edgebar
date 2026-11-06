@@ -10,7 +10,7 @@ Rectangle {
     required property var theme
     property string edge: "top"
     property real hoverX: -1
-    property bool dockHot: root.hoverX >= 0 && Config.dockAllIcons() && (Config.dockMagnify() || Config.dockJumpOn())
+    property bool dockHot: root.hoverX >= 0 && DockSettings.allIcons() && (DockSettings.magnify() || DockSettings.jumpOn())
 
     radius: Theme.radius
     color: root.theme.colSurface
@@ -25,7 +25,7 @@ Rectangle {
 
     HoverHandler {
         id: dockWatch
-        enabled: Config.dockAllIcons() && (Config.dockMagnify() || Config.dockJumpOn())
+        enabled: DockSettings.allIcons() && (DockSettings.magnify() || DockSettings.jumpOn())
         onPointChanged: {
             if (!dockWatch.hovered) {
                 root.hoverX = -1
@@ -39,7 +39,7 @@ Rectangle {
     Timer {
         interval: Theme.dockPollMs
         repeat: true
-        running: root.hoverX >= 0 && Config.dockAllIcons() && (Config.dockMagnify() || Config.dockJumpOn())
+        running: root.hoverX >= 0 && DockSettings.allIcons() && (DockSettings.magnify() || DockSettings.jumpOn())
         onTriggered: {
             if (!dockWatch.hovered)
                 root.hoverX = -1
@@ -92,7 +92,7 @@ Rectangle {
                 italic: !!button.face.italic
                 labelColor: String(button.face.color || "")
                 edge: root.edge
-                dockNeighbor: Config.dockNeighbor(root.hoverX, button.x + button.width / 2)
+                dockNeighbor: DockSettings.neighbor(root.hoverX, button.x + button.width / 2)
                 showNumber: {
                     if (button.modelData.isSpecial)
                         return false

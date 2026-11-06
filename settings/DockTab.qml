@@ -8,13 +8,12 @@ import qs.theme
 Item {
     id: root
 
-    readonly property var draft: Config.dockDraft()
+    readonly property var draft: DockSettings.editor.value
 
     function choose(key, value) {
-        Config.editDock(key, value)
+        DockSettings.editor.set(key, value)
     }
 
-    Component.onCompleted: Config.ensureDockEditor()
 
     Flickable {
         id: scroll
@@ -318,19 +317,19 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        applyEnabled: Config.dockEditorDirty
-        undoEnabled: Config.canUndoDock()
+        applyEnabled: DockSettings.editor.dirty
+        undoEnabled: DockSettings.editor.canUndo
         applyTip: "Save the dock effect, the spread, and the running-dot color"
         undoTip: "Drop an unsaved draft, or put back the last applied one"
         resetTip: "Restore Both, all icons, 128%, 72px spread, an 8px jump, and the cyan dot. Apply saves it."
-        onApplyClicked: Config.applyDockEditor()
-        onUndoClicked: Config.undoDockEditor()
-        onResetClicked: Config.resetDockEditor()
+        onApplyClicked: DockSettings.editor.apply()
+        onUndoClicked: DockSettings.editor.undo()
+        onResetClicked: DockSettings.editor.reset()
     }
 
     ColorDialog {
         id: dotDialog
         title: "Running-dot color"
-        onAccepted: Config.editDock("dot", selectedColor)
+        onAccepted: DockSettings.editor.set("dot", String(selectedColor))
     }
 }

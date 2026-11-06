@@ -16,16 +16,16 @@ Item {
     property bool always: false
 
     readonly property bool growIn: root.edge === "bottom" || root.edge === "left"
-    readonly property bool live: root.always || Config.dockAllIcons()
+    readonly property bool live: root.always || DockSettings.allIcons()
 
     property real mag: {
-        if (!root.live || !Config.dockMagnify())
+        if (!root.live || !DockSettings.magnify())
             return 1
         if (root.neighbors)
             return root.neighbor > 1 ? root.neighbor : 1
         if (!root.hovered)
             return 1
-        return Config.dockPercentValue()
+        return DockSettings.percentValue()
     }
     property real jumpY: 0
 
@@ -41,7 +41,7 @@ Item {
         NumberAnimation {
             target: root
             property: "jumpY"
-            to: root.growIn ? -Config.dockJumpValue() : Config.dockJumpValue()
+            to: root.growIn ? -DockSettings.jumpValue() : DockSettings.jumpValue()
             duration: Theme.dockRiseMs
             easing.type: Easing.OutQuad
         }
@@ -61,7 +61,7 @@ Item {
     }
 
     function play() {
-        if (!root.live || !Config.dockJumpOn())
+        if (!root.live || !DockSettings.jumpOn())
             return
         jumpAnim.restart()
     }

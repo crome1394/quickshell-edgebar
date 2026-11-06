@@ -21,7 +21,7 @@ Rectangle {
     property var menuHandle: null
     property var menuStack: []
     property real hoverX: -1
-    property bool dockHot: root.hoverX >= 0 && Config.dockAllIcons() && (Config.dockMagnify() || Config.dockJumpOn())
+    property bool dockHot: root.hoverX >= 0 && DockSettings.allIcons() && (DockSettings.magnify() || DockSettings.jumpOn())
 
     readonly property real ui: WidgetService.uiScale
     readonly property int cell: Math.max(1, Math.round((Theme.barHeight - Theme.barPad) * root.ui))
@@ -129,7 +129,7 @@ Rectangle {
 
     HoverHandler {
         id: dockWatch
-        enabled: Config.dockAllIcons() && (Config.dockMagnify() || Config.dockJumpOn())
+        enabled: DockSettings.allIcons() && (DockSettings.magnify() || DockSettings.jumpOn())
         onPointChanged: {
             if (!dockWatch.hovered) {
                 root.hoverX = -1
@@ -143,7 +143,7 @@ Rectangle {
     Timer {
         interval: Theme.dockPollMs
         repeat: true
-        running: root.hoverX >= 0 && Config.dockAllIcons() && (Config.dockMagnify() || Config.dockJumpOn())
+        running: root.hoverX >= 0 && DockSettings.allIcons() && (DockSettings.magnify() || DockSettings.jumpOn())
         onTriggered: {
             if (!dockWatch.hovered)
                 root.hoverX = -1
@@ -190,7 +190,7 @@ Rectangle {
                     edge: root.edge
                     neighbors: true
                     hovered: iconMouse.containsMouse
-                    neighbor: Config.dockNeighbor(root.hoverX, iconCell.x + iconCell.width / 2)
+                    neighbor: DockSettings.neighbor(root.hoverX, iconCell.x + iconCell.width / 2)
                 }
 
                 IconImage {

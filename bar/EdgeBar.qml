@@ -53,7 +53,7 @@ PanelWindow {
     readonly property bool shown: root.enabledBar
     readonly property real ui: WidgetService.uiScale
     readonly property int thickness: Math.max(1, Math.round(Theme.barHeight * root.ui))
-    readonly property int dockRoom: Config.dockRoom(root.thickness)
+    readonly property int dockRoom: DockSettings.room(root.thickness)
     readonly property int pad: Math.max(0, Math.round(Theme.barPad * root.ui))
     readonly property int sideGap: Math.max(0, Math.round(Theme.barSideGap * root.ui))
     readonly property int edgeInset: root.sideGap + root.pad

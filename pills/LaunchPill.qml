@@ -22,7 +22,7 @@ Rectangle {
     property bool tipShow: false
     property int runTick: 0
     property real hoverX: -1
-    property bool dockHot: root.hoverX >= 0 && (Config.dockMagnify() || Config.dockJumpOn())
+    property bool dockHot: root.hoverX >= 0 && (DockSettings.magnify() || DockSettings.jumpOn())
 
     readonly property real ui: WidgetService.uiScale
     readonly property int cell: Math.max(1, Math.round((Theme.barHeight - Theme.barPad) * root.ui))
@@ -168,7 +168,7 @@ Rectangle {
 
     HoverHandler {
         id: dockWatch
-        enabled: Config.dockMagnify() || Config.dockJumpOn()
+        enabled: DockSettings.magnify() || DockSettings.jumpOn()
         onPointChanged: {
             if (!dockWatch.hovered) {
                 root.hoverX = -1
@@ -181,7 +181,7 @@ Rectangle {
     Timer {
         interval: Theme.dockPollMs
         repeat: true
-        running: root.hoverX >= 0 && (Config.dockMagnify() || Config.dockJumpOn())
+        running: root.hoverX >= 0 && (DockSettings.magnify() || DockSettings.jumpOn())
         onTriggered: {
             if (!dockWatch.hovered)
                 root.hoverX = -1
@@ -246,7 +246,7 @@ Rectangle {
                     always: true
                     neighbors: true
                     hovered: iconMouse.containsMouse
-                    neighbor: Config.dockNeighbor(root.hoverX, cell.x + cell.width / 2)
+                    neighbor: DockSettings.neighbor(root.hoverX, cell.x + cell.width / 2)
                 }
 
                 Item {
@@ -286,7 +286,7 @@ Rectangle {
                     anchors.bottom: parent.bottom
                     anchors.margins: Theme.borderWidth
                     color: {
-                        const ink = Config.dockDotColor()
+                        const ink = DockSettings.dotColor()
                         if (cell.runState === "focus")
                             return ink
                         return Qt.rgba(ink.r, ink.g, ink.b, 0.72)
