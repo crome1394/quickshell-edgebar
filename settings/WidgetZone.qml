@@ -245,6 +245,48 @@ Column {
             }
 
             Item {
+                width: Theme.chip
+                height: Theme.fieldHeight
+
+                Rectangle {
+                    id: hideChip
+                    readonly property bool selected: WidgetService.barAutoHides(root.zone)
+
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: Theme.chip
+                    height: Theme.chip
+                    radius: Theme.radiusSm
+                    color: hideChip.selected ? Theme.accentDim : Theme.fieldBg
+                    border.width: Theme.borderWidth
+                    border.color: hideChip.selected ? Theme.accent : Theme.border
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "H"
+                        color: hideChip.selected ? Theme.wsActiveText : Theme.subtext
+                        font.family: Theme.uiFont
+                        font.pixelSize: Theme.smallPx
+                        font.bold: hideChip.selected
+                    }
+
+                    MouseArea {
+                        id: hideMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: WidgetService.setBarAutoHides(root.zone, !WidgetService.barAutoHides(root.zone))
+                    }
+
+                    HoverTip {
+                        message: hideChip.selected
+                            ? "Auto-hide is on: the bar slides away and comes back when the pointer touches this edge"
+                            : "Auto-hide: slide this bar away until the pointer touches its edge"
+                        show: hideMouse.containsMouse
+                    }
+                }
+            }
+
+            Item {
                 width: Theme.toggleWidth
                 height: Theme.fieldHeight
 

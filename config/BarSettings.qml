@@ -63,13 +63,59 @@ Singleton {
         return out
     }
 
+    readonly property var edges: ["top", "bottom", "left", "right"]
+    readonly property var autoHideFields: ({
+        top: "topBarAutoHide",
+        bottom: "bottomBarAutoHide",
+        left: "leftBarAutoHide",
+        right: "rightBarAutoHide"
+    })
+
+    // Saved auto-hide flag for one edge.
+    function autoHides(edge) {
+        const field = root.autoHideFields[String(edge || "")]
+        return field ? !!Config[field] : false
+    }
+
+    // { top, bottom, left, right } → booleans, for the widget editor.
+    function autoHideSnapshot() {
+        const out = {}
+        for (let i = 0; i < root.edges.length; i++)
+            out[root.edges[i]] = root.autoHides(root.edges[i])
+        return out
+    }
+
+    function delayNorm(value, low, high, fallback) {
+        const step = Math.max(1, Theme.barDelayStep)
+        let n = Math.round(Number(value) / step) * step
+        if (isNaN(n))
+            n = fallback
+        return Math.max(low, Math.min(high, n))
+    }
+
+    function hideDelayNorm(value) {
+        return root.delayNorm(value, Theme.barHideDelayMin, Theme.barHideDelayMax, 600)
+    }
+
+    function revealDelayNorm(value) {
+        return root.delayNorm(value, Theme.barRevealDelayMin, Theme.barRevealDelayMax, 150)
+    }
+
+    function hideDelayValue() {
+        return root.hideDelayNorm(Config.barHideDelayMs)
+    }
+
+    function revealDelayValue() {
+        return root.revealDelayNorm(Config.barRevealDelayMs)
+    }
+
     function alignNorm(align) {
         const value = String(align || "")
         return value === "left" || value === "right" ? value : "center"
     }
 
     // Save the widget editor's state: layout, scales, shown flags, bars,
-    // alignment, span, UI scale, and flush.
+    // alignment, span, auto-hide, UI scale, and flush.
     function apply(state) {
         const src = state || {}
         const shown = src.shown || {}
@@ -101,6 +147,11 @@ Singleton {
             Config.rightBarSpanFull = !!src.rightBarSpanFull
             Config.uiScaleManual = manual
             Config.flushWindowsToBar = !!src.flushWindowsToBar
+            const hides = src.autoHide || {}
+            for (let e = 0; e < root.edges.length; e++)
+                Config[root.autoHideFields[root.edges[e]]] = !!hides[root.edges[e]]
+            Config.barHideDelayMs = root.hideDelayNorm(src.hideDelayMs)
+            Config.barRevealDelayMs = root.revealDelayNorm(src.revealDelayMs)
         })
     }
 }

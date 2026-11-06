@@ -104,6 +104,16 @@ Item {
         return !!(item && item.dockHot === true)
     }
 
+    // True while this pill has its menu, calendar, or history open, so an
+    // auto-hide bar stays out until it closes.
+    readonly property var pill: cell.toolWidget ? tool.item : face.item
+    readonly property bool holding: {
+        if (cell.widgetId === "notifications" && NotificationService.historyOpen)
+            return true
+        const item = cell.pill
+        return !!(item && (item.menuOpen === true || item.calendarOpen === true))
+    }
+
     visible: cell.shown
     z: cell.dockRaised(cell.toolWidget ? tool.item : face.item) ? 4 : 0
     implicitWidth: cell.shown ? (cell.horizontal ? cell.along : cell.thick) : 0

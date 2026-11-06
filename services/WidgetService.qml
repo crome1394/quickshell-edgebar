@@ -54,6 +54,9 @@ Singleton {
     property bool editorSpanRight: false
     property real editorUiScale: 0
     property bool editorFlush: false
+    property var editorAutoHide: ({ top: false, bottom: false, left: false, right: false })
+    property int editorHideDelay: 600
+    property int editorRevealDelay: 150
     property bool editorReady: false
     property bool editorDirty: false
     property bool undoReady: false
@@ -659,6 +662,51 @@ Singleton {
         root.editorDirty = true
     }
 
+    // Auto-hide per edge, and the shared delays (draft while editing).
+    function barAutoHides(edge) {
+        const key = String(edge || "")
+        return root.editorReady ? !!root.editorAutoHide[key] : BarSettings.autoHides(key)
+    }
+
+    function setBarAutoHides(edge, on) {
+        const key = String(edge || "")
+        if (BarSettings.edges.indexOf(key) < 0)
+            return
+        root.ensureEditor()
+        if (!!root.editorAutoHide[key] === !!on)
+            return
+        const next = Object.assign({}, root.editorAutoHide)
+        next[key] = !!on
+        root.editorAutoHide = next
+        root.editorDirty = true
+    }
+
+    function hideDelay() {
+        return root.editorReady ? root.editorHideDelay : BarSettings.hideDelayValue()
+    }
+
+    function revealDelay() {
+        return root.editorReady ? root.editorRevealDelay : BarSettings.revealDelayValue()
+    }
+
+    function setHideDelay(ms) {
+        root.ensureEditor()
+        const next = BarSettings.hideDelayNorm(ms)
+        if (next === root.editorHideDelay)
+            return
+        root.editorHideDelay = next
+        root.editorDirty = true
+    }
+
+    function setRevealDelay(ms) {
+        root.ensureEditor()
+        const next = BarSettings.revealDelayNorm(ms)
+        if (next === root.editorRevealDelay)
+            return
+        root.editorRevealDelay = next
+        root.editorDirty = true
+    }
+
     function barSpans(edge) {
         if (!root.editorReady) {
             switch (String(edge || "")) {
@@ -878,7 +926,10 @@ Singleton {
             leftBarSpanFull: !!Config.leftBarSpanFull,
             rightBarSpanFull: !!Config.rightBarSpanFull,
             uiScaleManual: Number(Config.uiScaleManual) > 0 ? Number(Config.uiScaleManual) : 0,
-            flushWindowsToBar: !!Config.flushWindowsToBar
+            flushWindowsToBar: !!Config.flushWindowsToBar,
+            autoHide: BarSettings.autoHideSnapshot(),
+            hideDelayMs: BarSettings.hideDelayValue(),
+            revealDelayMs: BarSettings.revealDelayValue()
         }
     }
 
@@ -900,7 +951,10 @@ Singleton {
             leftBarSpanFull: !!root.editorSpanLeft,
             rightBarSpanFull: !!root.editorSpanRight,
             uiScaleManual: Number(root.editorUiScale) > 0 ? Number(root.editorUiScale) : 0,
-            flushWindowsToBar: !!root.editorFlush
+            flushWindowsToBar: !!root.editorFlush,
+            autoHide: Object.assign({}, root.editorAutoHide),
+            hideDelayMs: root.editorHideDelay,
+            revealDelayMs: root.editorRevealDelay
         }
     }
 
@@ -922,6 +976,9 @@ Singleton {
         root.editorSpanRight = !!Config.rightBarSpanFull
         root.editorUiScale = Number(Config.uiScaleManual) > 0 ? Number(Config.uiScaleManual) : 0
         root.editorFlush = !!Config.flushWindowsToBar
+        root.editorAutoHide = BarSettings.autoHideSnapshot()
+        root.editorHideDelay = BarSettings.hideDelayValue()
+        root.editorRevealDelay = BarSettings.revealDelayValue()
         root.editorReady = true
         root.editorDirty = false
     }

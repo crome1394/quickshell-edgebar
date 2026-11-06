@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import qs.config
 import qs.services
 import qs.theme
 
@@ -77,7 +78,7 @@ Item {
             SectionHeader {
                 width: parent.width
                 title: "Bar/Widget Positions"
-                hint: "L, C, and R align the cluster. On a side bar, L is the top of the screen and R is the bottom. S spans the monitor. Apply saves these with the rest of this page."
+                hint: "L, C, and R align the cluster. On a side bar, L is the top of the screen and R is the bottom. S spans the monitor. H auto-hides the bar. Apply saves these with the rest of this page."
             }
 
             Item {
@@ -243,6 +244,68 @@ Item {
                     checked: WidgetService.editorVisible("controlBar")
                     onToggled: WidgetService.toggle("controlBar")
                 }
+                }
+            }
+
+            Item {
+                width: 1
+                height: Theme.fieldHeight
+            }
+
+            SectionHeader {
+                width: parent.width
+                title: "Auto-hide"
+                hint: "Turn it on per bar with the H chip in that bar's header above. A hidden bar slides off its edge and gives the space back to windows. Touch the edge to bring it back; it stays out while you hover it or one of its menus is open."
+            }
+
+            Column {
+                x: Theme.sectionInset
+                width: parent.width - Theme.sectionInset * 2
+                spacing: Theme.space
+
+                FormRow {
+                    width: parent.width
+                    label: "Hide after"
+
+                    IntSlider {
+                        width: parent.width
+                        from: Theme.barHideDelayMin
+                        to: Theme.barHideDelayMax
+                        step: Theme.barDelayStep
+                        value: WidgetService.hideDelay()
+                        readout: (WidgetService.hideDelay() / 1000).toFixed(2) + " s"
+                        tip: "How long the bar waits after the pointer leaves before it slides away"
+                        onChanged: (value) => WidgetService.setHideDelay(value)
+                    }
+                }
+
+                FormRow {
+                    width: parent.width
+                    label: "Show after"
+
+                    IntSlider {
+                        width: parent.width
+                        from: Theme.barRevealDelayMin
+                        to: Theme.barRevealDelayMax
+                        step: Theme.barDelayStep
+                        value: WidgetService.revealDelay()
+                        readout: (WidgetService.revealDelay() / 1000).toFixed(2) + " s"
+                        tip: "How long the pointer rests on the edge before the bar comes back. A short wait stops it popping out when you pass the edge."
+                        onChanged: (value) => WidgetService.setRevealDelay(value)
+                    }
+                }
+
+                Text {
+                    width: parent.width
+                    wrapMode: Text.WordWrap
+                    text: {
+                        const names = { top: "Top", bottom: "Bottom", left: "Left", right: "Right" }
+                        const on = BarSettings.edges.filter((e) => WidgetService.barEnabled(e) && WidgetService.barAutoHides(e))
+                        return on.length ? "Auto-hiding: " + on.map((e) => names[e]).join(", ") : "No bar auto-hides yet."
+                    }
+                    color: Theme.subtext
+                    font.family: Theme.uiFont
+                    font.pixelSize: Theme.smallPx
                 }
             }
         }
