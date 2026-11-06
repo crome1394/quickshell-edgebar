@@ -64,14 +64,6 @@ Singleton {
     property string editorMenuCommand: ""
 
     // Page drafts. Apply writes the adapter. The bar keeps reading the saved fields.
-    property bool awEditorReady: false
-    property bool awEditorDirty: false
-    property bool awUndoReady: false
-    property var awUndo: null
-    property bool editorAwShow: true
-    property string editorAwCorner: "topLeft"
-    property int editorAwWidth: Theme.activeWindowWidthDefault
-    property string editorAwExcludes: "[\"hypr-screensaver\"]"
     property bool statEditorReady: false
     property bool statEditorDirty: false
     property bool statUndoReady: false
@@ -916,23 +908,6 @@ Singleton {
         root.touch()
     }
 
-    function replaceActiveWindowExcludes(json) {
-        const text = String(json || "[]")
-        if (root.activeWindowExcludesJson === text)
-            return
-        root.activeWindowExcludesJson = text
-        root.touch()
-    }
-
-    function setActiveWindowCorner(corner) {
-        const c = String(corner || "")
-        const next = (c === "topRight" || c === "bottomLeft" || c === "bottomRight") ? c : "topLeft"
-        if (root.activeWindowPillCorner === next)
-            return
-        root.activeWindowPillCorner = next
-        root.touch()
-    }
-
     function clockFormatText() {
         const fmt = String(root.clockFormat || "").replace(/[\r\n]/g, " ").trim()
         if (fmt.length)
@@ -1202,19 +1177,6 @@ Singleton {
         root.clockUndoReady = false
         root.writeClockState(previous)
         root.seedClockEditor()
-    }
-
-    function setActiveWindowWidth(px) {
-        const step = Math.max(1, Theme.activeWindowWidthStep)
-        let n = Math.round(Number(px) / step) * step
-        if (!(n >= Theme.activeWindowWidthMin))
-            n = Theme.activeWindowWidthMin
-        if (n > Theme.activeWindowWidthMax)
-            n = Theme.activeWindowWidthMax
-        if (root.activeWindowPillWidth === n)
-            return
-        root.activeWindowPillWidth = n
-        root.touch()
     }
 
     function setConnectivityShown(enabled) {
@@ -1924,207 +1886,6 @@ Singleton {
 
     function canUndoMenu() {
         return root.menuEditorDirty || root.menuUndoReady
-    }
-
-    function parseJsonList(raw) {
-        if (raw === undefined || raw === null)
-            return []
-        if (typeof raw !== "string") {
-            if (raw.length !== undefined)
-                return raw
-            return []
-        }
-        const text = String(raw).trim()
-        if (!text.length)
-            return []
-        try {
-            const parsed = JSON.parse(text)
-            if (parsed && parsed.length !== undefined)
-                return parsed
-        } catch (e) {
-        }
-        return []
-    }
-
-    // Class and title excludes. At most 40. A pattern is 2–80 characters after trimming stars.
-    function normalizeExcludes(list) {
-        const src = list || []
-        const out = []
-        const seen = {}
-        for (let i = 0; i < src.length && out.length < 40; i++) {
-            let text = ""
-            let kind = "class"
-            const item = src[i]
-            if (item && typeof item === "object" && item.length === undefined) {
-                text = String(item.text || item.pattern || "")
-                kind = String(item.kind || "") === "title" ? "title" : "class"
-            } else {
-                text = String(item || "")
-            }
-            text = text.replace(/[\r\n]/g, " ").trim()
-            if (text.length < 2 || text.length > 80)
-                continue
-            if (text.replace(/\*/g, "").trim().length < 2)
-                continue
-            const key = kind + "\n" + text.toLowerCase()
-            if (seen[key])
-                continue
-            seen[key] = true
-            out.push({ text: text, kind: kind })
-        }
-        return out
-    }
-
-    function awCornerNorm(corner) {
-        const c = String(corner || "")
-        if (c === "topRight" || c === "bottomLeft" || c === "bottomRight")
-            return c
-        return "topLeft"
-    }
-
-    function awWidthNorm(px) {
-        const step = Math.max(1, Theme.activeWindowWidthStep)
-        let n = Math.round(Number(px) / step) * step
-        if (!(n >= Theme.activeWindowWidthMin))
-            n = Theme.activeWindowWidthMin
-        if (n > Theme.activeWindowWidthMax)
-            n = Theme.activeWindowWidthMax
-        return n
-    }
-
-    function awExcludeJson(raw) {
-        return JSON.stringify(root.normalizeExcludes(root.parseJsonList(raw)))
-    }
-
-    function awSnapshot() {
-        return {
-            show: !!root.showActiveWindowPill,
-            corner: root.awCornerNorm(root.activeWindowPillCorner),
-            width: root.awWidthNorm(root.activeWindowPillWidth),
-            excludes: root.awExcludeJson(root.activeWindowExcludesJson)
-        }
-    }
-
-    function awDraft() {
-        return {
-            show: !!root.editorAwShow,
-            corner: root.awCornerNorm(root.editorAwCorner),
-            width: root.awWidthNorm(root.editorAwWidth),
-            excludes: root.awExcludeJson(root.editorAwExcludes)
-        }
-    }
-
-    function awSig(src) {
-        const snap = src || {}
-        return JSON.stringify({
-            show: !!snap.show,
-            corner: root.awCornerNorm(snap.corner),
-            width: root.awWidthNorm(snap.width),
-            excludes: root.awExcludeJson(snap.excludes)
-        })
-    }
-
-    function writeAwEditor(src) {
-        const snap = src || {}
-        root.editorAwShow = !!snap.show
-        root.editorAwCorner = root.awCornerNorm(snap.corner)
-        root.editorAwWidth = root.awWidthNorm(snap.width)
-        root.editorAwExcludes = root.awExcludeJson(snap.excludes)
-    }
-
-    function seedAwEditor() {
-        root.writeAwEditor(root.awSnapshot())
-        root.awEditorReady = true
-        root.awEditorDirty = false
-    }
-
-    function ensureAwEditor() {
-        if (!root.awEditorReady || !root.awEditorDirty)
-            root.seedAwEditor()
-    }
-
-    function touchAwEditor() {
-        root.awEditorDirty = root.awSig(root.awDraft()) !== root.awSig(root.awSnapshot())
-    }
-
-    function editAwShow(enabled) {
-        root.ensureAwEditor()
-        root.editorAwShow = !!enabled
-        root.touchAwEditor()
-    }
-
-    function editAwCorner(corner) {
-        root.ensureAwEditor()
-        root.editorAwCorner = root.awCornerNorm(corner)
-        root.touchAwEditor()
-    }
-
-    function editAwWidth(px) {
-        root.ensureAwEditor()
-        root.editorAwWidth = root.awWidthNorm(px)
-        root.touchAwEditor()
-    }
-
-    function editAwExcludes(json) {
-        root.ensureAwEditor()
-        root.editorAwExcludes = root.awExcludeJson(json)
-        root.touchAwEditor()
-    }
-
-    function awDraftList() {
-        void root.editorAwExcludes
-        void root.awEditorReady
-        return root.normalizeExcludes(root.parseJsonList(root.editorAwExcludes))
-    }
-
-    function writeAwState(src) {
-        const snap = src || {}
-        root.applying = true
-        root.showActiveWindowPill = !!snap.show
-        root.activeWindowPillCorner = root.awCornerNorm(snap.corner)
-        root.activeWindowPillWidth = root.awWidthNorm(snap.width)
-        root.activeWindowExcludesJson = root.awExcludeJson(snap.excludes)
-        root.applying = false
-        root.touch()
-        root.queueSave()
-    }
-
-    function applyAwEditor() {
-        if (!root.awEditorDirty)
-            return
-        root.awUndo = root.awSnapshot()
-        root.awUndoReady = true
-        root.writeAwState(root.awDraft())
-        root.seedAwEditor()
-    }
-
-    function undoAwEditor() {
-        if (root.awEditorDirty) {
-            root.seedAwEditor()
-            return
-        }
-        if (!root.awUndoReady || !root.awUndo)
-            return
-        const previous = root.awUndo
-        root.awUndo = null
-        root.awUndoReady = false
-        root.writeAwState(previous)
-        root.seedAwEditor()
-    }
-
-    function resetAwEditor() {
-        root.ensureAwEditor()
-        root.writeAwEditor({
-            show: true,
-            corner: "topLeft",
-            width: Theme.activeWindowWidthDefault,
-            excludes: "[\"hypr-screensaver\"]"
-        })
-        root.touchAwEditor()
-    }
-
-    function canUndoAw() {
-        return root.awEditorDirty || root.awUndoReady
     }
 
     function statTermNorm(name) {
