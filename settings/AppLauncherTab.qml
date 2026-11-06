@@ -19,7 +19,7 @@ Item {
     property real sceneY: 0
 
     readonly property int scrollGutter: Theme.space + Theme.tabGap
-    readonly property int cols: Config.editorLauncherSlots() <= 1 ? 1 : 2
+    readonly property int cols: LauncherSettings.draftSlots() <= 1 ? 1 : 2
     readonly property int cellWidth: {
         const inner = Math.max(1, (scroll.width - root.scrollGutter) - Theme.sectionInset * 2)
         if (root.cols <= 1)
@@ -79,7 +79,7 @@ Item {
         const parts = root.dragKey.split(":")
         const launcher = Math.round(Number(parts[0]))
         const index = Math.round(Number(parts[1]))
-        const boards = Config.editorLaunchBoards()
+        const boards = LauncherSettings.draftBoards()
         const row = boards[launcher - 1]
         if (!row || !row[index])
             return "Pin"
@@ -118,7 +118,7 @@ Item {
     function movePin(fromLauncher, fromIndex, toLauncher, toIndex) {
         if (fromLauncher < 1 || toLauncher < 1 || toLauncher > Theme.launcherMax)
             return
-        const boards = Config.editorLaunchBoards()
+        const boards = LauncherSettings.draftBoards()
         const src = boards[fromLauncher - 1]
         const dest = boards[toLauncher - 1]
         if (!src || !dest || fromIndex < 0 || fromIndex >= src.length)
@@ -127,9 +127,9 @@ Item {
             return
         const pin = src[fromIndex]
         if (fromLauncher !== toLauncher) {
-            const key = Config.pinKey(pin)
+            const key = LauncherSettings.pinKey(pin)
             for (let i = 0; i < dest.length; i++) {
-                if (Config.pinKey(dest[i]) === key) {
+                if (LauncherSettings.pinKey(dest[i]) === key) {
                     root.formError = "That pin is already on this launcher."
                     return
                 }
@@ -149,32 +149,32 @@ Item {
             at = dest.length
         dest.splice(at, 0, pin)
         root.formError = ""
-        Config.editLaunchBoards(boards)
+        LauncherSettings.setBoards(boards)
     }
 
     function removePin(launcher, index) {
-        const boards = Config.editorLaunchBoards()
+        const boards = LauncherSettings.draftBoards()
         const row = boards[launcher - 1]
         if (!row || index < 0 || index >= row.length)
             return
         row.splice(index, 1)
         root.formError = ""
-        Config.editLaunchBoards(boards)
+        LauncherSettings.setBoards(boards)
     }
 
     function pinDesktop(app) {
         const id = String(app.id || "")
         const name = String(app.name || id).replace(/[\r\n]/g, " ").trim()
-        const pin = Config.cleanPin({ id: id, name: name, icon: String(app.icon || ""), command: [] })
+        const pin = LauncherSettings.cleanPin({ id: id, name: name, icon: String(app.icon || ""), command: [] })
         if (!pin) {
             root.formError = "This app cannot be pinned."
             return
         }
-        const boards = Config.editorLaunchBoards()
+        const boards = LauncherSettings.draftBoards()
         const dest = boards[0]
-        const key = Config.pinKey(pin)
+        const key = LauncherSettings.pinKey(pin)
         for (let i = 0; i < dest.length; i++) {
-            if (Config.pinKey(dest[i]) === key) {
+            if (LauncherSettings.pinKey(dest[i]) === key) {
                 root.formError = "That app is already on Launcher 1."
                 return
             }
@@ -185,7 +185,7 @@ Item {
         }
         dest.push(pin)
         root.formError = ""
-        Config.editLaunchBoards(boards)
+        LauncherSettings.setBoards(boards)
     }
 
     function addCustom() {
@@ -193,16 +193,16 @@ Item {
         const raw = commandField.text.trim()
         const icon = iconField.text.trim()
         const parts = raw.length ? raw.split(/\s+/) : []
-        const pin = Config.cleanPin({ id: "", name: name, icon: icon, command: parts })
+        const pin = LauncherSettings.cleanPin({ id: "", name: name, icon: icon, command: parts })
         if (!pin) {
             root.formError = "Need a name and a command, with no shell characters."
             return
         }
-        const boards = Config.editorLaunchBoards()
+        const boards = LauncherSettings.draftBoards()
         const dest = boards[0]
-        const key = Config.pinKey(pin)
+        const key = LauncherSettings.pinKey(pin)
         for (let i = 0; i < dest.length; i++) {
-            if (Config.pinKey(dest[i]) === key) {
+            if (LauncherSettings.pinKey(dest[i]) === key) {
                 root.formError = "That command is already on Launcher 1."
                 return
             }
@@ -212,7 +212,7 @@ Item {
             return
         }
         dest.push(pin)
-        Config.editLaunchBoards(boards)
+        LauncherSettings.setBoards(boards)
         nameField.text = ""
         commandField.text = ""
         iconField.text = ""
@@ -220,18 +220,17 @@ Item {
     }
 
     function applyPage() {
-        if (!Config.applyLauncherEditor())
+        if (!LauncherSettings.editor.apply())
             return
         WidgetService.syncLaunchers()
     }
 
     function undoPage() {
-        if (!Config.undoLauncherEditor())
+        if (!LauncherSettings.editor.undo())
             return
         WidgetService.syncLaunchers()
     }
 
-    Component.onCompleted: Config.ensureLauncherEditor()
 
     Connections {
         target: DesktopEntries
@@ -342,10 +341,10 @@ Item {
                         from: Theme.launcherMin
                         to: Theme.launcherMax
                         step: 1
-                        value: Config.editorLauncherSlots()
-                        readout: String(Config.editorLauncherSlots())
+                        value: LauncherSettings.draftSlots()
+                        readout: String(LauncherSettings.draftSlots())
                         tip: "How many app launchers to keep. Four is the maximum."
-                        onChanged: (value) => Config.editLauncherCount(value)
+                        onChanged: (value) => LauncherSettings.setCount(value)
                     }
                 }
             }
@@ -365,7 +364,7 @@ Item {
 
                     Repeater {
                         id: columns
-                        model: Config.editorLauncherSlots()
+                        model: LauncherSettings.draftSlots()
                         delegate: LaunchColumn {
                             id: column
                             required property int index
@@ -581,9 +580,9 @@ Item {
                 readonly property string action: String(button.modelData.id || "")
                 readonly property bool enabledAction: {
                     if (button.action === "apply")
-                        return Config.launcherEditorDirty
+                        return LauncherSettings.editor.dirty
                     if (button.action === "undo")
-                        return Config.canUndoLauncher()
+                        return LauncherSettings.editor.canUndo
                     return true
                 }
                 readonly property bool applyReady: button.action === "apply" && button.enabledAction
@@ -620,7 +619,7 @@ Item {
                         else if (button.action === "undo")
                             root.undoPage()
                         else
-                            Config.resetLauncherEditor()
+                            LauncherSettings.editor.reset()
                     }
 
                     HoverTip {
