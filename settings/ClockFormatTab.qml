@@ -27,7 +27,7 @@ Item {
         { id: "6", label: "Saturday", tip: "Saturday is the first column" }
     ]
     readonly property var presetChoices: {
-        const list = Config.clockPresets()
+        const list = ClockSettings.presets
         const out = []
         for (let i = 0; i < list.length; i++) {
             const row = list[i]
@@ -42,8 +42,8 @@ Item {
         return out
     }
     readonly property bool draftIsPreset: {
-        const want = String(Config.editorClockFormat || "").trim()
-        const presets = Config.clockPresets()
+        const want = String(ClockSettings.editor.value.format || "").trim()
+        const presets = ClockSettings.presets
         for (let i = 0; i < presets.length; i++) {
             if (presets[i] && presets[i].format === want)
                 return true
@@ -51,10 +51,10 @@ Item {
         return false
     }
     readonly property string previewFormat: {
-        const text = String(Config.editorClockFormat || "").trim()
-        return text.length ? text : Config.clockFormatText()
+        const text = String(ClockSettings.editor.value.format || "").trim()
+        return text.length ? text : ClockSettings.formatText()
     }
-    readonly property color previewColor: Config.editorClockColor.length ? Config.editorClockColor : Theme.text
+    readonly property color previewColor: ClockSettings.editor.value.color.length ? ClockSettings.editor.value.color : Theme.text
 
     function takeFonts(text) {
         const lines = String(text || "").split("\n")
@@ -117,32 +117,27 @@ Item {
     function commitFormat() {
         const text = String(formatField.text || "").replace(/[\r\n]/g, " ").trim()
         formatField.text = text
-        Config.setEditorClockFormat(text)
+        ClockSettings.editor.set("format", text)
     }
 
     Component.onCompleted: {
-        Config.ensureClockEditor()
-        formatField.text = Config.editorClockFormat
+        formatField.text = ClockSettings.editor.value.format
         root.formReady = true
         fontList.running = true
     }
 
+    // Undo, Apply, and saves elsewhere change the draft; keep the field in step.
     Connections {
-        target: Config
-        function onEditorClockFormatChanged() {
-            if (formatField.text !== Config.editorClockFormat)
-                formatField.text = Config.editorClockFormat
-        }
-        function onRevisionChanged() {
-            if (!root.formReady || Config.clockEditorDirty)
-                return
-            Config.seedClockEditor()
+        target: ClockSettings.editor
+        function onValueChanged() {
+            if (root.formReady && formatField.text !== ClockSettings.editor.value.format)
+                formatField.text = ClockSettings.editor.value.format
         }
     }
 
     SystemClock {
         id: previewClock
-        precision: Config.clockFormatHasSeconds(root.previewFormat) ? SystemClock.Seconds : SystemClock.Minutes
+        precision: ClockSettings.hasSeconds(root.previewFormat) ? SystemClock.Seconds : SystemClock.Minutes
     }
 
     Process {
@@ -158,7 +153,7 @@ Item {
     ColorDialog {
         id: colors
         title: "Clock color"
-        onAccepted: Config.setEditorClockColor(selectedColor)
+        onAccepted: ClockSettings.editor.set("color", String(selectedColor))
     }
 
     Flickable {
@@ -216,12 +211,12 @@ Item {
                                 anchors.rightMargin: Theme.space
                                 verticalAlignment: Text.AlignVCenter
                                 elide: Text.ElideRight
-                                text: Config.editorClockFont.length ? Config.editorClockFont : "Bar font"
+                                text: ClockSettings.editor.value.font.length ? ClockSettings.editor.value.font : "Bar font"
                                 color: root.previewColor
-                                font.family: Config.editorClockFont.length ? Config.editorClockFont : Theme.uiFont
+                                font.family: ClockSettings.editor.value.font.length ? ClockSettings.editor.value.font : Theme.uiFont
                                 font.pixelSize: Theme.fontPx
-                                font.bold: Config.editorClockBold
-                                font.italic: Config.editorClockItalic
+                                font.bold: ClockSettings.editor.value.bold
+                                font.italic: ClockSettings.editor.value.italic
                             }
 
                             MouseArea {
@@ -254,11 +249,11 @@ Item {
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: (mouse) => {
                                     if (mouse.button === Qt.RightButton) {
-                                        Config.setEditorClockColor("")
+                                        ClockSettings.editor.set("color", "")
                                         return
                                     }
-                                    if (Config.editorClockColor.length)
-                                        colors.selectedColor = Config.editorClockColor
+                                    if (ClockSettings.editor.value.color.length)
+                                        colors.selectedColor = ClockSettings.editor.value.color
                                     colors.open()
                                 }
 
@@ -273,9 +268,9 @@ Item {
                             width: root.styleWidth
                             height: Theme.fieldHeight
                             radius: Theme.radiusSm
-                            color: Config.editorClockBold ? Theme.accentDim : Theme.fieldBg
+                            color: ClockSettings.editor.value.bold ? Theme.accentDim : Theme.fieldBg
                             border.width: Theme.borderWidth
-                            border.color: Config.editorClockBold ? Theme.accent : Theme.border
+                            border.color: ClockSettings.editor.value.bold ? Theme.accent : Theme.border
 
                             Text {
                                 anchors.centerIn: parent
@@ -291,7 +286,7 @@ Item {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: Config.setEditorClockBold(!Config.editorClockBold)
+                                onClicked: ClockSettings.editor.set("bold", !ClockSettings.editor.value.bold)
 
                                 HoverTip {
                                     message: "Bold the clock"
@@ -304,9 +299,9 @@ Item {
                             width: root.styleWidth
                             height: Theme.fieldHeight
                             radius: Theme.radiusSm
-                            color: Config.editorClockItalic ? Theme.accentDim : Theme.fieldBg
+                            color: ClockSettings.editor.value.italic ? Theme.accentDim : Theme.fieldBg
                             border.width: Theme.borderWidth
-                            border.color: Config.editorClockItalic ? Theme.accent : Theme.border
+                            border.color: ClockSettings.editor.value.italic ? Theme.accent : Theme.border
 
                             Text {
                                 anchors.centerIn: parent
@@ -322,7 +317,7 @@ Item {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: Config.setEditorClockItalic(!Config.editorClockItalic)
+                                onClicked: ClockSettings.editor.set("italic", !ClockSettings.editor.value.italic)
 
                                 HoverTip {
                                     message: "Italic the clock"
@@ -336,10 +331,10 @@ Item {
                             from: Theme.clockFontMin
                             to: Theme.clockFontMax
                             step: Theme.clockFontStep
-                            value: Config.editorClockPercent
-                            readout: Config.editorClockPercent + "%"
+                            value: ClockSettings.editor.value.percent
+                            readout: ClockSettings.editor.value.percent + "%"
                             tip: "Clock text size, from " + Theme.clockFontMin + " to " + Theme.clockFontMax
-                            onChanged: (value) => Config.setEditorClockPercent(value)
+                            onChanged: (value) => ClockSettings.editor.set("percent", value)
                         }
                     }
 
@@ -354,10 +349,10 @@ Item {
                     SelectBox {
                         width: parent.width
                         choices: root.presetChoices
-                        currentId: String(Config.editorClockFormat || "").trim()
+                        currentId: String(ClockSettings.editor.value.format || "").trim()
                         emptyLabel: "Custom"
                         tip: "Common date and time patterns"
-                        onPicked: (id) => Config.setEditorClockFormat(id)
+                        onPicked: (id) => ClockSettings.editor.set("format", id)
                     }
 
                     Text {
@@ -371,10 +366,10 @@ Item {
                     SelectBox {
                         width: parent.width
                         choices: root.weekChoices
-                        currentId: String(Config.editorClockWeekStart)
+                        currentId: String(ClockSettings.editor.value.weekStart)
                         emptyLabel: "Sunday"
                         tip: "Which weekday is the first column of the calendar"
-                        onPicked: (id) => Config.setEditorClockWeekStart(Number(id))
+                        onPicked: (id) => ClockSettings.editor.set("weekStart", Number(id))
                     }
 
                     Row {
@@ -402,8 +397,8 @@ Item {
                             onTextChanged: {
                                 if (!root.formReady)
                                     return
-                                if (text !== Config.editorClockFormat)
-                                    Config.setEditorClockFormat(text)
+                                if (text !== ClockSettings.editor.value.format)
+                                    ClockSettings.editor.set("format", text)
                             }
                             onAccepted: root.commitFormat()
 
@@ -477,10 +472,10 @@ Item {
                                 wrapMode: Text.WordWrap
                                 text: Qt.formatDateTime(previewClock.date, root.previewFormat)
                                 color: root.previewColor
-                                font.family: Config.editorClockFont.length ? Config.editorClockFont : Theme.fontFamily
-                                font.pixelSize: Math.max(Theme.smallPx, Math.round(Theme.fontPx * Config.editorClockPercent / 100))
-                                font.bold: Config.editorClockBold
-                                font.italic: Config.editorClockItalic
+                                font.family: ClockSettings.editor.value.font.length ? ClockSettings.editor.value.font : Theme.fontFamily
+                                font.pixelSize: Math.max(Theme.smallPx, Math.round(Theme.fontPx * ClockSettings.editor.value.percent / 100))
+                                font.bold: ClockSettings.editor.value.bold
+                                font.italic: ClockSettings.editor.value.italic
                             }
                         }
                     }
@@ -529,7 +524,7 @@ Item {
                                 required property var modelData
                                 required property int index
                                 readonly property string clickId: String(clickChip.modelData.id || "")
-                                readonly property bool chosen: Config.editorClockClick === clickChip.clickId
+                                readonly property bool chosen: ClockSettings.editor.value.click === clickChip.clickId
 
                                 width: clickLabel.implicitWidth + Theme.space * 2
                                 height: Theme.fieldHeight
@@ -553,7 +548,7 @@ Item {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: Config.setEditorClockClick(clickChip.clickId)
+                                    onClicked: ClockSettings.editor.set("click", clickChip.clickId)
 
                                     HoverTip {
                                         message: String(clickChip.modelData.tip || "")
@@ -585,7 +580,7 @@ Item {
                 required property var modelData
                 required property int index
                 readonly property string action: String(button.modelData.id || "")
-                readonly property bool enabledAction: button.action === "apply" ? Config.clockEditorDirty : Config.canUndoClock()
+                readonly property bool enabledAction: button.action === "apply" ? ClockSettings.editor.dirty : ClockSettings.editor.canUndo
                 readonly property bool applyReady: button.action === "apply" && button.enabledAction
 
                 implicitWidth: buttonLabel.implicitWidth + Theme.space * 2
@@ -617,9 +612,9 @@ Item {
                         if (!button.enabledAction)
                             return
                         if (button.action === "apply")
-                            Config.applyClockEditor()
+                            ClockSettings.editor.apply()
                         else
-                            Config.undoClockEditor()
+                            ClockSettings.editor.undo()
                     }
 
                     HoverTip {
@@ -642,7 +637,7 @@ Item {
                 height: parent.height
                 families: root.fontNames
                 onChosen: (family) => {
-                    Config.setEditorClockFont(family)
+                    ClockSettings.editor.set("font", family)
                     root.fontOpen = false
                 }
                 onDismiss: root.fontOpen = false

@@ -18,14 +18,14 @@ Rectangle {
     readonly property real ui: WidgetService.uiScale
     readonly property int barInner: Math.max(1, Math.round((Theme.barHeight - Theme.barPad) * root.ui))
     readonly property int facePx: {
-        const wanted = Math.round(root.theme.fontPx * (Config.clockFontPercentValue() / 100) * root.ui * root.widthFactor)
+        const wanted = Math.round(root.theme.fontPx * (ClockSettings.percentValue() / 100) * root.ui * root.widthFactor)
         const cap = Math.max(1, root.barInner - Theme.borderWidth * 4)
         return Math.max(1, Math.min(cap, wanted))
     }
-    readonly property string format: Config.clockFormatText()
-    readonly property string clickSide: Config.clockClickValue()
+    readonly property string format: ClockSettings.formatText()
+    readonly property string clickSide: ClockSettings.clickValue()
     readonly property color faceColor: {
-        const ink = Config.clockColorValue()
+        const ink = ClockSettings.colorValue()
         return ink.length ? ink : root.theme.colFg
     }
     readonly property int hPad: Math.max(1, Math.round(Theme.wsInnerPad * root.ui))
@@ -76,7 +76,7 @@ Rectangle {
     // Ticks on the second only when the format shows seconds, else on the minute.
     SystemClock {
         id: clock
-        precision: Config.clockFormatHasSeconds(root.format) ? SystemClock.Seconds : SystemClock.Minutes
+        precision: ClockSettings.hasSeconds(root.format) ? SystemClock.Seconds : SystemClock.Minutes
     }
 
     Text {
@@ -84,7 +84,7 @@ Rectangle {
         anchors.centerIn: parent
         text: Qt.formatDateTime(clock.date, root.format)
         color: root.faceColor
-        font.family: Config.clockFontFamily(root.theme.fontFamily)
+        font.family: ClockSettings.fontFamily(root.theme.fontFamily)
         font.pixelSize: root.facePx
         font.bold: Config.clockBold
         font.italic: Config.clockItalic
@@ -132,7 +132,7 @@ Rectangle {
             sourceComponent: Component {
                 ClockCalendar {
                     theme: root.theme
-                    weekStart: Config.clockWeekStartValue()
+                    weekStart: ClockSettings.weekStartValue()
                     onDismissed: root.calendarOpen = false
                 }
             }
