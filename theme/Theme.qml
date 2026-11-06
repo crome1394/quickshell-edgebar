@@ -37,7 +37,6 @@ Singleton {
     readonly property int wsGap: 4
     readonly property int wsPad: 8
     readonly property int wsIconPx: 16
-    readonly property int wsNumberPx: 13
     readonly property int wsInnerPad: 12
     readonly property int wsLabelMax: 92
 
@@ -162,6 +161,19 @@ Singleton {
     readonly property int networkPollMs: 2000
     readonly property int networkRefreshMs: 400
     readonly property int networkRateFirstMs: 1000
+    // Tailscale: a light status check while the pill is on the bar, a faster
+    // one while its menu is open, and how long to wait before deciding the
+    // tailscale CLI is missing.
+    readonly property int tailscaleIdlePollMs: 30000
+    readonly property int tailscaleOpenPollMs: 3000
+    readonly property int tailscaleStartMs: 3000
+    readonly property int tailscalePopupWidth: 440
+    readonly property int tailscalePopupMaxHeight: 620
+    readonly property int tailscaleSearchMin: 8
+    readonly property int dependencyTimeoutMs: 5000
+    readonly property int audioPopupWidth: 480
+    readonly property int audioPopupMaxHeight: 720
+    readonly property int audioMeterHeight: 4
     readonly property int bluetoothPulseMs: 1000
     readonly property int bluetoothRefreshMs: 1000
 
@@ -196,6 +208,17 @@ Singleton {
     readonly property color wsActiveBg: root.palette.colWsActive
     readonly property color wsActiveText: root.palette.colWsActiveFg
     readonly property color wsInactiveText: root.palette.colWsIdleFg
+
+    // Text size for every bar pill: the bar text size, scaled with the UI
+    // and the widget's width, times the widget's own percent override when it
+    // has one, and kept inside the bar. Pills use fontFamily unless the
+    // widget has its own font override.
+    function barTextPx(ui, widthFactor, percent) {
+        const pct = Number(percent) > 0 ? Number(percent) : 100
+        const wanted = Math.round(root.fontPx * pct / 100 * Number(ui) * Number(widthFactor))
+        const cap = Math.max(1, Math.round((root.barHeight - root.barPad) * Number(ui)) - root.borderWidth * 4)
+        return Math.max(root.statFontMin, Math.min(cap, wanted))
+    }
 
     function statUtilColor(util, metric, t1, t2, t3) {
         const kind = String(metric || "")

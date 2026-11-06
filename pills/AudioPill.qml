@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell
 import qs.components
 import qs.config
 import qs.services
@@ -14,12 +15,13 @@ Rectangle {
     property real widthFactor: 1
 
     property string tipText: "Audio"
+    property bool menuOpen: false
     property bool dockHot: dock.mag > 1.01 || Math.abs(dock.jumpY) > 0.5
 
     readonly property real ui: WidgetService.uiScale
     readonly property int cell: Math.max(1, Math.round((Theme.barHeight - Theme.barPad) * root.ui))
     readonly property int icon: Math.max(1, Math.round(root.theme.iconPx * root.ui * root.widthFactor))
-    readonly property int px: Math.max(Theme.statFontMin, Math.round(root.theme.fontPx * root.ui * root.widthFactor))
+    readonly property int px: Theme.barTextPx(root.ui, root.widthFactor)
     readonly property int gap: Math.max(4, Math.round(Theme.tabGap * root.ui))
     readonly property int barW: Math.max(Theme.statGaugeMinWidth, Math.round(Theme.audioBarWidth * root.ui * root.widthFactor))
     readonly property int barH: Math.max(Theme.statGaugeMinHeight, Math.round(Theme.audioBarHeight * root.ui))
@@ -130,14 +132,17 @@ Rectangle {
                 id: outMouse
                 anchors.fill: parent
                 hoverEnabled: true
-                acceptedButtons: Qt.RightButton
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onContainsMouseChanged: {
                     if (outMouse.containsMouse)
-                        root.tipText = levels.outMute ? "Speaker muted · Right: unmute · Wheel: volume" : "Speaker · Right: mute · Wheel: volume"
+                        root.tipText = levels.outMute ? "Speaker muted · Left: menu · Right: unmute · Wheel: volume" : "Speaker · Left: menu · Right: mute · Wheel: volume"
                 }
-                onClicked: {
+                onClicked: (mouse) => {
                     dock.play()
-                    levels.toggleMute("out")
+                    if (mouse.button === Qt.LeftButton)
+                        root.menuOpen = !root.menuOpen
+                    else
+                        levels.toggleMute("out")
                 }
                 onWheel: (wheel) => {
                     if (wheel.angleDelta.y === 0)
@@ -211,14 +216,17 @@ Rectangle {
                 id: inMouse
                 anchors.fill: parent
                 hoverEnabled: true
-                acceptedButtons: Qt.RightButton
+                acceptedButtons: Qt.LeftButton | Qt.RightButton
                 onContainsMouseChanged: {
                     if (inMouse.containsMouse)
-                        root.tipText = levels.inMute ? "Microphone muted · Right: unmute · Wheel: volume" : "Microphone · Right: mute · Wheel: volume"
+                        root.tipText = levels.inMute ? "Microphone muted · Left: menu · Right: unmute · Wheel: volume" : "Microphone · Left: menu · Right: mute · Wheel: volume"
                 }
-                onClicked: {
+                onClicked: (mouse) => {
                     dock.play()
-                    levels.toggleMute("in")
+                    if (mouse.button === Qt.LeftButton)
+                        root.menuOpen = !root.menuOpen
+                    else
+                        levels.toggleMute("in")
                 }
                 onWheel: (wheel) => {
                     if (wheel.angleDelta.y === 0)
@@ -232,6 +240,82 @@ Rectangle {
     BarTip {
         edge: root.edge
         message: root.tipText
-        show: outMouse.containsMouse || inMouse.containsMouse
+        show: (outMouse.containsMouse || inMouse.containsMouse) && !root.menuOpen
+    }
+
+    function placeMenu() {
+        const content = root.Window.contentItem
+        if (!content)
+            return
+        const bounds = root.mapToItem(content, 0, 0, root.width, root.height)
+        const cx = Math.round(bounds.x + bounds.width / 2)
+        const cy = Math.round(bounds.y + bounds.height / 2)
+        let x = cx
+        let y = Math.round(content.height)
+        let edgeFlags = Edges.Bottom
+        let grow = Edges.Bottom
+        if (root.edge === "bottom") {
+            y = 0
+            edgeFlags = Edges.Top
+            grow = Edges.Top
+        } else if (root.edge === "left") {
+            x = Math.round(content.width)
+            y = cy
+            edgeFlags = Edges.Right
+            grow = Edges.Right
+        } else if (root.edge === "right") {
+            x = 0
+            y = cy
+            edgeFlags = Edges.Left
+            grow = Edges.Left
+        }
+        const anchor = menuPopup.anchor
+        // qmllint disable missing-property
+        anchor.edges = edgeFlags
+        anchor.gravity = grow
+        anchor.rect = Qt.rect(x + 3, y + 3, 1, 1)
+        anchor.rect = Qt.rect(x, y, 1, 1)
+        // qmllint enable missing-property
+    }
+
+    // qmllint disable uncreatable-type
+    PopupWindow {
+    // qmllint enable uncreatable-type
+        id: menuPopup
+        visible: root.menuOpen
+        color: "transparent"
+        grabFocus: true
+        implicitWidth: Theme.audioPopupWidth
+        // qmllint disable missing-property
+        implicitHeight: Math.min(Theme.audioPopupMaxHeight, menu.implicitHeight)
+        anchor.item: root
+        anchor.adjustment: PopupAdjustment.Slide
+        // qmllint enable missing-property
+        onClosed: root.menuOpen = false
+
+        Rectangle {
+            anchors.fill: parent
+            radius: Theme.radius
+            color: root.theme.colBg
+            border.width: Theme.borderWidth
+            border.color: root.theme.colBorder
+
+            AudioMenu {
+                id: menu
+                anchors.fill: parent
+                theme: root.theme
+                open: root.menuOpen
+                onCloseRequested: root.menuOpen = false
+            }
+        }
+    }
+
+    Connections {
+        // qmllint disable incompatible-type
+        target: menuPopup.anchor
+        // qmllint enable incompatible-type
+        function onAnchoring() {
+            root.placeMenu()
+        }
     }
 }

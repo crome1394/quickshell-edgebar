@@ -25,6 +25,7 @@ Item {
         || cell.widgetId === "opacity" || cell.widgetId === "networkPanel" || cell.widgetId === "bluetooth"
         || cell.widgetId === "launcher" || cell.widgetId === "stats"
         || cell.widgetId === "notifications" || cell.widgetId === "volume"
+        || cell.widgetId === "tailscale"
         || WidgetService.isLauncherId(cell.widgetId)
     // An empty launcher, or stats with every section off, stays unloaded.
     readonly property bool shown: {
@@ -90,6 +91,8 @@ Item {
             file = "NotificationPill.qml"
         else if (cell.widgetId === "volume")
             file = "AudioPill.qml"
+        else if (cell.widgetId === "tailscale")
+            file = "TailscalePill.qml"
         else if (WidgetService.isLauncherId(cell.widgetId)) {
             file = "LaunchPill.qml"
             props.launcher = cell.launcherIndex()

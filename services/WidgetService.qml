@@ -213,6 +213,7 @@ Singleton {
             || key === "tray" || key === "power" || key === "opacity"
             || key === "networkPanel" || key === "bluetooth" || key === "launcher"
             || key === "stats" || key === "notifications" || key === "volume"
+            || key === "tailscale"
             || root.isLauncherId(key)
     }
 

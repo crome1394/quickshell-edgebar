@@ -38,3 +38,8 @@ WorkspacesTab 1.0 WorkspacesTab.qml
 WsOptions 1.0 WsOptions.qml
 WsSlotCard 1.0 WsSlotCard.qml
 LaunchIcon 1.0 LaunchIcon.qml
+CommandRow 1.0 CommandRow.qml
+DependencyRow 1.0 DependencyRow.qml
+DependenciesTab 1.0 DependenciesTab.qml
+DisplayTab 1.0 DisplayTab.qml
+SystemTab 1.0 SystemTab.qml

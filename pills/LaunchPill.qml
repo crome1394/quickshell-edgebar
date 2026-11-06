@@ -277,14 +277,15 @@ Rectangle {
                     }
                 }
 
+                // Running-app dot, centered under the icon.
                 Rectangle {
                     visible: cell.runState.length > 0
                     width: root.dot
                     height: root.dot
                     radius: width / 2
-                    anchors.right: parent.right
+                    anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: parent.bottom
-                    anchors.margins: Theme.borderWidth
+                    anchors.bottomMargin: Theme.borderWidth
                     color: {
                         const ink = DockSettings.dotColor()
                         if (cell.runState === "focus")

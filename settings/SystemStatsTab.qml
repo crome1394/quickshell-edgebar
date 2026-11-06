@@ -10,6 +10,7 @@ Item {
     id: root
 
     property var terminals: []
+    property string actionError: ""
     property bool fontOpen: false
     property string paintMetric: "cpu"
     property int paintSlot: 0
@@ -201,7 +202,7 @@ Item {
             SectionHeader {
                 width: parent.width
                 title: "Misc"
-                hint: "Font for the pill, and which button opens the terminal. The other button does nothing."
+                hint: "Font for the pill, and what a left or right click on each group runs. Leave a field empty to do nothing."
             }
 
             Item {
@@ -332,58 +333,25 @@ Item {
                     }
 
                     Text {
+                        visible: root.actionError.length > 0
                         width: parent.width
-                        text: "Terminal click"
-                        color: Theme.subtext
+                        wrapMode: Text.WordWrap
+                        text: root.actionError
+                        color: Theme.danger
                         font.family: Theme.uiFont
                         font.pixelSize: Theme.smallPx
                     }
 
-                    Row {
-                        spacing: Theme.tabGap
-
-                        Repeater {
-                            model: [
-                                { id: "left", label: "Left click", tip: "Open btop or nvtop with the left button" },
-                                { id: "right", label: "Right click", tip: "Open btop or nvtop with the right button" }
-                            ]
-                            delegate: Rectangle {
-                                id: clickChip
-                                required property var modelData
-                                required property int index
-                                readonly property string clickId: String(clickChip.modelData.id || "")
-                                readonly property bool chosen: StatsSettings.editor.value.click === clickChip.clickId
-
-                                width: clickLabel.implicitWidth + Theme.space * 2
-                                height: Theme.fieldHeight
-                                radius: Theme.radiusSm
-                                color: clickChip.chosen ? Theme.accentDim : (clickMouse.containsMouse ? Theme.hover : Theme.pillBg)
-                                border.width: Theme.borderWidth
-                                border.color: clickChip.chosen ? Theme.accent : Theme.border
-
-                                Text {
-                                    id: clickLabel
-                                    anchors.centerIn: parent
-                                    text: String(clickChip.modelData.label || "")
-                                    color: clickChip.chosen ? Theme.wsActiveText : Theme.subtext
-                                    font.family: Theme.uiFont
-                                    font.pixelSize: Theme.smallPx
-                                    font.bold: clickChip.chosen
-                                }
-
-                                MouseArea {
-                                    id: clickMouse
-                                    anchors.fill: parent
-                                    hoverEnabled: true
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: StatsSettings.editor.set("click", clickChip.clickId)
-
-                                    HoverTip {
-                                        message: String(clickChip.modelData.tip || "")
-                                        show: clickMouse.containsMouse
-                                    }
-                                }
-                            }
+                    Repeater {
+                        model: StatsSettings.actionSlots
+                        delegate: CommandRow {
+                            required property var modelData
+                            width: parent.width
+                            title: String(modelData.label)
+                            command: StatsSettings.editor.value.actions[modelData.id].cmd
+                            inTerminal: StatsSettings.editor.value.actions[modelData.id].term
+                            onCommandEdited: (text) => StatsSettings.setAction(String(modelData.id), "cmd", text)
+                            onTerminalToggled: (on) => StatsSettings.setAction(String(modelData.id), "term", on)
                         }
                     }
                 }
@@ -396,65 +364,8 @@ Item {
 
             SectionHeader {
                 width: parent.width
-                title: "Thresholds"
-                hint: "Each step has a color to the left of the buttons. Above high is the color past the last step. Apply stores the steps and colors in the theme."
-            }
-
-            Item {
-                width: parent.width
-                height: root.wide
-                       ? Math.max(cpuBands.implicitHeight, memBands.implicitHeight) + Theme.space + Math.max(gpuBands.implicitHeight, vramBands.implicitHeight)
-                       : cpuBands.implicitHeight + memBands.implicitHeight + gpuBands.implicitHeight + vramBands.implicitHeight + Theme.space * 3
-
-                StatBandGroup {
-                    id: cpuBands
-                    x: Theme.sectionInset
-                    width: root.wide ? (parent.width - Theme.sectionInset * 2 - Theme.space) / 2 : parent.width - Theme.sectionInset * 2
-                    metric: "cpu"
-                    title: "CPU"
-                    onColorRequested: (slot) => root.pickStatColor("cpu", slot)
-                }
-
-                StatBandGroup {
-                    id: memBands
-                    x: root.wide ? cpuBands.x + cpuBands.width + Theme.space : Theme.sectionInset
-                    y: root.wide ? 0 : cpuBands.height + Theme.space
-                    width: cpuBands.width
-                    metric: "mem"
-                    title: "Memory"
-                    onColorRequested: (slot) => root.pickStatColor("mem", slot)
-                }
-
-                StatBandGroup {
-                    id: gpuBands
-                    x: Theme.sectionInset
-                    y: root.wide ? Math.max(cpuBands.height, memBands.height) + Theme.space : memBands.y + memBands.height + Theme.space
-                    width: cpuBands.width
-                    metric: "gpu"
-                    title: "GPU"
-                    onColorRequested: (slot) => root.pickStatColor("gpu", slot)
-                }
-
-                StatBandGroup {
-                    id: vramBands
-                    x: root.wide ? cpuBands.x + cpuBands.width + Theme.space : Theme.sectionInset
-                    y: root.wide ? gpuBands.y : gpuBands.y + gpuBands.height + Theme.space
-                    width: cpuBands.width
-                    metric: "vram"
-                    title: "VRAM"
-                    onColorRequested: (slot) => root.pickStatColor("vram", slot)
-                }
-            }
-
-            Item {
-                width: parent.width
-                height: Theme.space * 2
-            }
-
-            SectionHeader {
-                width: parent.width
                 title: "Terminal"
-                hint: "CPU and Memory open btop. GPU and VRAM open nvtop. The window class and title are the program name."
+                hint: "Click commands marked Terminal open in this terminal. The window keeps the terminal's own class, so its window rules apply."
             }
 
             Item {
@@ -546,12 +457,23 @@ Item {
         anchors.bottom: parent.bottom
         applyEnabled: StatsSettings.editor.dirty
         undoEnabled: StatsSettings.editor.canUndo
-        applyTip: "Save the sections, the font, the threshold steps and colors, the terminal, and the click"
+        applyTip: "Save the sections, the font, the click commands, the threshold steps and colors, and the terminal"
         undoTip: "Drop an unsaved draft, or put back the last applied one"
-        resetTip: "Restore the theme steps and colors, the bar font, all four sections, the bars, kitty, and left click. Apply saves it."
-        onApplyClicked: StatsSettings.editor.apply()
-        onUndoClicked: StatsSettings.editor.undo()
-        onResetClicked: StatsSettings.editor.reset()
+        resetTip: "Restore the theme steps and colors, the bar font, all four sections, the bars, kitty, and btop and nvtop on left click. Apply saves it."
+        onApplyClicked: {
+            if (StatsSettings.apply())
+                root.actionError = ""
+            else
+                root.actionError = "Check the command for " + StatsSettings.badAction(StatsSettings.editor.draft.actions) + ". Use a program and arguments, with no shell characters."
+        }
+        onUndoClicked: {
+            StatsSettings.editor.undo()
+            root.actionError = ""
+        }
+        onResetClicked: {
+            StatsSettings.editor.reset()
+            root.actionError = ""
+        }
     }
 
     function pickStatColor(metric, slot) {

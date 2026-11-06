@@ -80,6 +80,7 @@ Singleton {
     property alias showStatGauges: data.showStatGauges
     property alias statTerminal: data.statTerminal
     property alias statClick: data.statClick
+    property alias statActionsJson: data.statActionsJson
     property alias statFont: data.statFont
     property alias statFontPercent: data.statFontPercent
     property alias statBold: data.statBold
@@ -303,6 +304,26 @@ Singleton {
         return !/[\r\n;&|`$<>\\]/.test(program)
     }
 
+    // A command line to argv: split on spaces, never run through a shell.
+    // [] when empty, null when the program or an argument is not allowed.
+    function commandArgv(line, maxLength) {
+        const raw = String(line || "").trim()
+        if (!raw.length)
+            return []
+        if (raw.length > maxLength)
+            return null
+        const parts = raw.split(/\s+/)
+        if (!root.programOk(parts[0]))
+            return null
+        const command = [String(parts[0]).trim()]
+        for (let i = 1; i < parts.length && command.length < 13; i++) {
+            if (!root.argOk(parts[i]))
+                return null
+            command.push(parts[i])
+        }
+        return command
+    }
+
     function argOk(text) {
         return /^[A-Za-z0-9_./:@+=,~%-]+$/.test(String(text || ""))
     }
@@ -418,6 +439,7 @@ Singleton {
             property bool showStatGauges: true
             property string statTerminal: "kitty"
             property string statClick: "left"
+            property string statActionsJson: ""
             property string statFont: ""
             property int statFontPercent: 100
             property bool statBold: true

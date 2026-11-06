@@ -90,7 +90,7 @@ Rectangle {
             width: Math.min(implicitWidth, Math.round(Theme.wsLabelMax * root.ui))
             elide: Text.ElideRight
             text: root.label
-            font.pixelSize: Math.max(1, Math.round(Theme.wsNumberPx * root.ui))
+            font.pixelSize: Theme.barTextPx(root.ui, 1)
             font.family: root.fontName.length ? root.fontName : root.theme.fontFamily
             font.bold: root.bold
             font.italic: root.italic
@@ -100,7 +100,7 @@ Rectangle {
         Text {
             visible: root.showNumber
             text: root.special ? "" : String(root.workspaceId)
-            font.pixelSize: Math.max(1, Math.round(Theme.wsNumberPx * root.ui))
+            font.pixelSize: Theme.barTextPx(root.ui, 1)
             font.bold: true
             font.family: root.theme.fontFamily
             color: root.stateColor()

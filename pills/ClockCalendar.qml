@@ -20,6 +20,10 @@ Rectangle {
     // Month title, four arrows, and Today. The day grid is narrower than that row.
     readonly property int navWidth: 4 * Theme.chip + 3 * Theme.wsGap
     readonly property int headerNeed: Theme.chip * 6 + root.navWidth + Theme.chip * 4 + Theme.tabGap * 2
+    // The 7 columns stretch to the full popup width, so there is no empty
+    // margin when the header row is wider than the day grid.
+    readonly property int innerWidth: Math.max(root.gridWidth, root.headerNeed)
+    readonly property real colWidth: (root.innerWidth - (root.columns - 1) * Theme.wsGap) / root.columns
     readonly property int weekOrigin: ((root.weekStart % 7) + 7) % 7
     readonly property var weekdayLabels: {
         const names = ["S", "M", "T", "W", "T", "F", "S"]
@@ -59,7 +63,7 @@ Rectangle {
         return { n: number, inMonth: true, today: today }
     }
 
-    implicitWidth: Math.max(root.gridWidth, root.headerNeed) + Theme.space * 2
+    implicitWidth: root.innerWidth + Theme.space * 2
     implicitHeight: column.implicitHeight + Theme.space * 2
     radius: Theme.radius
     color: root.theme.colBg
@@ -188,8 +192,7 @@ Rectangle {
             height: Theme.chip
 
             Row {
-                x: Math.max(0, Math.round((parent.width - root.gridWidth) / 2))
-                width: root.gridWidth
+                width: parent.width
                 height: Theme.chip
                 spacing: Theme.wsGap
 
@@ -199,9 +202,9 @@ Rectangle {
                     id: weekday
                     required property var modelData
                     required property int index
-                    implicitWidth: root.cell
+                    implicitWidth: root.colWidth
                     implicitHeight: Theme.chip
-                    width: root.cell
+                    width: root.colWidth
                     height: Theme.chip
 
                     Text {
@@ -223,24 +226,32 @@ Rectangle {
 
             Grid {
                 id: dayGrid
-                x: Math.max(0, Math.round((parent.width - root.gridWidth) / 2))
+                width: parent.width
                 columns: root.columns
                 rowSpacing: Theme.wsGap
                 columnSpacing: Theme.wsGap
 
             Repeater {
                 model: 42
-                delegate: Rectangle {
+                delegate: Item {
                     id: day
                     required property int index
                     readonly property var info: root.dayAt(day.index)
 
-                    implicitWidth: root.cell
+                    implicitWidth: root.colWidth
                     implicitHeight: root.cell
-                    width: root.cell
+                    width: root.colWidth
                     height: root.cell
-                    radius: day.info.today ? root.cell / 2 : Theme.radiusSm
-                    color: day.info.today ? root.theme.colAccent : "transparent"
+
+                    // Today stays a circle, centered in its wider column.
+                    Rectangle {
+                        anchors.centerIn: parent
+                        visible: day.info.today
+                        width: root.cell
+                        height: root.cell
+                        radius: root.cell / 2
+                        color: root.theme.colAccent
+                    }
 
                     Text {
                         anchors.centerIn: parent

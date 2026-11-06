@@ -18,11 +18,7 @@ Rectangle {
 
     readonly property real ui: WidgetService.uiScale
     readonly property int barInner: Math.max(1, Math.round((Theme.barHeight - Theme.barPad) * root.ui))
-    readonly property int facePx: {
-        const wanted = Math.round(root.theme.fontPx * (ClockSettings.percentValue() / 100) * root.ui * root.widthFactor)
-        const cap = Math.max(1, root.barInner - Theme.borderWidth * 4)
-        return Math.max(1, Math.min(cap, wanted))
-    }
+    readonly property int facePx: Theme.barTextPx(root.ui, root.widthFactor, ClockSettings.percentValue())
     readonly property string format: ClockSettings.formatText()
     readonly property string clickSide: ClockSettings.clickValue()
     readonly property color faceColor: {

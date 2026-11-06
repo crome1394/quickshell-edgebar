@@ -4,7 +4,7 @@ import Quickshell
 import qs.theme
 
 // Widgets → System Stats: which sections the pill draws, its font, the
-// terminal and click that open btop or nvtop, and the color thresholds.
+// terminal and the left/right click commands, and the color thresholds.
 // Thresholds and colors are saved in theme/theme.json by Theme.
 Singleton {
     id: root
@@ -24,17 +24,9 @@ Singleton {
         return root.terminalOk(text) ? text : "kitty"
     }
 
-    function clickNorm(side) {
-        return String(side || "") === "right" ? "right" : "left"
-    }
-
     // Saved values, for the pill and the widget list.
     function terminalValue() {
         return root.terminalNorm(Config.statTerminal)
-    }
-
-    function clickValue() {
-        return root.clickNorm(Config.statClick)
     }
 
     function fontPercentValue() {
@@ -45,34 +37,116 @@ Singleton {
         return !!Config.showStatCpu || !!Config.showStatMem || !!Config.showStatGpu || !!Config.showStatVram
     }
 
-    // btop and nvtop only. The terminal name is a saved token, never a shell line.
-    function launchArgv(app) {
-        const program = app === "nvtop" ? "nvtop" : (app === "btop" ? "btop" : "")
-        if (!program.length)
-            return []
-        const term = root.terminalValue()
-        if (term === "kitty")
-            return [term, "--class", program, "--name", program, "--title", program, "-e", program]
-        if (term === "foot" || term === "footclient")
-            return [term, "--app-id", program, "--title", program, program]
-        if (term === "alacritty")
-            return [term, "--class", program, "-t", program, "-e", program]
-        if (term === "ghostty")
-            return [term, "--class=" + program, "--title=" + program, "-e", program]
-        if (term === "wezterm")
-            return [term, "start", "--class", program, "--", program]
-        if (term === "gnome-terminal")
-            return [term, "--title", program, "--", program]
-        if (term === "xfce4-terminal" || term === "mate-terminal" || term === "terminator")
-            return [term, "--title", program, "-x", program]
-        if (term === "st")
-            return [term, "-n", program, "-T", program, "-e", program]
-        if (term === "xterm")
-            return [term, "-name", program, "-T", program, "-e", program]
-        if (term === "urxvt")
-            return [term, "-name", program, "-title", program, "-e", program]
-        return [term, "-e", program]
+    // What a click on a stats group runs: a command line per group and
+    // button, optionally inside the chosen terminal. Never a shell.
+    readonly property var actionSlots: [
+        { id: "cpuLeft", group: "cpu", button: "left", label: "CPU · Memory, left click" },
+        { id: "cpuRight", group: "cpu", button: "right", label: "CPU · Memory, right click" },
+        { id: "gpuLeft", group: "gpu", button: "left", label: "GPU · VRAM, left click" },
+        { id: "gpuRight", group: "gpu", button: "right", label: "GPU · VRAM, right click" }
+    ]
+
+    // btop and nvtop on the button the older click setting chose.
+    function defaultActions() {
+        const side = String(Config.statClick || "") === "right" ? "Right" : "Left"
+        const other = side === "Left" ? "Right" : "Left"
+        const out = {}
+        out["cpu" + side] = { cmd: "btop", term: true }
+        out["gpu" + side] = { cmd: "nvtop", term: true }
+        out["cpu" + other] = { cmd: "", term: false }
+        out["gpu" + other] = { cmd: "", term: false }
+        return out
     }
+
+    function actionsNorm(raw) {
+        const src = raw && typeof raw === "object" ? raw : {}
+        const out = {}
+        for (let i = 0; i < root.actionSlots.length; i++) {
+            const id = root.actionSlots[i].id
+            const a = src[id] || {}
+            let cmd = String(a.cmd || "").replace(/[\r\n]/g, " ")
+            if (cmd.length > Theme.menuCommandMax)
+                cmd = cmd.substring(0, Theme.menuCommandMax)
+            out[id] = { cmd: cmd, term: !!a.term }
+        }
+        return out
+    }
+
+    function savedActions() {
+        const text = String(Config.statActionsJson || "").trim()
+        if (!text.length)
+            return root.actionsNorm(root.defaultActions())
+        try {
+            return root.actionsNorm(JSON.parse(text))
+        } catch (e) {
+            return root.actionsNorm(root.defaultActions())
+        }
+    }
+
+    // The first action whose command line is not allowed, or "".
+    function badAction(actions) {
+        const a = root.actionsNorm(actions)
+        for (let i = 0; i < root.actionSlots.length; i++) {
+            const slot = root.actionSlots[i]
+            if (Config.commandArgv(a[slot.id].cmd, Theme.menuCommandMax) === null)
+                return slot.label
+        }
+        return ""
+    }
+
+    // Wrap argv so the terminal runs it. No class or app-id flags, so the
+    // window keeps the terminal's own class and its window rules apply.
+    function terminalArgv(argv) {
+        const term = root.terminalValue()
+        if (term === "kitty" || term === "foot" || term === "footclient")
+            return [term].concat(argv)
+        if (term === "wezterm")
+            return [term, "start", "--"].concat(argv)
+        if (term === "gnome-terminal" || term === "kgx" || term === "ptyxis")
+            return [term, "--"].concat(argv)
+        if (term === "xfce4-terminal" || term === "mate-terminal" || term === "terminator")
+            return [term, "-x"].concat(argv)
+        return [term, "-e"].concat(argv)
+    }
+
+    // argv for a click on a group ("cpu" or "gpu"), or [] for nothing.
+    function actionArgv(group, button) {
+        const id = String(group) + (button === "right" ? "Right" : "Left")
+        const a = root.savedActions()[id]
+        if (!a)
+            return []
+        const argv = Config.commandArgv(a.cmd, Theme.menuCommandMax)
+        if (!argv || !argv.length)
+            return []
+        return a.term ? root.terminalArgv(argv) : argv
+    }
+
+    // Hover text for a group, e.g. "Left: btop · Right: nothing".
+    function actionHint(group) {
+        const all = root.savedActions()
+        const left = all[group + "Left"].cmd.trim()
+        const right = all[group + "Right"].cmd.trim()
+        return "Left: " + (left.length ? left : "nothing") + " · Right: " + (right.length ? right : "nothing")
+    }
+
+    function setAction(id, field, next) {
+        const all = root.actionsNorm(root.editor.value.actions)
+        if (!all[id])
+            return
+        all[id][field] = next
+        root.editor.set("actions", all)
+    }
+
+    // False, with nothing saved, when a command line is not allowed.
+    function apply() {
+        if (!root.editor.dirty)
+            return true
+        if (root.badAction(root.editor.draft.actions).length)
+            return false
+        root.editor.apply()
+        return true
+    }
+
 
     function themeBands() {
         const palette = Theme.palette
@@ -207,7 +281,7 @@ Singleton {
             vram: !!src.vram,
             gauges: !!src.gauges,
             terminal: root.terminalNorm(src.terminal),
-            click: root.clickNorm(src.click),
+            actions: root.actionsNorm(src.actions),
             font: Config.fontClamp(src.font),
             fontPercent: Config.fontPercentNorm(src.fontPercent === undefined ? 100 : src.fontPercent),
             bold: src.bold !== false,
@@ -224,7 +298,7 @@ Singleton {
             vram: Config.showStatVram,
             gauges: Config.showStatGauges,
             terminal: Config.statTerminal,
-            click: Config.statClick,
+            actions: root.savedActions(),
             font: Config.statFont,
             fontPercent: root.fontPercentValue(),
             bold: Config.statBold,
@@ -241,7 +315,7 @@ Singleton {
             vram: true,
             gauges: true,
             terminal: "kitty",
-            click: "left",
+            actions: root.actionsNorm({ cpuLeft: { cmd: "btop", term: true }, gpuLeft: { cmd: "nvtop", term: true } }),
             font: "",
             fontPercent: Theme.clockFontDefault,
             bold: true,
@@ -259,7 +333,7 @@ Singleton {
             Config.showStatVram = clean.vram
             Config.showStatGauges = clean.gauges
             Config.statTerminal = clean.terminal
-            Config.statClick = clean.click
+            Config.statActionsJson = JSON.stringify(clean.actions)
             Config.statFont = clean.font
             Config.statFontPercent = clean.fontPercent
             Config.statBold = clean.bold

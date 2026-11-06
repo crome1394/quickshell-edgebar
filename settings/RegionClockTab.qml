@@ -4,7 +4,7 @@ import qs.theme
 Item {
     id: root
 
-    property string section: "region"
+    property string section: "clock"
     property int revealSerial: 0
     property string revealSection: ""
 
@@ -25,8 +25,8 @@ Item {
         anchors.right: parent.right
         anchors.top: parent.top
         model: [
-            { id: "region", label: "Region" },
-            { id: "clock", label: "Clock" }
+            { id: "clock", label: "Clock" },
+            { id: "region", label: "Region" }
         ]
         currentId: root.section
         onSelected: (tabId) => { root.section = tabId }

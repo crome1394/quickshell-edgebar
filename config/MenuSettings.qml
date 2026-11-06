@@ -32,21 +32,7 @@ Singleton {
 
     // argv for a command line, [] when empty, null when it is not allowed.
     function argvFromLine(line) {
-        const raw = String(line || "").trim()
-        if (!raw.length)
-            return []
-        if (raw.length > Theme.menuCommandMax)
-            return null
-        const parts = raw.split(/\s+/)
-        if (!parts.length || !Config.programOk(parts[0]))
-            return null
-        const command = [String(parts[0]).trim()]
-        for (let i = 1; i < parts.length && command.length < 13; i++) {
-            if (!Config.argOk(parts[i]))
-                return null
-            command.push(parts[i])
-        }
-        return command
+        return Config.commandArgv(line, Theme.menuCommandMax)
     }
 
     function commandLine(stored) {
