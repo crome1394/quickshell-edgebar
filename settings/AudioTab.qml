@@ -117,6 +117,56 @@ Item {
 
             SectionHeader {
                 width: parent.width
+                title: "Volume & meters"
+                hint: "A volume ceiling for every control, and the live level meters in the audio menu. Meters that are off do no work."
+            }
+
+            Item {
+                width: parent.width
+                height: meterCol.implicitHeight
+
+                Column {
+                    id: meterCol
+                    x: Theme.sectionInset
+                    width: parent.width - Theme.sectionInset * 2
+                    spacing: Theme.space
+
+                    CheckRow {
+                        width: parent.width
+                        title: "Limit volume to 100%"
+                        detail: "Sliders, + buttons, and the scroll wheel stop at 100% (else " + Theme.volumeMax + "%)"
+                        tip: "A volume already above 100% stays until you lower it"
+                        checked: AudioSettings.editor.value.limit100
+                        onToggled: AudioSettings.editor.set("limit100", !AudioSettings.editor.value.limit100)
+                    }
+
+                    CheckRow {
+                        width: parent.width
+                        title: "Stream level meters"
+                        detail: "The bar under each app in Active Streams"
+                        tip: "Show a live level meter for each playing or recording app"
+                        checked: AudioSettings.editor.value.meterStreams
+                        onToggled: AudioSettings.editor.set("meterStreams", !AudioSettings.editor.value.meterStreams)
+                    }
+
+                    CheckRow {
+                        width: parent.width
+                        title: "Device level meters"
+                        detail: "The bars under Playback and Recording"
+                        tip: "Show live level meters for the chosen output and input"
+                        checked: AudioSettings.editor.value.meterDevices
+                        onToggled: AudioSettings.editor.set("meterDevices", !AudioSettings.editor.value.meterDevices)
+                    }
+                }
+            }
+
+            Item {
+                width: parent.width
+                height: Theme.space * 2
+            }
+
+            SectionHeader {
+                width: parent.width
                 title: "Thresholds"
                 hint: "Speaker and microphone colors for each level. The chip sits to the left of the buttons. Apply stores the steps and colors in the theme."
             }
@@ -289,9 +339,9 @@ Item {
                         IntSlider {
                             width: parent.width
                             from: 0
-                            to: Theme.volumeMax
+                            to: AudioSettings.volumeCap()
                             step: Theme.volumeStep
-                            value: root.percent("out")
+                            value: Math.min(root.percent("out"), AudioSettings.volumeCap())
                             readout: root.percent("out") + "%"
                             tip: "Output volume"
                             onChanged: (value) => root.setVolume("out", value)
@@ -385,9 +435,9 @@ Item {
                         IntSlider {
                             width: parent.width
                             from: 0
-                            to: Theme.volumeMax
+                            to: AudioSettings.volumeCap()
                             step: Theme.volumeStep
-                            value: root.percent("in")
+                            value: Math.min(root.percent("in"), AudioSettings.volumeCap())
                             readout: root.percent("in") + "%"
                             tip: "Input volume"
                             onChanged: (value) => root.setVolume("in", value)
@@ -448,9 +498,9 @@ Item {
         anchors.bottom: parent.bottom
         applyEnabled: AudioSettings.editor.dirty
         undoEnabled: AudioSettings.editor.canUndo
-        applyTip: "Save the scroll step, the percent, and the level threshold steps and colors"
+        applyTip: "Save the scroll step, the percent, the volume limit, the meters, and the level threshold steps and colors"
         undoTip: "Drop an unsaved draft, or put back the last applied one"
-        resetTip: "Restore a step of " + Theme.volumeStep + ", the percent, and the theme level colors. Apply saves it."
+        resetTip: "Restore a step of " + Theme.volumeStep + ", the percent, no volume limit, both meters on, and the theme level colors. Apply saves it."
         onApplyClicked: AudioSettings.editor.apply()
         onUndoClicked: AudioSettings.editor.undo()
         onResetClicked: AudioSettings.editor.reset()

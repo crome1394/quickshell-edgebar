@@ -32,6 +32,7 @@ Item {
             { tab: "connectivity", section: "network", title: "Connectivity · Network", keys: "network ip address wifi octet device" },
             { tab: "connectivity", section: "bluetooth", title: "Connectivity · Bluetooth", keys: "bluetooth scan paired adapter" },
             { tab: "audio", section: "", title: "Audio · On the bar", keys: "audio speaker microphone volume scroll percent mute" },
+            { tab: "audio", section: "", title: "Audio · Volume & meters", keys: "volume limit 100 maximum boost meter level monitor stream playback recording" },
             { tab: "audio", section: "", title: "Audio · Output", keys: "speaker output sink volume mute device" },
             { tab: "audio", section: "", title: "Audio · Input", keys: "microphone input source volume mute device" },
             { tab: "region", section: "clock", title: "Region & Clock · Clock", keys: "clock font format calendar time date" },

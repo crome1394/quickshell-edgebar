@@ -103,6 +103,11 @@ Singleton {
     property alias showVolumePill: data.showVolumePill
     property alias audioScrollStep: data.audioScrollStep
     property alias audioShowPercent: data.audioShowPercent
+    property alias audioMeterStreams: data.audioMeterStreams
+    property alias audioLimit100: data.audioLimit100
+    property alias audioMeterDevices: data.audioMeterDevices
+    property alias audioPlaybackOpen: data.audioPlaybackOpen
+    property alias audioRecordingOpen: data.audioRecordingOpen
     property alias showClockPill: data.showClockPill
     property alias showNotificationPill: data.showNotificationPill
     property alias notificationAutoExpand: data.notificationAutoExpand
@@ -474,6 +479,11 @@ Singleton {
             property bool showVolumePill: false
             property int audioScrollStep: 5
             property bool audioShowPercent: true
+            property bool audioMeterStreams: true
+            property bool audioLimit100: false
+            property bool audioMeterDevices: true
+            property bool audioPlaybackOpen: true
+            property bool audioRecordingOpen: true
             property bool showClockPill: false
             property bool showNotificationPill: false
             property bool notificationAutoExpand: false

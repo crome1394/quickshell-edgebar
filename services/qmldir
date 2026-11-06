@@ -16,3 +16,4 @@ singleton BluetoothService 1.0 BluetoothService.qml
 singleton DisplayService 1.0 DisplayService.qml
 singleton ScreensaverService 1.0 ScreensaverService.qml
 singleton CaptureService 1.0 CaptureService.qml
+singleton AudioMenuService 1.0 AudioMenuService.qml

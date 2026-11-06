@@ -28,6 +28,12 @@ Item {
     property string notice: ""
 
     readonly property int scrollGutter: Theme.space + Theme.tabGap
+    // Matches AudioStreamRow's height, so the list shows whole rows.
+    readonly property int streamSpacing: Theme.tabGap
+    readonly property int streamRowHeight: Theme.fieldHeight + Theme.tabGap
+        + (Config.audioMeterStreams ? Theme.borderWidth * 2 + Theme.audioMeterHeight : 0)
+    readonly property int streamListMax: Theme.audioStreamRowsMax * root.streamRowHeight
+        + (Theme.audioStreamRowsMax - 1) * root.streamSpacing
 
     // The bar's own level meters show up as capture streams; leave them out.
     function isOwnStream(node) {
@@ -190,7 +196,7 @@ Item {
 
                 Text {
                     width: parent.width
-                    text: "Active Streams"
+                    text: "Active Streams" + (root.streams.length ? "  (" + root.streams.length + ")" : "")
                     color: root.theme.colAccent
                     font.family: root.theme.uiFont
                     font.pixelSize: root.theme.fontPx
@@ -206,14 +212,50 @@ Item {
                     font.pixelSize: root.theme.smallPx
                 }
 
-                Repeater {
-                    model: root.streams
-                    delegate: AudioStreamRow {
-                        required property var modelData
-                        width: parent.width
-                        theme: root.theme
-                        node: modelData
-                        live: root.open
+                // Up to audioStreamRowsMax rows, then this list scrolls.
+                Flickable {
+                    id: streamFlick
+                    readonly property bool scrolls: streamCol.implicitHeight > root.streamListMax
+                    visible: root.streams.length > 0
+                    width: parent.width
+                    height: Math.min(streamCol.implicitHeight, root.streamListMax)
+                    contentWidth: width
+                    contentHeight: streamCol.implicitHeight
+                    clip: true
+                    interactive: streamFlick.scrolls
+                    boundsBehavior: Flickable.StopAtBounds
+                    flickableDirection: Flickable.VerticalFlick
+
+                    ScrollBar.vertical: ScrollBar {
+                        id: streamBar
+                        policy: streamFlick.scrolls ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
+                        width: Theme.scrollBarWidth
+                        padding: 0
+                        background: Item {}
+                        contentItem: Rectangle {
+                            implicitWidth: Theme.scrollBarWidth
+                            radius: width / 2
+                            color: streamBar.pressed || streamBar.hovered ? root.theme.colAccent : root.theme.colFgMuted
+                        }
+                    }
+
+                    Column {
+                        id: streamCol
+                        width: streamFlick.width - (streamFlick.scrolls ? root.scrollGutter : 0)
+                        spacing: root.streamSpacing
+
+                        Repeater {
+                            model: root.streams
+                            delegate: AudioStreamRow {
+                                required property var modelData
+                                width: streamCol.width
+                                height: root.streamRowHeight
+                                theme: root.theme
+                                node: modelData
+                                live: root.open
+                                meter: Config.audioMeterStreams
+                            }
+                        }
                     }
                 }
             }
@@ -226,6 +268,9 @@ Item {
                 devices: root.sinks
                 current: root.currentSink
                 live: root.open
+                expanded: Config.audioPlaybackOpen
+                meter: Config.audioMeterDevices
+                onToggleRequested: AudioSettings.setSectionOpen(true, !Config.audioPlaybackOpen)
             }
 
             AudioDeviceSection {
@@ -236,6 +281,9 @@ Item {
                 devices: root.sources
                 current: root.currentSource
                 live: root.open
+                expanded: Config.audioRecordingOpen
+                meter: Config.audioMeterDevices
+                onToggleRequested: AudioSettings.setSectionOpen(false, !Config.audioRecordingOpen)
             }
 
             Text {

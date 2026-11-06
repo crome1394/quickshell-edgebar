@@ -224,14 +224,14 @@ Item {
         const current = root.volumeOf(node)
         if (current < 0)
             return
-        root.commit(node, kind, current + dir * AudioSettings.scrollStepValue())
+        root.commit(node, kind, AudioSettings.limitRaise(current, current + dir * AudioSettings.scrollStepValue()))
     }
 
     function setVolume(kind, percent) {
         const node = kind === "in" ? root.source : root.sink
         if (!node)
             return
-        root.commit(node, kind, percent)
+        root.commit(node, kind, AudioSettings.limitRaise(root.volumeOf(node), percent))
     }
 
     function toggleMute(kind) {
