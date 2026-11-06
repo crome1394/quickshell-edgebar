@@ -5,9 +5,11 @@ import Quickshell
 import Quickshell.Io
 import qs.theme
 
-// Workspace faces and widget layout. The cycle script reads
-// wsSpecialNameCustom and wsSlotsJson from state/bar-layout.json.
-// Widget keys keep the old bar's names so a copied layout can load.
+// The saved settings store: every field in state/bar-layout.json, the
+// save timer, shared validators, and the shell IPC target. Feature logic
+// and settings-page drafts live in the *Settings singletons beside this
+// file. Field names keep the old bar's keys so a copied layout loads, and
+// the cycle script reads wsSpecialNameCustom and wsSlotsJson directly.
 Singleton {
     id: root
 

@@ -18,7 +18,16 @@ The old bar is at <~/Projects/qs-old-bar>
 
 ## Code standards
 - qmllint must be clean (0 warnings) for every new file. No unqualified   access, required properties instead of reaching into parent ids, and   pragma ComponentBehavior: Bound where delegates need it.
-- One component per file. Name files for what they do. Suffixes: Pill (bar item), Panel (floating window), Tab (settings page), Service (singleton).
+- One component per file. Name files for what they do. Suffixes: Pill (bar item), Panel (floating window), Tab (settings page), Service (runtime singleton), Settings (saved-settings singleton in `config/`).
+- Settings live in `config/`. `Config.qml` is only the saved store (the
+  fields in `state/bar-layout.json`), the save timer, and shared validators.
+  Each feature has its own `<Feature>Settings.qml` singleton with its value
+  helpers. A settings page with Apply/Undo/Reset uses that singleton's
+  `editor`, a `Draft` (`config/Draft.qml`): read `editor.value`, edit with
+  `editor.set(key, value)`, and wire the footer to `editor.dirty`,
+  `editor.canUndo`, `apply()`, `undo()`, and `reset()`. Never write to the
+  store from inside a binding. New saved fields go in `Config.qml`; save
+  several at once with `Config.saveFields()`.
 - Every folder has a hand-written qmldir. When you add, rename, or delete a QML file, update that folder's qmldir in the same change (`Name 1.0 Name.qml`, or `singleton Name 1.0 Name.qml` for a file with `pragma Singleton`). An unlisted file fails at runtime with "X is not a type" or "X is not defined", even though qmllint may pass.
 - No component references an id from another file. Data flows down as required properties. Events flow up as signals.
 - Colors, sizes, fonts, and intervals come from the Theme and Config singletons. No hardcoded values in widgets.
