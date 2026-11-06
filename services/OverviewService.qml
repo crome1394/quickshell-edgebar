@@ -118,6 +118,16 @@ Singleton {
         root.syncBlur()
     }
 
+    // Close without going to the workspace being browsed: Esc, a click on
+    // empty space, IPC close, and a workspace change from outside. Only the
+    // toggle (Super+Tab again) goes to the browsed workspace.
+    function cancelOverview() {
+        if (!root.open && root.reveal <= 0)
+            return
+        root.skipCommit = true
+        root.closeOverview()
+    }
+
     function closeOverview() {
         if (!root.open && root.reveal <= 0)
             return
@@ -810,12 +820,34 @@ Singleton {
             root.dispatch("hl.dsp.focus({ workspace = " + root.quote(ws) + " })")
     }
 
+    // Closing drops the overlay's keyboard focus, and Hyprland then focuses
+    // the window that had it, which pulls the view back to its workspace.
+    // Switching right away loses to that, so wait until focus has settled.
+    property var pendingWorkspace: null
+    property string pendingMonitor: ""
+
+    function focusWorkspaceAfterClose(ws, monName) {
+        root.pendingWorkspace = ws
+        root.pendingMonitor = String(monName || "")
+        commitTimer.restart()
+    }
+
     function focusWindow(addr) {
         root.dispatch("hl.dsp.focus({ window = " + root.quote(root.addressOf(addr)) + " })")
     }
 
     function closeWindow(addr) {
         root.dispatch("hl.dsp.window.close({ window = " + root.quote(root.addressOf(addr)) + " })")
+        root.queueRefresh()
+    }
+
+    // Window positions and sizes come from each toplevel's lastIpcObject,
+    // which Quickshell only updates on refreshToplevels(). Without this, a
+    // window opened while the overview is up has no size and is left out,
+    // and moved or swapped windows keep their old spots until reopen.
+    function queueRefresh() {
+        if (root.open)
+            eventRefresh.restart()
     }
 
     function moveWindow(addr, workspace, follow) {
@@ -827,11 +859,13 @@ Singleton {
         root.dispatch("hl.dsp.window.move({ window = " + window
             + ", workspace = " + ws
             + ", follow = " + (follow ? "true" : "false") + " })")
+        root.queueRefresh()
     }
 
     function swapWindow(fromAddr, toAddr) {
         root.focusWindow(fromAddr)
         root.dispatch("hl.dsp.window.swap({ target = " + root.quote(root.addressOf(toAddr)) + " })")
+        root.queueRefresh()
     }
 
     function toplevelFor(addr) {
@@ -903,16 +937,57 @@ Singleton {
                 return
             if (root.nowMs() < root.suppressUntil)
                 return
-            root.closeOverview()
+            root.cancelOverview()
         }
         function onRawEvent(event) {
             if (!root.open || !event)
                 return
             const name = event.name
+            // A title change only needs a redraw; the rest can move windows.
+            if (name === "windowtitle" || name === "windowtitlev2") {
+                root.refreshSerial++
+                return
+            }
             if (name === "openwindow" || name === "closewindow" || name === "movewindow"
-                    || name === "windowtitle" || name === "changefloatingmode"
-                    || name === "fullscreen" || name === "workspace" || name === "createworkspace"
-                    || name === "destroyworkspace" || name === "focusedmon")
+                    || name === "movewindowv2" || name === "changefloatingmode"
+                    || name === "fullscreen" || name === "workspace" || name === "workspacev2"
+                    || name === "createworkspace" || name === "destroyworkspace"
+                    || name === "focusedmon" || name === "pin") {
+                root.refreshSerial++
+                root.queueRefresh()
+            }
+        }
+    }
+
+    Timer {
+        id: commitTimer
+        interval: Theme.overviewCommitDelayMs
+        repeat: false
+        onTriggered: {
+            if (root.open || root.pendingWorkspace === null)
+                return
+            root.dispatchFocusWorkspace(root.pendingWorkspace, root.pendingMonitor)
+            root.pendingWorkspace = null
+        }
+    }
+
+    // Events often come in bursts; one refresh covers a burst.
+    Timer {
+        id: eventRefresh
+        interval: Theme.overviewRefreshMs
+        repeat: false
+        onTriggered: {
+            root.refreshHypr()
+            settleRefresh.restart()
+        }
+    }
+
+    Timer {
+        id: settleRefresh
+        interval: Theme.overviewSettleMs
+        repeat: false
+        onTriggered: {
+            if (root.open)
                 root.refreshSerial++
         }
     }
@@ -929,7 +1004,7 @@ Singleton {
         target: "overview"
         function toggle(): void { root.toggle() }
         function open(): void { root.openOverview("workspace") }
-        function close(): void { root.closeOverview() }
+        function close(): void { root.cancelOverview() }
         function desktop(): void { root.openMode("desktop") }
         function all(): void { root.openMode("all") }
         function next(): void { root.step(1) }

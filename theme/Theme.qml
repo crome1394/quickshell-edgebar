@@ -63,6 +63,13 @@ Singleton {
     readonly property int overviewDebounceMs: 280
     // Ignore the workspace-changed close for this long after our own Hyprland dispatch.
     readonly property int overviewSuppressMs: 700
+    // After a window event: wait, ask Hyprland for fresh window data, then
+    // rebuild once it has arrived.
+    readonly property int overviewRefreshMs: 60
+    readonly property int overviewSettleMs: 140
+    readonly property int overviewCommitDelayMs: 90
+    readonly property int overviewGrabRetryMs: 250
+    readonly property int overviewGrabRetries: 6
     readonly property int startupAttemptMs: 350
     // Late window classes (games, some toolkits) arrive after focus.
     readonly property int activeWindowClassMs: 350

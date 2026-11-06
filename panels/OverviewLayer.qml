@@ -144,9 +144,9 @@ Variants {
             if (!key || key === live || key === "all")
                 return
             if (key.indexOf("s:") === 0)
-                OverviewService.dispatchFocusWorkspace(key.slice(2), panel.monName)
+                OverviewService.focusWorkspaceAfterClose(key.slice(2), panel.monName)
             else if (key.indexOf("w:") === 0)
-                OverviewService.dispatchFocusWorkspace(Number(key.slice(2)), panel.monName)
+                OverviewService.focusWorkspaceAfterClose(Number(key.slice(2)), panel.monName)
         }
 
         function rebuild(force) {
@@ -479,7 +479,7 @@ Variants {
             acceptedButtons: Qt.LeftButton
             onClicked: {
                 if (OverviewSettings.live.ovExitOnClick)
-                    OverviewService.closeOverview()
+                    OverviewService.cancelOverview()
             }
         }
 
@@ -517,7 +517,7 @@ Variants {
                     return
                 }
                 if (event.key === Qt.Key_Escape) {
-                    OverviewService.closeOverview()
+                    OverviewService.cancelOverview()
                     event.accepted = true
                     return
                 }

@@ -100,7 +100,7 @@ Item {
                     Text {
                         width: parent.width
                         wrapMode: Text.WordWrap
-                        text: "Super+Tab opens the workspace overview. Super+Shift+Tab opens desktop layout, with windows in place and close buttons. Super+Ctrl+Tab opens every workspace. Inside: Tab and Shift+Tab move between cards, arrows select a window, Enter focuses it, D closes the selected window, A toggles all workspaces, a bare Shift flips desktop layout, 1–9 and 0 pick a strip card, the wheel steps cards, and a click on empty space closes. Drag a window onto a card to move it. In grid layout, drop one preview on another to swap them. The workspace you are viewing is focused when the overview closes, except All."
+                        text: "Super+Tab opens the workspace overview. Super+Shift+Tab opens desktop layout, with windows in place and close buttons. Super+Ctrl+Tab opens every workspace. Inside: Tab and Shift+Tab move between cards, arrows select a window, Enter focuses it, D closes the selected window, A toggles all workspaces, a bare Shift flips desktop layout, 1–9 and 0 pick a strip card, the wheel steps cards, and Esc or a click on empty space closes without switching. Press Super+Tab again to go to the workspace you are viewing (except All). Drag a window onto a card to move it. In grid layout, drop one preview on another to swap them."
                         color: Theme.subtext
                         font.family: Theme.uiFont
                         font.pixelSize: Theme.smallPx
@@ -109,7 +109,7 @@ Item {
                     Text {
                         width: parent.width
                         wrapMode: Text.WordWrap
-                        text: "IPC: qs ipc call overview toggle | open | desktop | all | next | prev | close."
+                        text: "IPC: qs ipc call overview toggle | open | desktop | all | next | prev | close. toggle goes to the viewed workspace; close stays put."
                         color: Theme.subtext
                         font.family: Theme.uiFont
                         font.pixelSize: Theme.smallPx
