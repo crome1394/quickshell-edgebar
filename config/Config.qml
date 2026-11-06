@@ -95,11 +95,6 @@ Singleton {
     property bool editorNetFull: false
     property bool editorNetOctet: true
     property bool editorNetDevice: false
-    property bool btEditorReady: false
-    property bool btEditorDirty: false
-    property bool btUndoReady: false
-    property var btUndo: null
-    property int editorBtScan: Theme.bluetoothScanDefault
     property bool ovEditorReady: false
     property bool ovEditorDirty: false
     property bool ovUndoReady: false
@@ -543,6 +538,18 @@ Singleton {
         saveTimer.restart()
     }
 
+    // Write several saved fields as one change: one revision bump, one save.
+    function saveFields(write) {
+        root.applying = true
+        try {
+            write()
+        } finally {
+            root.applying = false
+        }
+        root.touch()
+        root.queueSave()
+    }
+
     function setShowSpecial(enabled) {
         const next = !!enabled
         if (root.showSpecial === next)
@@ -780,19 +787,6 @@ Singleton {
         if (root.showNetworkDeviceName === next)
             return
         root.showNetworkDeviceName = next
-        root.touch()
-    }
-
-    function setBluetoothScanSeconds(seconds) {
-        const step = Math.max(1, Theme.bluetoothScanStep)
-        let next = Math.round(Number(seconds) / step) * step
-        if (!(next >= Theme.bluetoothScanMin))
-            next = Theme.bluetoothScanMin
-        if (next > Theme.bluetoothScanMax)
-            next = Theme.bluetoothScanMax
-        if (root.bluetoothScanSeconds === next)
-            return
-        root.bluetoothScanSeconds = next
         root.touch()
     }
 
@@ -3004,78 +2998,6 @@ Singleton {
 
     function canUndoNet() {
         return root.netEditorDirty || root.netUndoReady
-    }
-
-    function btScanNorm(seconds) {
-        const step = Math.max(1, Theme.bluetoothScanStep)
-        let next = Math.round(Number(seconds) / step) * step
-        if (!(next >= Theme.bluetoothScanMin))
-            next = Theme.bluetoothScanMin
-        if (next > Theme.bluetoothScanMax)
-            next = Theme.bluetoothScanMax
-        return next
-    }
-
-    function seedBtEditor() {
-        root.editorBtScan = root.btScanNorm(root.bluetoothScanSeconds)
-        root.btEditorReady = true
-        root.btEditorDirty = false
-    }
-
-    function ensureBtEditor() {
-        if (!root.btEditorReady || !root.btEditorDirty)
-            root.seedBtEditor()
-    }
-
-    function touchBtEditor() {
-        root.btEditorDirty = root.btScanNorm(root.editorBtScan) !== root.btScanNorm(root.bluetoothScanSeconds)
-    }
-
-    function editBtScan(seconds) {
-        root.ensureBtEditor()
-        root.editorBtScan = root.btScanNorm(seconds)
-        root.touchBtEditor()
-    }
-
-    function writeBtState(seconds) {
-        root.applying = true
-        root.bluetoothScanSeconds = root.btScanNorm(seconds)
-        root.applying = false
-        root.touch()
-        root.queueSave()
-    }
-
-    function applyBtEditor() {
-        if (!root.btEditorDirty)
-            return
-        root.btUndo = root.btScanNorm(root.bluetoothScanSeconds)
-        root.btUndoReady = true
-        root.writeBtState(root.editorBtScan)
-        root.seedBtEditor()
-    }
-
-    function undoBtEditor() {
-        if (root.btEditorDirty) {
-            root.seedBtEditor()
-            return
-        }
-        if (!root.btUndoReady)
-            return
-        const previous = root.btUndo
-        root.btUndo = null
-        root.btUndoReady = false
-        root.writeBtState(previous)
-        root.seedBtEditor()
-    }
-
-    function resetBtEditor() {
-        root.ensureBtEditor()
-        root.editorBtScan = root.btScanNorm(Theme.bluetoothScanDefault)
-        root.touchBtEditor()
-    }
-
-    function canUndoBt() {
-        return root.btEditorDirty || root.btUndoReady
     }
 
     function ovLayoutNorm(value) {

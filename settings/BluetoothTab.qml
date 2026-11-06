@@ -30,7 +30,6 @@ Item {
         return count
     }
 
-    Component.onCompleted: Config.ensureBtEditor()
 
     Timer {
         interval: Theme.bluetoothPulseMs
@@ -95,10 +94,10 @@ Item {
                         from: Theme.bluetoothScanMin
                         to: Theme.bluetoothScanMax
                         step: Theme.bluetoothScanStep
-                        value: Config.editorBtScan
-                        readout: Config.editorBtScan + " s"
+                        value: BluetoothSettings.editor.value.scan
+                        readout: BluetoothSettings.editor.value.scan + " s"
                         tip: "Stop discovery after this many seconds"
-                        onChanged: (value) => Config.editBtScan(value)
+                        onChanged: (value) => BluetoothSettings.editor.set("scan", value)
                     }
                 }
             }
@@ -222,13 +221,13 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        applyEnabled: Config.btEditorDirty
-        undoEnabled: Config.canUndoBt()
+        applyEnabled: BluetoothSettings.editor.dirty
+        undoEnabled: BluetoothSettings.editor.canUndo
         applyTip: "Save how long a Bluetooth scan runs"
         undoTip: "Drop an unsaved draft, or put back the last applied one"
         resetTip: "Restore the scan length to the default. Apply saves it."
-        onApplyClicked: Config.applyBtEditor()
-        onUndoClicked: Config.undoBtEditor()
-        onResetClicked: Config.resetBtEditor()
+        onApplyClicked: BluetoothSettings.editor.apply()
+        onUndoClicked: BluetoothSettings.editor.undo()
+        onResetClicked: BluetoothSettings.editor.reset()
     }
 }
