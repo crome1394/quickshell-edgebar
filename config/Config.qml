@@ -52,6 +52,12 @@ Singleton {
     property alias rightBarSpanFull: data.rightBarSpanFull
     property alias uiScaleManual: data.uiScaleManual
     property alias flushWindowsToBar: data.flushWindowsToBar
+    property alias topBarAutoHide: data.topBarAutoHide
+    property alias bottomBarAutoHide: data.bottomBarAutoHide
+    property alias leftBarAutoHide: data.leftBarAutoHide
+    property alias rightBarAutoHide: data.rightBarAutoHide
+    property alias barHideDelayMs: data.barHideDelayMs
+    property alias barRevealDelayMs: data.barRevealDelayMs
     property alias widgetLayoutJson: data.widgetLayoutJson
     property alias widgetLayoutClassicJson: data.widgetLayoutClassicJson
     property alias widgetLayoutDualJson: data.widgetLayoutDualJson
@@ -415,6 +421,12 @@ Singleton {
             property bool rightBarSpanFull: false
             property real uiScaleManual: 0
             property bool flushWindowsToBar: false
+            property bool topBarAutoHide: false
+            property bool bottomBarAutoHide: false
+            property bool leftBarAutoHide: false
+            property bool rightBarAutoHide: false
+            property int barHideDelayMs: 600
+            property int barRevealDelayMs: 150
             property string widgetLayoutJson: ""
             property string widgetLayoutClassicJson: ""
             property string widgetLayoutDualJson: ""

@@ -138,6 +138,16 @@ Singleton {
     // Width of the label column on form-style settings pages.
     readonly property int formLabelWidth: 96
 
+    // Auto-hide bars: the strip left at the edge to bring a bar back, the
+    // slide time, and the delay ranges under Widgets → Bars.
+    readonly property int barTriggerPx: 2
+    readonly property int barSlideMs: 180
+    readonly property int barHideDelayMin: 100
+    readonly property int barHideDelayMax: 3000
+    readonly property int barRevealDelayMin: 0
+    readonly property int barRevealDelayMax: 1000
+    readonly property int barDelayStep: 50
+
     // Settings → System → Display.
     readonly property int displayConfirmSeconds: 15
     readonly property int displaySettleMs: 1500
