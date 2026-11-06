@@ -2,6 +2,7 @@
 
 ## 0.1.4 — 2026-11-05
 
+- The Mac-style dock hover now covers every bar widget. Clock and Audio grow as one pill; System Stats grows only the section under the pointer.
 - `config/Config.qml` is split by feature: it went from 3,735 to about 550 lines and now holds only the saved store, the save timer, shared validators, and the shell IPC target. Bluetooth, Network, Notifications, Active Window, Application Menu, Clock, Audio, System Stats, Dock, Overview, App Launcher, Opacity, Wallpaper, Workspaces, and the bar widget flags each have a `*Settings.qml` singleton in `config/`.
 - Every settings page uses one shared draft (`config/Draft.qml`) for Apply, Undo, and Reset. Reading a draft never writes, so a binding cannot undo an edit.
 - `state/bar-layout.json` keeps the same fields, so saved settings carry over.
