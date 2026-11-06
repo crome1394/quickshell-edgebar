@@ -30,7 +30,7 @@ Singleton {
 
     Behavior on reveal {
         NumberAnimation {
-            duration: Math.max(0, Config.ovLive().ovDuration)
+            duration: Math.max(0, OverviewSettings.live.ovDuration)
             easing.type: Easing.OutCubic
         }
     }
@@ -77,7 +77,7 @@ Singleton {
     }
 
     function syncBlur() {
-        const on = !!Config.ovLive().ovBackdropBlur
+        const on = !!OverviewSettings.live.ovBackdropBlur
         try {
             Hyprland.dispatch("function() hl.layer_rule({ name = \"quickshell-overview-blur\", match = { namespace = \"^quickshell-overview$\" }, blur = "
                 + (on ? "true" : "false") + ", ignore_alpha = 0.05 }) end")
@@ -93,7 +93,7 @@ Singleton {
         if (root.open)
             root.closeOverview()
         else
-            root.openOverview(Config.ovLive().ovShowAll ? "all" : "workspace")
+            root.openOverview(OverviewSettings.live.ovShowAll ? "all" : "workspace")
     }
 
     function openMode(mode) {
@@ -314,7 +314,7 @@ Singleton {
     function cardCaption(card) {
         if (!card)
             return ""
-        const opts = Config.ovLive()
+        const opts = OverviewSettings.live
         if (card.all)
             return "All"
         if (opts.ovNumberLabels && !card.special) {
@@ -371,7 +371,7 @@ Singleton {
     }
 
     function cardsFor(monName) {
-        const opts = Config.ovLive()
+        const opts = OverviewSettings.live
         const vals = root.listOf(Hyprland.workspaces)
         const byId = {}
         const specials = []
@@ -542,7 +542,7 @@ Singleton {
 
     function visibleWindows(monName, key, mode) {
         const wins = root.windowsOn(monName)
-        const opts = Config.ovLive()
+        const opts = OverviewSettings.live
         const out = []
         if (mode === "all") {
             for (let i = 0; i < wins.length; i++) {
@@ -560,7 +560,7 @@ Singleton {
     }
 
     function effectiveLayout() {
-        const opts = Config.ovLive()
+        const opts = OverviewSettings.live
         if (root.viewMode === "desktop")
             return "natural"
         if (root.viewMode === "all" && opts.ovLayout === "natural")
@@ -590,7 +590,7 @@ Singleton {
         const height = Math.max(0, areaH)
         if (!wins.length || width < Theme.space || height < Theme.space)
             return []
-        const opts = Config.ovLive()
+        const opts = OverviewSettings.live
         const unit = root.unitFor(mon, screenW)
         const maxScale = Math.max(0.05, Number(opts.ovMaxScale) || 1)
         const gap = Math.max(0, Number(opts.ovGap) || 0)
@@ -862,7 +862,7 @@ Singleton {
     }
 
     function minisFor(mon, monName, key, cardW, cardH) {
-        if (!Config.ovLive().ovStripPreviews || !mon)
+        if (!OverviewSettings.live.ovStripPreviews || !mon)
             return []
         const wins = root.visibleWindows(monName, key, "workspace")
         const inset = Theme.wsGap
@@ -899,7 +899,7 @@ Singleton {
     Connections {
         target: Hyprland
         function onFocusedWorkspaceChanged() {
-            if (!root.open || !Config.ovLive().ovExitOnSwitch)
+            if (!root.open || !OverviewSettings.live.ovExitOnSwitch)
                 return
             if (root.nowMs() < root.suppressUntil)
                 return
