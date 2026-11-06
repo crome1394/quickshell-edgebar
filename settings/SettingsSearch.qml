@@ -4,10 +4,17 @@ import QtQuick.Controls
 import qs.theme
 
 // Magnifier in the settings header. Click or Ctrl+F opens the field.
+// Keys: type to filter. Tab or Down moves into the results. Up and Down
+// pick a result, Enter opens it, Tab or Shift+Tab goes back to the field,
+// and Esc closes. Typing in the results goes back to the field. The mouse
+// works as before: hover highlights, click opens.
 Item {
     id: root
 
     property bool open: false
+    property int selected: 0
+    readonly property var results: root.matches()
+    readonly property bool listFocus: resultList.activeFocus
 
     signal picked(string tab, string section)
 
@@ -60,6 +67,37 @@ Item {
     function closeSearch() {
         root.open = false
         field.text = ""
+        root.selected = 0
+    }
+
+    function focusResults() {
+        if (!root.results.length)
+            return
+        root.selected = Math.max(0, Math.min(root.selected, root.results.length - 1))
+        resultList.forceActiveFocus()
+    }
+
+    function focusField() {
+        field.forceActiveFocus()
+    }
+
+    // Move the highlight; moving up from the first result returns to the field.
+    function step(delta) {
+        const count = root.results.length
+        if (!count)
+            return
+        const next = root.selected + delta
+        if (next < 0) {
+            root.focusField()
+            return
+        }
+        root.selected = Math.min(count - 1, next)
+    }
+
+    function chooseSelected() {
+        const rows = root.results
+        if (rows.length)
+            root.choose(rows[Math.max(0, Math.min(root.selected, rows.length - 1))])
     }
 
     function choose(row) {
@@ -132,15 +170,21 @@ Item {
             border.width: Theme.borderWidth
             border.color: Theme.border
         }
+        onTextChanged: root.selected = 0
         Keys.onEscapePressed: root.closeSearch()
-        onAccepted: {
-            const rows = root.matches()
-            if (rows.length)
-                root.choose(rows[0])
+        Keys.onTabPressed: (event) => {
+            event.accepted = true
+            root.focusResults()
         }
+        Keys.onDownPressed: (event) => {
+            event.accepted = true
+            root.focusResults()
+        }
+        onAccepted: root.chooseSelected()
     }
 
     Rectangle {
+        id: resultBox
         visible: root.open && field.text.trim().length > 0
         z: 2
         width: Theme.popupWidth
@@ -161,7 +205,7 @@ Item {
             spacing: Theme.tabGap
 
             Text {
-                visible: root.matches().length === 0
+                visible: root.results.length === 0
                 width: parent.width
                 text: "No matching settings"
                 color: Theme.subtext
@@ -169,37 +213,118 @@ Item {
                 font.pixelSize: Theme.smallPx
             }
 
-            Repeater {
-                model: root.matches()
-                delegate: Rectangle {
-                    id: hit
-                    required property var modelData
-                    required property int index
-                    width: parent.width
-                    height: Theme.fieldHeight
-                    radius: Theme.radiusSm
-                    color: hitMouse.containsMouse ? Theme.hover : Theme.pillBg
+            // Takes keyboard focus for the results; the rows draw the highlight.
+            Column {
+                id: resultList
+                width: parent.width
+                spacing: Theme.tabGap
+                activeFocusOnTab: false
 
-                    Text {
-                        anchors.fill: parent
-                        anchors.leftMargin: Theme.space
-                        anchors.rightMargin: Theme.space
-                        verticalAlignment: Text.AlignVCenter
-                        elide: Text.ElideRight
-                        text: String(hit.modelData.title || "")
-                        color: Theme.text
-                        font.family: Theme.uiFont
-                        font.pixelSize: Theme.fontPx
+                Keys.onUpPressed: (event) => {
+                    event.accepted = true
+                    root.step(-1)
+                }
+                Keys.onDownPressed: (event) => {
+                    event.accepted = true
+                    root.step(1)
+                }
+                Keys.onReturnPressed: (event) => {
+                    event.accepted = true
+                    root.chooseSelected()
+                }
+                Keys.onEnterPressed: (event) => {
+                    event.accepted = true
+                    root.chooseSelected()
+                }
+                Keys.onTabPressed: (event) => {
+                    event.accepted = true
+                    root.focusField()
+                }
+                Keys.onBacktabPressed: (event) => {
+                    event.accepted = true
+                    root.focusField()
+                }
+                Keys.onEscapePressed: (event) => {
+                    event.accepted = true
+                    root.closeSearch()
+                }
+                // Typing goes back to the field, keeping the key.
+                Keys.onPressed: (event) => {
+                    const ch = String(event.text || "")
+                    if (!ch.length || event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier))
+                        return
+                    if (ch === "\b") {
+                        event.accepted = true
+                        root.focusField()
+                        field.remove(Math.max(0, field.cursorPosition - 1), field.cursorPosition)
+                        return
                     }
+                    if (ch.charCodeAt(0) < 32)
+                        return
+                    event.accepted = true
+                    root.focusField()
+                    field.insert(field.cursorPosition, ch)
+                }
 
-                    MouseArea {
-                        id: hitMouse
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: root.choose(hit.modelData)
+                Repeater {
+                    model: root.results
+                    delegate: Rectangle {
+                        id: hit
+                        required property var modelData
+                        required property int index
+                        // The row Enter opens: from the field it is the first match.
+                        readonly property bool current: hit.index === root.selected
+                        width: resultList.width
+                        height: Theme.fieldHeight
+                        radius: Theme.radiusSm
+                        color: hit.current && root.listFocus ? Theme.accentDim : (hitMouse.containsMouse ? Theme.hover : Theme.pillBg)
+                        border.width: Theme.borderWidth
+                        border.color: hit.current ? (root.listFocus ? Theme.accent : Theme.border) : "transparent"
+
+                        Text {
+                            anchors.fill: parent
+                            anchors.leftMargin: Theme.space
+                            anchors.rightMargin: Theme.space
+                            verticalAlignment: Text.AlignVCenter
+                            elide: Text.ElideRight
+                            text: String(hit.modelData.title || "")
+                            color: hit.current && root.listFocus ? Theme.wsActiveText : Theme.text
+                            font.family: Theme.uiFont
+                            font.pixelSize: Theme.fontPx
+                            font.bold: hit.current && root.listFocus
+                        }
+
+                        Text {
+                            visible: hit.current
+                            anchors.right: parent.right
+                            anchors.rightMargin: Theme.space
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: "↵"
+                            color: Theme.subtext
+                            font.family: Theme.uiFont
+                            font.pixelSize: Theme.smallPx
+                        }
+
+                        MouseArea {
+                            id: hitMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onEntered: root.selected = hit.index
+                            onClicked: root.choose(hit.modelData)
+                        }
                     }
                 }
+            }
+
+            Text {
+                visible: root.results.length > 0
+                width: parent.width
+                horizontalAlignment: Text.AlignRight
+                text: root.listFocus ? "↑ ↓ choose · Enter open · Tab back · Esc close" : "Tab or ↓ to choose · Enter opens the first"
+                color: Theme.subtext
+                font.family: Theme.uiFont
+                font.pixelSize: Theme.smallPx
             }
         }
     }
