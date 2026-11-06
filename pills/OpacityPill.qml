@@ -7,7 +7,9 @@ import qs.services
 import qs.settings
 import qs.theme
 
-// Manual override for the opacity numbers in the theme file.
+// Transparency menu: one level for every application, plus a quick slider
+// for each override. Settings → System → Transparency adds and edits the
+// overrides. Changes save at once; OpacityService applies them.
 Rectangle {
     id: root
 
@@ -56,10 +58,7 @@ Rectangle {
         // qmllint enable missing-property
     }
 
-    function push(quickshell, satty) {
-        OpacitySettings.setLevels(quickshell, satty)
-        OpacityService.apply(OpacitySettings.quickshellValue(), OpacitySettings.sattyValue(), false)
-    }
+    readonly property var overrides: OpacitySettings.savedOverrides().filter((r) => r.on)
 
     implicitWidth: root.cell
     implicitHeight: root.cell
@@ -151,20 +150,11 @@ Rectangle {
 
                 Text {
                     width: parent.width
-                    text: "Quickshell"
+                    text: "All applications"
                     color: root.theme.colFg
                     font.family: root.theme.uiFont
                     font.pixelSize: root.theme.fontPx
                     font.bold: true
-                }
-
-                Text {
-                    width: parent.width
-                    wrapMode: Text.WordWrap
-                    text: "Window transparency for every application. Fullscreen and Settings stay solid."
-                    color: root.theme.colFgMuted
-                    font.family: root.theme.uiFont
-                    font.pixelSize: root.theme.smallPx
                 }
 
                 IntSlider {
@@ -172,44 +162,58 @@ Rectangle {
                     from: Theme.opacityMin
                     to: Theme.opacityMax
                     step: Theme.opacityStep
-                    value: OpacitySettings.quickshellValue()
-                    tip: "Quickshell window opacity, " + Theme.opacityMin + " to " + Theme.opacityMax
-                    onChanged: (value) => root.push(value, OpacitySettings.sattyValue())
+                    value: OpacitySettings.allValue()
+                    readout: OpacitySettings.allValue() + "%"
+                    tip: "Every window, " + Theme.opacityMin + " to " + Theme.opacityMax + "%. 100 is solid."
+                    onChanged: (value) => OpacitySettings.setAllLive(value)
                 }
 
                 Text {
+                    visible: root.overrides.length > 0
                     width: parent.width
-                    text: "Satty"
+                    text: "Overrides"
                     color: root.theme.colFg
                     font.family: root.theme.uiFont
                     font.pixelSize: root.theme.fontPx
                     font.bold: true
                 }
 
-                Text {
-                    width: parent.width
-                    text: "Satty window only."
-                    color: root.theme.colFgMuted
-                    font.family: root.theme.uiFont
-                    font.pixelSize: root.theme.smallPx
-                }
+                Repeater {
+                    model: root.overrides
+                    delegate: Column {
+                        id: overrideRow
+                        required property var modelData
+                        width: menuCol.width
+                        spacing: Theme.borderWidth
 
-                IntSlider {
-                    width: parent.width
-                    from: Theme.opacityMin
-                    to: Theme.opacityMax
-                    step: Theme.opacityStep
-                    value: OpacitySettings.sattyValue()
-                    tip: "Satty window opacity, " + Theme.opacityMin + " to " + Theme.opacityMax
-                    onChanged: (value) => root.push(OpacitySettings.quickshellValue(), value)
+                        Text {
+                            width: parent.width
+                            elide: Text.ElideRight
+                            text: overrideRow.modelData.label
+                                + (overrideRow.modelData.active !== overrideRow.modelData.inactive
+                                    ? "  ·  unfocused " + overrideRow.modelData.inactive + "%" : "")
+                            color: root.theme.colFgMuted
+                            font.family: root.theme.uiFont
+                            font.pixelSize: root.theme.smallPx
+                        }
+
+                        IntSlider {
+                            width: parent.width
+                            from: Theme.opacityMin
+                            to: Theme.opacityMax
+                            step: Theme.opacityStep
+                            value: overrideRow.modelData.active
+                            readout: overrideRow.modelData.active + "%"
+                            tip: overrideRow.modelData.label + " (" + overrideRow.modelData.cls + ") while focused"
+                            onChanged: (value) => OpacitySettings.setOverrideLive(overrideRow.modelData.cls, value)
+                        }
+                    }
                 }
 
                 Text {
                     width: parent.width
                     wrapMode: Text.WordWrap
-                    text: "100% is solid. Theme defaults are "
-                          + DefaultTheme.opacityQuickshell + "% and "
-                          + DefaultTheme.opacitySatty + "%."
+                    text: "Settings and fullscreen windows stay solid. Add or edit overrides in Settings → System → Transparency."
                     color: root.theme.colFgMuted
                     font.family: root.theme.uiFont
                     font.pixelSize: root.theme.smallPx
@@ -248,13 +252,10 @@ Rectangle {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: {
-                            OpacitySettings.clearOverride()
-                            OpacityService.apply(OpacitySettings.quickshellValue(), OpacitySettings.sattyValue(), true)
-                        }
+                        onClicked: OpacitySettings.useTheme()
 
                         HoverTip {
-                            message: "Drop the override and use the theme file"
+                            message: "Set All applications back to the theme default (" + DefaultTheme.opacityQuickshell + "%)"
                             show: themeMouse.containsMouse
                         }
                     }

@@ -13,14 +13,14 @@
             "pkg": "hyprland",
             "area": "Core",
             "need": "required",
-            "use": "Workspaces, gaps, opacity rules, log out"
+            "use": "Workspaces, gaps, transparency rules, display modes, log out"
         },
         {
             "name": "python3",
             "pkg": "python",
             "area": "Core",
             "need": "required",
-            "use": "Helper scripts: network, notifications, wallpaper, opacity"
+            "use": "Helper scripts: network, notifications, wallpaper, install-deps.sh"
         },
         {
             "name": "bash",

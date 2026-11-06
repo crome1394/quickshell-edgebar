@@ -81,6 +81,8 @@ Singleton {
     readonly property int opacityMin: 5
     readonly property int opacityMax: 100
     readonly property int opacityStep: 5
+    readonly property int opacityOverrideMax: 32
+    readonly property int opacityOverrideDefault: 85
     readonly property int volumeMax: 150
     readonly property int volumeStep: 5
     readonly property int volumeOsdMs: 40

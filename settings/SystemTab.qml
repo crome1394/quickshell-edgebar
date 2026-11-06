@@ -1,7 +1,7 @@
 import QtQuick
 import qs.theme
 
-// Settings → System: Dependencies and Display.
+// Settings → System: Dependencies, Display, and Transparency.
 Item {
     id: root
 
@@ -11,7 +11,7 @@ Item {
 
     function applyReveal() {
         const id = root.revealSection
-        if (id === "dependencies" || id === "display")
+        if (id === "dependencies" || id === "display" || id === "transparency")
             root.section = id
     }
 
@@ -25,7 +25,8 @@ Item {
         anchors.top: parent.top
         model: [
             { id: "dependencies", label: "Dependencies" },
-            { id: "display", label: "Display" }
+            { id: "display", label: "Display" },
+            { id: "transparency", label: "Transparency" }
         ]
         currentId: root.section
         onSelected: (tabId) => { root.section = tabId }
@@ -51,5 +52,16 @@ Item {
         anchors.topMargin: Theme.space
         active: root.section === "display"
         source: displayPage.active ? Qt.resolvedUrl("DisplayTab.qml") : ""
+    }
+
+    Loader {
+        id: transparencyPage
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: sections.bottom
+        anchors.bottom: parent.bottom
+        anchors.topMargin: Theme.space
+        active: root.section === "transparency"
+        source: transparencyPage.active ? Qt.resolvedUrl("TransparencyTab.qml") : ""
     }
 }

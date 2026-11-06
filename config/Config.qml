@@ -130,6 +130,7 @@ Singleton {
     property alias clockClick: data.clockClick
     property alias opacityQuickshell: data.opacityQuickshell
     property alias opacitySatty: data.opacitySatty
+    property alias opacityOverridesJson: data.opacityOverridesJson
     property alias wallpaperDir: data.wallpaperDir
     property alias wallpaperCurrent: data.wallpaperCurrent
     property alias wallpaperTileSize: data.wallpaperTileSize
@@ -501,6 +502,7 @@ Singleton {
             // 0 means the theme file's opacity numbers.
             property int opacityQuickshell: 0
             property int opacitySatty: 0
+            property string opacityOverridesJson: ""
             property string wallpaperDir: ""
             property string wallpaperCurrent: ""
             property int wallpaperTileSize: 148
