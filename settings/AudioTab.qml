@@ -42,11 +42,10 @@ Item {
 
     function pickAudioColor(slot) {
         root.paintSlot = slot
-        audioColors.selectedColor = Config.audioColorAt(slot)
+        audioColors.selectedColor = AudioSettings.colorAt(slot)
         audioColors.open()
     }
 
-    Component.onCompleted: Config.ensureAudioEditor()
 
     Flickable {
         id: scroll
@@ -94,10 +93,10 @@ Item {
                         from: Theme.audioScrollMin
                         to: Theme.audioScrollMax
                         step: 1
-                        value: Config.editorAudioScroll
-                        readout: String(Config.editorAudioScroll)
+                        value: AudioSettings.editor.value.step
+                        readout: String(AudioSettings.editor.value.step)
                         tip: "How many percent one wheel notch moves"
-                        onChanged: (value) => Config.editAudioScroll(value)
+                        onChanged: (value) => AudioSettings.editor.set("step", value)
                     }
 
                     CheckRow {
@@ -105,8 +104,8 @@ Item {
                         title: "Show percent"
                         detail: "The number beside each symbol"
                         tip: "Show the volume percent on the pill"
-                        checked: Config.editorAudioPercent
-                        onToggled: Config.editAudioPercent(!Config.editorAudioPercent)
+                        checked: AudioSettings.editor.value.percent
+                        onToggled: AudioSettings.editor.set("percent", !AudioSettings.editor.value.percent)
                     }
                 }
             }
@@ -145,12 +144,12 @@ Item {
                         from: 0
                         to: 100
                         step: 5
-                        value: Config.audioBandAt(0)
-                        readout: Config.audioBandAt(0) + "%"
+                        value: AudioSettings.bandAt(0)
+                        readout: AudioSettings.bandAt(0) + "%"
                         tip: "Percent at or under this uses the low color"
                         showSwatch: true
-                        swatch: Config.audioColorAt(0)
-                        onChanged: (value) => Config.editAudioBand(0, value)
+                        swatch: AudioSettings.colorAt(0)
+                        onChanged: (value) => AudioSettings.setBand(0, value)
                         onSwatchClicked: root.pickAudioColor(0)
                     }
 
@@ -167,12 +166,12 @@ Item {
                         from: 0
                         to: 100
                         step: 5
-                        value: Config.audioBandAt(1)
-                        readout: Config.audioBandAt(1) + "%"
+                        value: AudioSettings.bandAt(1)
+                        readout: AudioSettings.bandAt(1) + "%"
                         tip: "Percent at or under this uses the mid color"
                         showSwatch: true
-                        swatch: Config.audioColorAt(1)
-                        onChanged: (value) => Config.editAudioBand(1, value)
+                        swatch: AudioSettings.colorAt(1)
+                        onChanged: (value) => AudioSettings.setBand(1, value)
                         onSwatchClicked: root.pickAudioColor(1)
                     }
 
@@ -189,12 +188,12 @@ Item {
                         from: 0
                         to: 100
                         step: 5
-                        value: Config.audioBandAt(2)
-                        readout: Config.audioBandAt(2) + "%"
+                        value: AudioSettings.bandAt(2)
+                        readout: AudioSettings.bandAt(2) + "%"
                         tip: "Percent at or under this uses the high color. Above it uses the peak color"
                         showSwatch: true
-                        swatch: Config.audioColorAt(2)
-                        onChanged: (value) => Config.editAudioBand(2, value)
+                        swatch: AudioSettings.colorAt(2)
+                        onChanged: (value) => AudioSettings.setBand(2, value)
                         onSwatchClicked: root.pickAudioColor(2)
                     }
 
@@ -217,7 +216,7 @@ Item {
                             width: Theme.chip
                             height: parent.height
                             radius: Theme.radiusSm
-                            color: Config.audioColorAt(3)
+                            color: AudioSettings.colorAt(3)
                             border.width: Theme.borderWidth
                             border.color: Theme.border
 
@@ -447,19 +446,19 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        applyEnabled: Config.audioEditorDirty
-        undoEnabled: Config.canUndoAudio()
+        applyEnabled: AudioSettings.editor.dirty
+        undoEnabled: AudioSettings.editor.canUndo
         applyTip: "Save the scroll step, the percent, and the level threshold steps and colors"
         undoTip: "Drop an unsaved draft, or put back the last applied one"
         resetTip: "Restore a step of " + Theme.volumeStep + ", the percent, and the theme level colors. Apply saves it."
-        onApplyClicked: Config.applyAudioEditor()
-        onUndoClicked: Config.undoAudioEditor()
-        onResetClicked: Config.resetAudioEditor()
+        onApplyClicked: AudioSettings.editor.apply()
+        onUndoClicked: AudioSettings.editor.undo()
+        onResetClicked: AudioSettings.editor.reset()
     }
 
     ColorDialog {
         id: audioColors
         title: "Threshold color"
-        onAccepted: Config.editAudioColor(root.paintSlot, selectedColor)
+        onAccepted: AudioSettings.setColor(root.paintSlot, selectedColor)
     }
 }

@@ -67,13 +67,6 @@ Singleton {
     property bool dockUndoReady: false
     property var dockUndo: null
     property var editorDock: null
-    property bool audioEditorReady: false
-    property bool audioEditorDirty: false
-    property bool audioUndoReady: false
-    property var audioUndo: null
-    property int editorAudioScroll: 5
-    property bool editorAudioPercent: true
-    property var editorAudioTiers: null
 
     property alias showSpecial: data.wsShowSpecialPill
     property alias showOnlyActive: data.wsShowOnlyActive
@@ -498,6 +491,44 @@ Singleton {
         if (n > Theme.clockFontMax)
             n = Theme.clockFontMax
         return n
+    }
+
+    // Threshold steps are 0–100 in steps of 5.
+    function bandStep(value) {
+        let n = Math.round(Number(value) / 5) * 5
+        if (!(n >= 0))
+            n = 0
+        if (n > 100)
+            n = 100
+        return n
+    }
+
+    // A copy of a { t: [low, mid, high], c: [4 colors] } threshold set with
+    // one step moved. The other steps move with it so low ≤ mid ≤ high.
+    function withBand(visual, slot, value) {
+        const triple = visual.t.slice()
+        triple[slot] = root.bandStep(value)
+        if (slot === 0) {
+            triple[1] = Math.max(triple[1], triple[0])
+            triple[2] = Math.max(triple[2], triple[1])
+        } else if (slot === 1) {
+            triple[0] = Math.min(triple[0], triple[1])
+            triple[2] = Math.max(triple[2], triple[1])
+        } else {
+            triple[1] = Math.min(triple[1], triple[2])
+            triple[0] = Math.min(triple[0], triple[1])
+        }
+        return { t: triple, c: visual.c.slice() }
+    }
+
+    // A copy with one color changed, or null when the color is not valid.
+    function withColor(visual, slot, color) {
+        const hex = Theme.colorHex(color)
+        if (!hex.length)
+            return null
+        const colors = visual.c.slice()
+        colors[slot] = hex
+        return { t: visual.t.slice(), c: colors }
     }
 
     // Write several saved fields as one change: one revision bump, one save.
@@ -1436,24 +1467,15 @@ Singleton {
         return [palette.statUtilThreshold1, palette.statUtilThreshold2, palette.statUtilThreshold3]
     }
 
-    function statBandStep(value) {
-        let n = Math.round(Number(value) / 5) * 5
-        if (!(n >= 0))
-            n = 0
-        if (n > 100)
-            n = 100
-        return n
-    }
-
     function statNormTriple(raw) {
         const theme = root.statThemeBands()
         let low = theme[0]
         let mid = theme[1]
         let high = theme[2]
         if (raw && raw.length >= 3) {
-            low = root.statBandStep(raw[0])
-            mid = root.statBandStep(raw[1])
-            high = root.statBandStep(raw[2])
+            low = root.bandStep(raw[0])
+            mid = root.bandStep(raw[1])
+            high = root.bandStep(raw[2])
         }
         if (mid < low)
             mid = low
@@ -1697,7 +1719,7 @@ Singleton {
         root.ensureStatEditor()
         const all = root.statBandsFrom(root.editorStatBands)
         const triple = all[key].t.slice()
-        triple[slot] = root.statBandStep(value)
+        triple[slot] = root.bandStep(value)
         if (slot === 0) {
             if (triple[1] < triple[0])
                 triple[1] = triple[0]
@@ -1803,192 +1825,6 @@ Singleton {
 
     function canUndoStat() {
         return root.statEditorDirty || root.statUndoReady
-    }
-
-    function audioScrollNorm(value) {
-        let n = Math.round(Number(value))
-        if (!(n >= Theme.audioScrollMin))
-            n = Theme.volumeStep
-        if (n > Theme.audioScrollMax)
-            n = Theme.audioScrollMax
-        return n
-    }
-
-    function audioScrollStepValue() {
-        return root.audioScrollNorm(root.audioScrollStep)
-    }
-
-    function audioNormTriple(raw) {
-        return Theme.normSteps(raw, Theme.defaultAudioVisual().t)
-    }
-
-    function audioNormVisual(raw) {
-        const base = Theme.defaultAudioVisual()
-        if (!raw)
-            return { t: base.t.slice(), c: base.c.slice() }
-        const steps = raw.t ? raw.t : raw
-        return {
-            t: root.audioNormTriple(steps),
-            c: Theme.normColors(raw.c, base.c)
-        }
-    }
-
-    function audioBandAt(index) {
-        const visual = root.audioNormVisual(root.editorAudioTiers)
-        const slot = Math.round(Number(index))
-        if (slot < 0 || slot > 2)
-            return visual.t[0]
-        return visual.t[slot]
-    }
-
-    function audioColorAt(index) {
-        const visual = root.audioNormVisual(root.editorAudioTiers)
-        const slot = Math.round(Number(index))
-        if (slot < 0 || slot > 3)
-            return visual.c[0]
-        return visual.c[slot]
-    }
-
-    function audioSnapshot() {
-        return {
-            step: root.audioScrollStepValue(),
-            percent: root.audioShowPercent !== false,
-            tiers: Theme.audioVisual()
-        }
-    }
-
-    function audioDraft() {
-        return {
-            step: root.audioScrollNorm(root.editorAudioScroll),
-            percent: !!root.editorAudioPercent,
-            tiers: root.audioNormVisual(root.editorAudioTiers)
-        }
-    }
-
-    function writeAudioEditor(src) {
-        const snap = src || {}
-        root.editorAudioScroll = root.audioScrollNorm(snap.step)
-        root.editorAudioPercent = snap.percent !== false
-        root.editorAudioTiers = root.audioNormVisual(snap.tiers)
-    }
-
-    function seedAudioEditor() {
-        root.writeAudioEditor(root.audioSnapshot())
-        root.audioEditorReady = true
-        root.audioEditorDirty = false
-    }
-
-    function ensureAudioEditor() {
-        if (!root.audioEditorReady || !root.audioEditorDirty)
-            root.seedAudioEditor()
-    }
-
-    function touchAudioEditor() {
-        root.audioEditorDirty = JSON.stringify(root.audioDraft()) !== JSON.stringify(root.audioSnapshot())
-    }
-
-    function editAudioScroll(value) {
-        root.ensureAudioEditor()
-        root.editorAudioScroll = root.audioScrollNorm(value)
-        root.touchAudioEditor()
-    }
-
-    function editAudioPercent(enabled) {
-        root.ensureAudioEditor()
-        root.editorAudioPercent = !!enabled
-        root.touchAudioEditor()
-    }
-
-    function editAudioBand(index, value) {
-        const slot = Math.round(Number(index))
-        if (slot < 0 || slot > 2)
-            return
-        root.ensureAudioEditor()
-        const visual = root.audioNormVisual(root.editorAudioTiers)
-        const triple = visual.t.slice()
-        triple[slot] = root.statBandStep(value)
-        if (slot === 0) {
-            if (triple[1] < triple[0])
-                triple[1] = triple[0]
-            if (triple[2] < triple[1])
-                triple[2] = triple[1]
-        } else if (slot === 1) {
-            if (triple[0] > triple[1])
-                triple[0] = triple[1]
-            if (triple[2] < triple[1])
-                triple[2] = triple[1]
-        } else {
-            if (triple[1] > triple[2])
-                triple[1] = triple[2]
-            if (triple[0] > triple[1])
-                triple[0] = triple[1]
-        }
-        root.editorAudioTiers = { t: triple, c: visual.c.slice() }
-        root.touchAudioEditor()
-    }
-
-    function editAudioColor(index, color) {
-        const slot = Math.round(Number(index))
-        if (slot < 0 || slot > 3)
-            return
-        const hex = Theme.colorHex(color)
-        if (!hex.length)
-            return
-        root.ensureAudioEditor()
-        const visual = root.audioNormVisual(root.editorAudioTiers)
-        const colors = visual.c.slice()
-        colors[slot] = hex
-        root.editorAudioTiers = { t: visual.t.slice(), c: colors }
-        root.touchAudioEditor()
-    }
-
-    function writeAudioState(src) {
-        const snap = src || {}
-        root.applying = true
-        root.audioScrollStep = root.audioScrollNorm(snap.step)
-        root.audioShowPercent = snap.percent !== false
-        root.applying = false
-        if (snap.tiers)
-            Theme.saveAudio(root.audioNormVisual(snap.tiers))
-        root.touch()
-        root.queueSave()
-    }
-
-    function applyAudioEditor() {
-        if (!root.audioEditorDirty)
-            return
-        root.audioUndo = root.audioSnapshot()
-        root.audioUndoReady = true
-        root.writeAudioState(root.audioDraft())
-        root.seedAudioEditor()
-    }
-
-    function undoAudioEditor() {
-        if (root.audioEditorDirty) {
-            root.seedAudioEditor()
-            return
-        }
-        if (!root.audioUndoReady || !root.audioUndo)
-            return
-        const previous = root.audioUndo
-        root.audioUndo = null
-        root.audioUndoReady = false
-        root.writeAudioState(previous)
-        root.seedAudioEditor()
-    }
-
-    function resetAudioEditor() {
-        root.ensureAudioEditor()
-        root.writeAudioEditor({
-            step: Theme.volumeStep,
-            percent: true,
-            tiers: Theme.defaultAudioVisual()
-        })
-        root.touchAudioEditor()
-    }
-
-    function canUndoAudio() {
-        return root.audioEditorDirty || root.audioUndoReady
     }
 
     function ovLayoutNorm(value) {

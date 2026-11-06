@@ -7,3 +7,4 @@ singleton NotificationSettings 1.0 NotificationSettings.qml
 singleton ActiveWindowSettings 1.0 ActiveWindowSettings.qml
 singleton MenuSettings 1.0 MenuSettings.qml
 singleton ClockSettings 1.0 ClockSettings.qml
+singleton AudioSettings 1.0 AudioSettings.qml

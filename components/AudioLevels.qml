@@ -224,7 +224,7 @@ Item {
         const current = root.volumeOf(node)
         if (current < 0)
             return
-        root.commit(node, kind, current + dir * Config.audioScrollStepValue())
+        root.commit(node, kind, current + dir * AudioSettings.scrollStepValue())
     }
 
     function setVolume(kind, percent) {
