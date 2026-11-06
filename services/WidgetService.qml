@@ -113,7 +113,7 @@ Singleton {
     }
 
     function statsDrawn() {
-        return Config.statsAnyShown()
+        return StatsSettings.anyShown()
     }
 
     function buildCatalog() {

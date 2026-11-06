@@ -91,7 +91,6 @@ Item {
     }
 
     Component.onCompleted: {
-        Config.ensureStatEditor()
         termProc.running = true
     }
 
@@ -152,8 +151,8 @@ Item {
                         title: "Show CPU"
                         detail: "CPU percent, temperature, and bar"
                         tip: "Show the CPU section on the System Stats pill"
-                        checked: Config.editorStatCpu
-                        onToggled: Config.editStatCpu(!Config.editorStatCpu)
+                        checked: StatsSettings.editor.value.cpu
+                        onToggled: StatsSettings.editor.set("cpu", !StatsSettings.editor.value.cpu)
                     }
 
                     CheckRow {
@@ -161,8 +160,8 @@ Item {
                         title: "Show Memory"
                         detail: "Memory percent, used memory, and bar"
                         tip: "Show the Memory section on the System Stats pill"
-                        checked: Config.editorStatMem
-                        onToggled: Config.editStatMem(!Config.editorStatMem)
+                        checked: StatsSettings.editor.value.mem
+                        onToggled: StatsSettings.editor.set("mem", !StatsSettings.editor.value.mem)
                     }
 
                     CheckRow {
@@ -170,8 +169,8 @@ Item {
                         title: "Show GPU"
                         detail: "GPU percent, temperature, and bar"
                         tip: "Show the GPU section on the System Stats pill"
-                        checked: Config.editorStatGpu
-                        onToggled: Config.editStatGpu(!Config.editorStatGpu)
+                        checked: StatsSettings.editor.value.gpu
+                        onToggled: StatsSettings.editor.set("gpu", !StatsSettings.editor.value.gpu)
                     }
 
                     CheckRow {
@@ -179,8 +178,8 @@ Item {
                         title: "Show VRAM"
                         detail: "VRAM percent, used memory, and bar"
                         tip: "Show the VRAM section on the System Stats pill"
-                        checked: Config.editorStatVram
-                        onToggled: Config.editStatVram(!Config.editorStatVram)
+                        checked: StatsSettings.editor.value.vram
+                        onToggled: StatsSettings.editor.set("vram", !StatsSettings.editor.value.vram)
                     }
 
                     CheckRow {
@@ -188,8 +187,8 @@ Item {
                         title: "Show Bar Graphs"
                         detail: "Utilization bars on the pill"
                         tip: "Show or hide the bars on the System Stats pill"
-                        checked: Config.editorStatGauges
-                        onToggled: Config.editStatGauges(!Config.editorStatGauges)
+                        checked: StatsSettings.editor.value.gauges
+                        onToggled: StatsSettings.editor.set("gauges", !StatsSettings.editor.value.gauges)
                     }
                 }
             }
@@ -236,12 +235,12 @@ Item {
                                 anchors.rightMargin: Theme.space
                                 verticalAlignment: Text.AlignVCenter
                                 elide: Text.ElideRight
-                                text: Config.editorStatFont.length ? Config.editorStatFont : "Bar font"
+                                text: StatsSettings.editor.value.font.length ? StatsSettings.editor.value.font : "Bar font"
                                 color: Theme.text
-                                font.family: Config.editorStatFont.length ? Config.editorStatFont : Theme.uiFont
+                                font.family: StatsSettings.editor.value.font.length ? StatsSettings.editor.value.font : Theme.uiFont
                                 font.pixelSize: Theme.fontPx
-                                font.bold: Config.editorStatBold
-                                font.italic: Config.editorStatItalic
+                                font.bold: StatsSettings.editor.value.bold
+                                font.italic: StatsSettings.editor.value.italic
                             }
 
                             MouseArea {
@@ -262,9 +261,9 @@ Item {
                             width: root.styleWidth
                             height: Theme.fieldHeight
                             radius: Theme.radiusSm
-                            color: Config.editorStatBold ? Theme.accentDim : Theme.fieldBg
+                            color: StatsSettings.editor.value.bold ? Theme.accentDim : Theme.fieldBg
                             border.width: Theme.borderWidth
-                            border.color: Config.editorStatBold ? Theme.accent : Theme.border
+                            border.color: StatsSettings.editor.value.bold ? Theme.accent : Theme.border
 
                             Text {
                                 anchors.centerIn: parent
@@ -280,7 +279,7 @@ Item {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: Config.editStatBold(!Config.editorStatBold)
+                                onClicked: StatsSettings.editor.set("bold", !StatsSettings.editor.value.bold)
 
                                 HoverTip {
                                     message: "Bold the stats text"
@@ -293,9 +292,9 @@ Item {
                             width: root.styleWidth
                             height: Theme.fieldHeight
                             radius: Theme.radiusSm
-                            color: Config.editorStatItalic ? Theme.accentDim : Theme.fieldBg
+                            color: StatsSettings.editor.value.italic ? Theme.accentDim : Theme.fieldBg
                             border.width: Theme.borderWidth
-                            border.color: Config.editorStatItalic ? Theme.accent : Theme.border
+                            border.color: StatsSettings.editor.value.italic ? Theme.accent : Theme.border
 
                             Text {
                                 anchors.centerIn: parent
@@ -311,7 +310,7 @@ Item {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: Config.editStatItalic(!Config.editorStatItalic)
+                                onClicked: StatsSettings.editor.set("italic", !StatsSettings.editor.value.italic)
 
                                 HoverTip {
                                     message: "Italic the stats text"
@@ -325,10 +324,10 @@ Item {
                             from: Theme.clockFontMin
                             to: Theme.clockFontMax
                             step: Theme.clockFontStep
-                            value: Config.editorStatFontPercent
-                            readout: Config.editorStatFontPercent + "%"
+                            value: StatsSettings.editor.value.fontPercent
+                            readout: StatsSettings.editor.value.fontPercent + "%"
                             tip: "Stats text size, from " + Theme.clockFontMin + " to " + Theme.clockFontMax
-                            onChanged: (value) => Config.editStatFontPercent(value)
+                            onChanged: (value) => StatsSettings.editor.set("fontPercent", value)
                         }
                     }
 
@@ -353,7 +352,7 @@ Item {
                                 required property var modelData
                                 required property int index
                                 readonly property string clickId: String(clickChip.modelData.id || "")
-                                readonly property bool chosen: Config.statClickNorm(Config.editorStatClick) === clickChip.clickId
+                                readonly property bool chosen: StatsSettings.editor.value.click === clickChip.clickId
 
                                 width: clickLabel.implicitWidth + Theme.space * 2
                                 height: Theme.fieldHeight
@@ -377,7 +376,7 @@ Item {
                                     anchors.fill: parent
                                     hoverEnabled: true
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: Config.editStatClick(clickChip.clickId)
+                                    onClicked: StatsSettings.editor.set("click", clickChip.clickId)
 
                                     HoverTip {
                                         message: String(clickChip.modelData.tip || "")
@@ -500,7 +499,7 @@ Item {
                                     id: termChip
                                     required property string modelData
                                     required property int index
-                                    readonly property bool chosen: Config.statTermNorm(Config.editorStatTerminal) === termChip.modelData
+                                    readonly property bool chosen: StatsSettings.editor.value.terminal === termChip.modelData
 
                                     width: termLabel.implicitWidth + Theme.space * 2
                                     height: Theme.fieldHeight
@@ -524,7 +523,7 @@ Item {
                                         anchors.fill: parent
                                         hoverEnabled: true
                                         cursorShape: Qt.PointingHandCursor
-                                        onClicked: Config.editStatTerminal(termChip.modelData)
+                                        onClicked: StatsSettings.setTerminal(termChip.modelData)
 
                                         HoverTip {
                                             message: "Open btop and nvtop in " + termChip.modelData
@@ -545,27 +544,27 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        applyEnabled: Config.statEditorDirty
-        undoEnabled: Config.canUndoStat()
+        applyEnabled: StatsSettings.editor.dirty
+        undoEnabled: StatsSettings.editor.canUndo
         applyTip: "Save the sections, the font, the threshold steps and colors, the terminal, and the click"
         undoTip: "Drop an unsaved draft, or put back the last applied one"
         resetTip: "Restore the theme steps and colors, the bar font, all four sections, the bars, kitty, and left click. Apply saves it."
-        onApplyClicked: Config.applyStatEditor()
-        onUndoClicked: Config.undoStatEditor()
-        onResetClicked: Config.resetStatEditor()
+        onApplyClicked: StatsSettings.editor.apply()
+        onUndoClicked: StatsSettings.editor.undo()
+        onResetClicked: StatsSettings.editor.reset()
     }
 
     function pickStatColor(metric, slot) {
         root.paintMetric = metric
         root.paintSlot = slot
-        bandColors.selectedColor = Config.statColorAt(metric, slot)
+        bandColors.selectedColor = StatsSettings.colorAt(metric, slot)
         bandColors.open()
     }
 
     ColorDialog {
         id: bandColors
         title: "Threshold color"
-        onAccepted: Config.editStatColor(root.paintMetric, root.paintSlot, selectedColor)
+        onAccepted: StatsSettings.setColor(root.paintMetric, root.paintSlot, selectedColor)
     }
 
     Loader {
@@ -577,7 +576,7 @@ Item {
                 height: parent.height
                 families: root.fontNames
                 onChosen: (family) => {
-                    Config.editStatFont(family)
+                    StatsSettings.editor.set("font", family)
                     root.fontOpen = false
                 }
                 onDismiss: root.fontOpen = false
