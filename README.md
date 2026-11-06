@@ -36,6 +36,7 @@ Each screen edge can show a bar. The widgets drawn today are workspaces, the clo
 - **Notifications** sets toast position and timeout, and the history options: keep expanded, stagger row colors, clear at boot, and show the counter. Apply saves that page and updates SwayNC when the corner or the timeout changes. The bell stays off until you enable Notifications under Widgets and press Apply. Left-click opens the history list beside the bar: under a top bar, over a bottom bar, and beside a side bar. Right-click toggles do not disturb. The badge counts saved messages. `qs ipc call notificationBell toggleHistory` opens that list while the shell is running. `showHistory`, `hideHistory`, and `toggleDoNotDisturb` are the other calls.
 - **Transparency**, on the bar, overrides the Quickshell and Satty opacity numbers in `theme/DefaultTheme.qml`. Fullscreen windows and this Settings window stay solid.
 - Bar tooltips open outside the bar: below a top widget, above a bottom widget, to the right of a left widget, and to the left of a right widget.
+- **Applications → Application Menu** sets the menu icon: a symbol from a font, or an SVG or PNG image with an optional tint, plus its size, color, and the command a click runs.
 
 Settings are stored in `state/bar-layout.json`.
 

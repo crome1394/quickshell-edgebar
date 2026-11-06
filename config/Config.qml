@@ -70,6 +70,9 @@ Singleton {
     property alias menuItalic: data.menuItalic
     property alias menuColor: data.menuColor
     property alias menuCommand: data.menuCommand
+    property alias menuIconMode: data.menuIconMode
+    property alias menuImagePath: data.menuImagePath
+    property alias menuImageTint: data.menuImageTint
     property alias showFreshRssPill: data.showFreshRssPill
     property alias showWorkspacesPill: data.showWorkspacesPill
     property alias showStatsWidget: data.showStatsWidget
@@ -430,6 +433,9 @@ Singleton {
             property bool menuItalic: false
             property string menuColor: ""
             property string menuCommand: ""
+            property string menuIconMode: "symbol"
+            property string menuImagePath: ""
+            property bool menuImageTint: false
             property bool showFreshRssPill: false
             property bool showWorkspacesPill: true
             property bool showStatsWidget: false

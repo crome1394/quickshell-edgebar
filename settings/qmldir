@@ -43,3 +43,5 @@ DependencyRow 1.0 DependencyRow.qml
 DependenciesTab 1.0 DependenciesTab.qml
 DisplayTab 1.0 DisplayTab.qml
 SystemTab 1.0 SystemTab.qml
+FormRow 1.0 FormRow.qml
+ChipButton 1.0 ChipButton.qml
