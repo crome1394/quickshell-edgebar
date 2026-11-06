@@ -182,6 +182,16 @@ Item {
                 }
             }
 
+            Text {
+                visible: root.dep.checkedOnce && (root.dep.installLine().length > 0 || root.dep.stoppedServices().length > 0)
+                width: parent.width
+                wrapMode: Text.WordWrap
+                text: "Or run scripts/install-deps.sh in a terminal: it installs the missing packages and enables and starts stopped services, asking before each step. Add --dry-run to only look."
+                color: Theme.subtext
+                font.family: Theme.uiFont
+                font.pixelSize: Theme.smallPx
+            }
+
             Repeater {
                 model: root.areas
                 delegate: Column {
