@@ -6,8 +6,15 @@ import QtQuick
 Singleton {
     id: root
 
-    // The object bar modules receive. DefaultTheme until a switcher exists.
-    readonly property var palette: DefaultTheme
+    // The object bar modules receive: the active theme's palette
+    // (Settings → Theme). Changes the moment a theme is applied.
+    readonly property ThemePalette palette: ThemePalette {
+        colors: ThemeBuilder.build(root.activeTheme)
+        temp: root.activeTheme.temp
+    }
+
+    // The saved theme, cleaned. Liquid amber until one is applied.
+    readonly property var activeTheme: ThemeBuilder.normalize(root.parsedObject(root.themeJson) || ThemePresets.defaultTheme())
 
     readonly property string fontFamily: root.palette.fontFamily
     readonly property string uiFont: root.palette.uiFont
@@ -105,6 +112,17 @@ Singleton {
     readonly property int opacityStep: 5
     readonly property int opacityOverrideMax: 32
     readonly property int opacityOverrideDefault: 85
+    // Settings → Theme.
+    readonly property int themeCardMinWidth: 200
+    readonly property int themeCardHeight: 78
+    readonly property int themePreviewHeight: 30
+    readonly property int themeLibraryMax: 40
+    readonly property int themeImportMaxBytes: 262144
+    readonly property int themeGlassStep: 2
+    readonly property int themeMenuGlassMin: 50
+    readonly property int themeTempMin: 40
+    readonly property int themeTempMax: 110
+    readonly property int themeTempStep: 5
     // Tallest the Transparency menu's open-window list grows before it scrolls.
     readonly property int opacityPickMaxHeight: 220
     readonly property int volumeMax: 150
@@ -157,6 +175,8 @@ Singleton {
     readonly property int launcherListMax: 80
     // nf-md-apps, one glyph: a square of nine squares.
     readonly property string menuSymbolDefault: "󰀻"
+    // Inspector pill: nf-md-text-search, a page with a magnifier.
+    readonly property string inspectorGlyph: "󱎸"
     readonly property int menuFontMin: 8
     readonly property int menuFontMax: 32
     readonly property int menuImagePathMax: 1024
@@ -332,11 +352,15 @@ Singleton {
         return p.colStatTempCool
     }
 
-    // Saved threshold steps and colors. theme/theme.json overrides DefaultTheme.
-    // An empty file keeps the defaults in DefaultTheme.qml. Apply writes this file.
+    // The active look, saved in state/theme.json: the theme (themeJson) and
+    // the stat and audio threshold steps and colors. Empty fields keep the
+    // defaults (Liquid amber, DefaultTheme.qml). Older setups kept the
+    // thresholds in theme/theme.json; they are copied over once.
     property bool themeReady: false
     property bool themeApplying: false
     property bool themeWriting: false
+    property bool themeLegacy: false
+    property alias themeJson: themeStore.themeJson
     property alias statsJson: themeStore.statsJson
     property alias audioJson: themeStore.audioJson
 
@@ -494,14 +518,29 @@ Singleton {
         return visual.c[3]
     }
 
+    // A change during a write saves again when that write ends.
+    property bool themeSavePending: false
+
     function queueThemeSave() {
-        if (!root.themeReady || root.themeApplying || root.themeWriting)
+        if (!root.themeReady || root.themeApplying)
             return
+        if (root.themeWriting) {
+            root.themeSavePending = true
+            return
+        }
         root.themeWriting = true
         themeFile.writeAdapter()
     }
 
-    function saveStats(visual) {
+    function themeSaveDone() {
+        root.themeWriting = false
+        if (root.themeSavePending) {
+            root.themeSavePending = false
+            root.queueThemeSave()
+        }
+    }
+
+    function statsText(visual) {
         const source = visual || {}
         const defaults = root.defaultStatVisual()
         const keys = ["cpu", "mem", "gpu", "vram"]
@@ -514,38 +553,69 @@ Singleton {
                 c: root.normColors(row.c, defaults[key].c)
             }
         }
+        return JSON.stringify(out)
+    }
+
+    function saveStats(visual) {
         root.themeApplying = true
-        root.statsJson = JSON.stringify(out)
+        root.statsJson = root.statsText(visual)
         root.themeApplying = false
         root.queueThemeSave()
     }
 
-    function saveAudio(visual) {
+    function audioText(visual) {
         const base = root.defaultAudioVisual()
         const row = visual || base
         const out = {
             t: root.normSteps(row.t, base.t),
             c: root.normColors(row.c, base.c)
         }
+        return JSON.stringify(out)
+    }
+
+    function saveAudio(visual) {
         root.themeApplying = true
-        root.audioJson = JSON.stringify(out)
+        root.audioJson = root.audioText(visual)
         root.themeApplying = false
         root.queueThemeSave()
     }
 
+    // Apply a whole look in one write. `stats` and `audio` are optional:
+    // null keeps the current thresholds (a preset carries colors only).
+    function saveLook(theme, stats, audio) {
+        root.themeApplying = true
+        root.themeJson = JSON.stringify(ThemeBuilder.normalize(theme))
+        if (stats)
+            root.statsJson = root.statsText(stats)
+        if (audio)
+            root.audioJson = root.audioText(audio)
+        root.themeApplying = false
+        root.queueThemeSave()
+    }
+
+    // Every stat metric's steps and colors as saved now.
+    function statVisual() {
+        const keys = ["cpu", "mem", "gpu", "vram"]
+        const out = {}
+        for (let i = 0; i < keys.length; i++)
+            out[keys[i]] = { t: root.statThresholds(keys[i]), c: root.statColors(keys[i]) }
+        return out
+    }
+
     FileView {
         id: themeFile
-        path: Quickshell.shellDir + "/theme/theme.json"
+        path: Quickshell.shellDir + "/state/theme.json"
         atomicWrites: true
         watchChanges: true
         printErrors: false
         onLoaded: root.themeReady = true
-        onLoadFailed: root.themeReady = true
+        // No state/theme.json yet: copy from the old theme/theme.json.
+        onLoadFailed: root.themeLegacy = true
         onAdapterUpdated: root.queueThemeSave()
-        onSaved: root.themeWriting = false
-        onSaveFailed: root.themeWriting = false
+        onSaved: root.themeSaveDone()
+        onSaveFailed: root.themeSaveDone()
         onFileChanged: {
-            if (!root.themeWriting)
+            if (!root.themeWriting && !root.themeSavePending)
                 themeFile.reload()
         }
 
@@ -553,8 +623,32 @@ Singleton {
         JsonAdapter {
         // qmllint enable unresolved-type
             id: themeStore
+            property string themeJson: ""
             property string statsJson: ""
             property string audioJson: ""
+        }
+    }
+
+    // One-time read of the old theme/theme.json. Ready either way.
+    FileView {
+        id: legacyFile
+        path: root.themeLegacy ? Quickshell.shellDir + "/theme/theme.json" : ""
+        printErrors: false
+        onLoaded: {
+            const old = root.parsedObject(legacyFile.text())
+            root.themeReady = true
+            if (old && (old.statsJson || old.audioJson)) {
+                root.themeApplying = true
+                root.statsJson = String(old.statsJson || "")
+                root.audioJson = String(old.audioJson || "")
+                root.themeApplying = false
+                root.queueThemeSave()
+            }
+            root.themeLegacy = false
+        }
+        onLoadFailed: {
+            root.themeReady = true
+            root.themeLegacy = false
         }
     }
 }

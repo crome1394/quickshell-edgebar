@@ -85,7 +85,7 @@ FloatingWindow {
 
     // qs ipc call settings open
     // qs ipc call settings openTab applications menu
-    // Tab ids: bar, widgets, wallpaper, applications, connectivity, audio,
+    // Tab ids: bar, widgets, wallpaper, theme, applications, connectivity, audio,
     // notifications, region, system, tools. The section is optional ("" for none)
     // and each tab ignores sections it does not have.
     IpcHandler {
@@ -261,6 +261,18 @@ FloatingWindow {
         }
 
         Loader {
+            id: themePage
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: header.bottom
+            anchors.bottom: tabs.top
+            anchors.margins: Theme.space
+            active: window.visible && window.currentTab === "theme"
+            visible: window.currentTab === "theme"
+            source: themePage.active ? Qt.resolvedUrl("../settings/ThemeTab.qml") : ""
+        }
+
+        Loader {
             id: applicationsPage
             anchors.left: parent.left
             anchors.right: parent.right
@@ -370,6 +382,7 @@ FloatingWindow {
                 { id: "bar", label: "Bar" },
                 { id: "widgets", label: "Widgets" },
                 { id: "wallpaper", label: "Wallpaper" },
+                { id: "theme", label: "Theme" },
                 { id: "applications", label: "Applications" },
                 { id: "connectivity", label: "Connectivity" },
                 { id: "audio", label: "Audio" },

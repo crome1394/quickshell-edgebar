@@ -16,6 +16,8 @@ ShellRoot {
     property bool overviewWatch: OverviewService.surfaceLive
     // Registers the notification IPC target. The history watcher starts with the bell.
     property bool notificationWatch: NotificationService.resident
+    // Registers the theme IPC target (switch themes from a keybind).
+    property string themeWatch: ThemeSettings.format
 
     // A bar that is turned off is not created, so its widgets do not load.
     Loader {

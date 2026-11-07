@@ -5,7 +5,7 @@ import qs.theme
 
 // Widgets → System Stats: which sections the pill draws, its font, the
 // terminal and the left/right click commands, and the color thresholds.
-// Thresholds and colors are saved in theme/theme.json by Theme.
+// Thresholds and colors are saved in state/theme.json by Theme.
 Singleton {
     id: root
 

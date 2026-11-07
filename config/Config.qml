@@ -138,6 +138,8 @@ Singleton {
     property alias opacityQuickshell: data.opacityQuickshell
     property alias opacitySatty: data.opacitySatty
     property alias opacityOverridesJson: data.opacityOverridesJson
+    // Settings → Theme: saved themes (ThemeSettings).
+    property alias themeLibraryJson: data.themeLibraryJson
     property alias wallpaperDir: data.wallpaperDir
     property alias wallpaperCurrent: data.wallpaperCurrent
     property alias wallpaperTileSize: data.wallpaperTileSize
@@ -529,6 +531,7 @@ Singleton {
             property int opacityQuickshell: 0
             property int opacitySatty: 0
             property string opacityOverridesJson: ""
+            property string themeLibraryJson: ""
             property string wallpaperDir: ""
             property string wallpaperCurrent: ""
             property int wallpaperTileSize: 148
