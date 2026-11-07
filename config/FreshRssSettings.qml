@@ -148,4 +148,26 @@ Singleton {
             Config.freshRssListWidth = n
         })
     }
+
+    // Feeds whose articles open as the full web page (feed/<number> ids).
+    function fullFeeds() {
+        const list = Array.isArray(Config.freshRssFullFeeds) ? Config.freshRssFullFeeds : []
+        return list.filter((id) => /^feed\/\d+$/.test(String(id)))
+    }
+
+    function isFullFeed(feedId) {
+        return root.fullFeeds().indexOf(String(feedId || "")) >= 0
+    }
+
+    function setFullFeedLive(feedId, on) {
+        const id = String(feedId || "")
+        if (!/^feed\/\d+$/.test(id) || root.isFullFeed(id) === !!on)
+            return
+        const next = root.fullFeeds().filter((x) => x !== id)
+        if (on)
+            next.push(id)
+        Config.saveFields(() => {
+            Config.freshRssFullFeeds = next
+        })
+    }
 }

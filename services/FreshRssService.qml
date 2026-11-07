@@ -389,7 +389,8 @@ Singleton {
 
     // ── Articles ────────────────────────────────────────────────────────
     // Article HTML for the reader: no scripts, frames, forms, or styles,
-    // and images become links so nothing loads from the network.
+    // and images become links so nothing loads from the network. (The
+    // open article's lead picture is the one exception; see leadImage.)
     function cleanHtml(html) {
         let s = String(html || "")
         if (s.length > Theme.freshRssHtmlMax)
@@ -410,6 +411,37 @@ Singleton {
             .replace(/\s+/g, " ").trim()
     }
 
+    // The site icon FreshRSS keeps for a feed, as a full http(s) URL, or "".
+    function iconUrl(raw) {
+        const url = String(raw || "").trim()
+        if (/^https?:\/\/[^\s"'<>]+$/i.test(url))
+            return url
+        if (/^\/[^\s"'<>]*$/.test(url) && root.baseUrl.length) {
+            const origin = root.baseUrl.match(/^https?:\/\/[^\/]+/i)
+            return origin ? origin[0] + url : ""
+        }
+        return ""
+    }
+
+    // The YouTube video id in a link, or "".
+    function youtubeId(url) {
+        const m = String(url || "").match(/^https?:\/\/(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?(?:[^#]*&)?v=|shorts\/|live\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/i)
+        return m ? m[1] : ""
+    }
+
+    // The article's lead picture: a YouTube still, an image enclosure, or
+    // the first image in its text. Only the open article's one is loaded.
+    function leadImage(src, rawHtml, videoUrl, url) {
+        const yt = root.youtubeId(videoUrl) || root.youtubeId(url)
+        if (yt.length)
+            return "https://i.ytimg.com/vi/" + yt + "/hqdefault.jpg"
+        const encl = (src.enclosure || []).filter((e) => /^image\//.test(String(e.type || "")) && /^https?:\/\//.test(String(e.href || "")))
+        if (encl.length)
+            return String(encl[0].href)
+        const img = String(rawHtml || "").match(/<img\b[^>]*?\bsrc\s*=\s*["']?(https?:[^"'\s>]+)/i)
+        return img ? img[1].replace(/&amp;/g, "&") : ""
+    }
+
     function isVideoUrl(url) {
         return /^https?:\/\/(www\.|m\.)?(youtube\.com\/(watch|shorts|live)|youtu\.be\/|vimeo\.com\/\d|odysee\.com\/|rumble\.com\/v)/i.test(url)
             || /^https?:\/\/[^?#]+\.(mp4|m4v|webm|mkv|mov)(\?|#|$)/i.test(url)
@@ -423,7 +455,15 @@ Singleton {
         const origin = src.origin || {}
         const feedId = String(origin.streamId || "")
         const encl = (src.enclosure || []).filter((e) => /^video\//.test(String(e.type || "")) && /^https?:\/\//.test(String(e.href || "")))
-        const html = root.cleanHtml((src.content && src.content.content) || (src.summary && src.summary.content) || "")
+        const raw = (src.content && src.content.content) || (src.summary && src.summary.content) || ""
+        const videoUrl = encl.length ? String(encl[0].href) : (root.isVideoUrl(url) ? url : "")
+        const image = root.leadImage(src, raw, videoUrl, url)
+        let html = root.cleanHtml(raw)
+        // The lead picture shows above the text, so drop its [image] link.
+        if (image.length)
+            html = html.split("<a href=\"" + image.replace(/&/g, "&amp;") + "\">[image]</a>").join("").split("<a href=\"" + image + "\">[image]</a>").join("")
+        if (image.indexOf("https://i.ytimg.com/") === 0)
+            html = html.replace(/<a href="https?:\/\/[a-z0-9]+\.ytimg\.com\/[^"]*">\[image\]<\/a>/gi, "")
         const plain = root.plainText(html)
         return {
             id: String(src.id || ""),
@@ -433,7 +473,8 @@ Singleton {
             author: String(src.author || ""),
             published: Math.round(Number(src.published) || Number(src.crawlTimeMsec) / 1000 || 0),
             url: url,
-            videoUrl: encl.length ? String(encl[0].href) : (root.isVideoUrl(url) ? url : ""),
+            videoUrl: videoUrl,
+            image: image,
             read: cats.indexOf(root.readTag) >= 0,
             starred: cats.indexOf(root.starTag) >= 0,
             html: html,
@@ -475,7 +516,7 @@ Singleton {
             for (let i = 0; i < data.subscriptions.length; i++) {
                 const s = data.subscriptions[i]
                 const cat = s.categories && s.categories[0] ? String(s.categories[0].label || "") : ""
-                subs.push({ id: String(s.id || ""), title: String(s.title || s.id || ""), htmlUrl: String(s.htmlUrl || ""), category: cat })
+                subs.push({ id: String(s.id || ""), title: String(s.title || s.id || ""), htmlUrl: String(s.htmlUrl || ""), category: cat, icon: root.iconUrl(s.iconUrl) })
                 names[String(s.id || "")] = String(s.title || "")
             }
             root.subscriptions = subs
@@ -596,6 +637,11 @@ Singleton {
     function setRead(item, read) {
         if (item && item.read !== read)
             root.tag([item], root.readTag, read, "read")
+    }
+
+    // Several articles read or unread in one request (those not already so).
+    function setReadMany(list, read) {
+        root.tag((list || []).filter((it) => it && it.read !== read), root.readTag, read, "read")
     }
 
     function setStarred(item, starred) {

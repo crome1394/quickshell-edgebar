@@ -5,13 +5,16 @@ import qs.config
 import qs.settings
 import qs.theme
 
-// The reader's controls: date, scope, and type chips, collapse and expand,
+// The reader's controls: date, scope, and type pickers, collapse and expand,
 // and the Filters box (search, max days, per feed or max items). Scope,
 // days, and limits reload from the server; the rest filter what is loaded.
 Column {
     id: root
 
     required property ReaderModel reader
+
+    // Enter in the search box: back to the list.
+    signal searchDone()
 
     property bool filtersOpen: Config.freshRssFiltersOpen
     readonly property bool searchFocused: searchField.activeFocus
@@ -30,81 +33,51 @@ Column {
 
     Flow {
         width: parent.width
-        spacing: Theme.tabGap
+        spacing: Theme.space
 
-        Repeater {
-            model: [
+        ReaderSegment {
+            options: [
                 { id: "all", label: "All dates", tip: "Every loaded article" },
                 { id: "today", label: "Today", tip: "Articles published today" },
                 { id: "week", label: "7 days", tip: "Articles from the last 7 days" }
             ]
-            delegate: ChipButton {
-                required property var modelData
-                label: modelData.label
-                tip: modelData.tip
-                active: root.reader.dateFilter === modelData.id
-                onClicked: root.reader.dateFilter = modelData.id
-            }
+            current: root.reader.dateFilter
+            onPicked: (id) => root.reader.dateFilter = id
         }
 
-        Item {
-            width: Theme.space
-            height: Theme.fieldHeight
-        }
-
-        Repeater {
-            model: [
+        ReaderSegment {
+            options: [
                 { id: "unread", label: "Unread", tip: "Load unread articles" },
                 { id: "all", label: "All", tip: "Load the newest articles of every feed" },
                 { id: "read", label: "Read", tip: "Load read articles of every feed" },
                 { id: "starred", label: "Starred", tip: "Load starred articles" }
             ]
-            delegate: ChipButton {
-                required property var modelData
-                label: modelData.label
-                tip: modelData.tip
-                active: root.reader.scope === modelData.id
-                onClicked: root.reader.setScope(modelData.id)
-            }
+            current: root.reader.scope
+            onPicked: (id) => root.reader.setScope(id)
         }
 
-        Item {
-            width: Theme.space
-            height: Theme.fieldHeight
+        ReaderSegment {
+            options: [
+                { id: "any", label: "Any type", tip: "Every article" },
+                { id: "video", label: "Video", tip: "Only articles that link to a video (they can play in mpv)" }
+            ]
+            current: root.reader.typeFilter
+            onPicked: (id) => root.reader.typeFilter = id
         }
 
-        ChipButton {
-            label: "Any type"
-            tip: "Every article"
-            active: root.reader.typeFilter === "any"
-            onClicked: root.reader.typeFilter = "any"
-        }
-
-        ChipButton {
-            label: "Video"
-            tip: "Only articles that link to a video (they can play in mpv)"
-            active: root.reader.typeFilter === "video"
-            onClicked: root.reader.typeFilter = "video"
-        }
-
-        Item {
-            width: Theme.space
-            height: Theme.fieldHeight
-        }
-
-        ChipButton {
+        ActionChip {
             label: "Collapse all"
             tip: "Close every feed"
             onClicked: root.reader.collapseAll()
         }
 
-        ChipButton {
+        ActionChip {
             label: "Expand all"
             tip: "Open every feed"
             onClicked: root.reader.expandAll()
         }
 
-        ChipButton {
+        ActionChip {
             label: root.filtersOpen ? "Filters ▾" : "Filters ▸"
             active: root.filtersOpen
             tip: "Show or hide search, max days, and limits"
@@ -126,7 +99,7 @@ Column {
             height: Theme.fieldHeight
             verticalAlignment: Text.AlignVCenter
             selectByMouse: true
-            placeholderText: "⌕  Search title, feed, author…  (/ or Ctrl+F)"
+            placeholderText: "⌕  Search title, feed, author…   Ctrl+F"
             leftPadding: Theme.space
             rightPadding: Theme.chip + Theme.space
             color: Theme.text
@@ -140,6 +113,7 @@ Column {
                 border.color: searchField.activeFocus ? Theme.accent : Theme.border
             }
             onTextChanged: root.reader.search = text
+            onAccepted: root.searchDone()
 
             Text {
                 visible: searchField.text.length > 0

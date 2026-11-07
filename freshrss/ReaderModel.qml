@@ -1,6 +1,7 @@
 import QtQuick
 import qs.config
 import qs.services
+import qs.theme
 
 // The reader's state: filters, which feeds and days are open, the list
 // rows built from FreshRssService.items, the keyboard cursor, and the
@@ -21,6 +22,50 @@ QtObject {
     property string dateFilter: "all"
     property string typeFilter: "any"
     property string search: ""
+
+    // A feed or day just opened: the list scrolls it to the top.
+    signal revealRequested(string key)
+
+    // Web page view. pages: article id → { state: "loading" | "ready" |
+    // "failed", html }, newest last in pageOrder, at most
+    // Theme.freshRssPageCache kept. fullChoice: article id → true or false
+    // once switched with f; until then the feed's "Always" setting decides.
+    property var pages: ({})
+    property var pageOrder: []
+    property var fullChoice: ({})
+
+    readonly property bool fullWanted: !!root.selected
+        && (root.fullChoice[root.selected.id] !== undefined
+            ? root.fullChoice[root.selected.id] : FreshRssSettings.isFullFeed(root.selected.feedId))
+    readonly property var page: root.selected ? (root.pages[root.selected.id] || null) : null
+
+    function setPage(id, entry) {
+        const next = Object.assign({}, root.pages)
+        let order = root.pageOrder.filter((x) => x !== id)
+        if (entry) {
+            next[id] = entry
+            order.push(id)
+        } else {
+            delete next[id]
+        }
+        while (order.length > Theme.freshRssPageCache)
+            delete next[order.shift()]
+        root.pages = next
+        root.pageOrder = order
+    }
+
+    // f: switch the open article between feed text and its web page. A
+    // page that failed is tried again.
+    function toggleFull() {
+        if (!root.selected)
+            return
+        const on = !root.fullWanted
+        const next = Object.assign({}, root.fullChoice)
+        next[root.selected.id] = on
+        root.fullChoice = next
+        if (on && root.page && root.page.state === "failed")
+            root.setPage(root.selected.id, null)
+    }
 
     property var openFeeds: ({})
     property var closedDays: ({})
@@ -113,12 +158,16 @@ QtObject {
         }
         order.sort((a, b) => a.title.localeCompare(b.title))
         const counts = FreshRssService.feedUnread
+        const icons = {}
+        const subs = FreshRssService.subscriptions
+        for (let s = 0; s < subs.length; s++)
+            icons[subs[s].id] = subs[s].icon || ""
         const out = []
         for (let f = 0; f < order.length; f++) {
             const feed = order[f]
             const open = root.searching || root.openFeeds[feed.key] === true
             out.push({
-                kind: "feed", key: feed.key, feedId: feed.feedId, title: feed.title, open: open,
+                kind: "feed", key: feed.key, feedId: feed.feedId, title: feed.title, open: open, icon: icons[feed.feedId] || "",
                 count: feed.items.length,
                 unread: counts[feed.feedId] !== undefined ? counts[feed.feedId] : feed.items.filter((x) => !x.read).length
             })
@@ -146,6 +195,8 @@ QtObject {
     }
 
     readonly property var cursorRow: root.rows.length ? root.rows[Math.max(0, Math.min(root.cursor, root.rows.length - 1))] : null
+    // The article under the cursor, or null on a feed or day header.
+    readonly property var cursorItem: root.cursorRow && root.cursorRow.kind === "item" ? root.cursorRow.item : null
 
     readonly property var selected: {
         const list = FreshRssService.items
@@ -182,6 +233,30 @@ QtObject {
         root.cursor = Math.max(0, Math.min(root.rows.length - 1, root.cursor + step))
     }
 
+    function moveCursorTo(index) {
+        if (root.rows.length)
+            root.cursor = Math.max(0, Math.min(root.rows.length - 1, index))
+    }
+
+    // What Space marks: the article under the cursor, or the loaded
+    // articles of the feed or day under it. `read` is true (mark read)
+    // while any of them is unread, else false (mark unread). A feed also
+    // counts the server's unread number, since not every article is loaded.
+    function spaceTarget() {
+        const row = root.cursorRow
+        if (!row)
+            return null
+        let list = []
+        if (row.kind === "item")
+            list = [row.item]
+        else if (row.kind === "feed")
+            list = root.filtered.filter((it) => (it.feedId || it.feed) === row.key)
+        else
+            list = root.filtered.filter((it) => (it.feedId || it.feed) + "|" + root.dayKey(it.published) === row.key)
+        const unread = list.some((it) => !it.read) || (row.kind === "feed" && row.unread > 0)
+        return { kind: row.kind, feedId: row.feedId, items: list, read: unread }
+    }
+
     function setOpen(row, open) {
         if (!row)
             return
@@ -194,6 +269,8 @@ QtObject {
             next[row.key] = !open
             root.closedDays = next
         }
+        if (open && row.kind !== "item")
+            root.revealRequested(row.key)
     }
 
     function toggleRow(row) {
@@ -201,8 +278,8 @@ QtObject {
             root.setOpen(row, !row.open)
     }
 
-    // Space and ←: open or close the feed or day under the cursor. On an
-    // article, close its day and put the cursor on the day.
+    // ←: open or close the feed or day under the cursor. On an article,
+    // close its day and put the cursor on the day.
     function toggleAtCursor() {
         const row = root.cursorRow
         if (!row)
@@ -275,6 +352,14 @@ QtObject {
     function collapseAll() {
         root.openFeeds = ({})
         root.cursor = 0
+    }
+
+    // One highlighted row: the article shown is the one under the cursor.
+    // Reads rows directly: cursorItem may not have caught up yet here.
+    onCursorChanged: {
+        const row = root.rows[root.cursor]
+        if (row && row.kind === "item")
+            root.selectedId = row.item.id
     }
 
     onRowsChanged: {

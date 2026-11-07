@@ -6,14 +6,16 @@ import qs.theme
 
 // The reader's left pane: feeds, days, and articles. A click moves the
 // cursor there and opens the row; a double-click plays a video in mpv or
-// opens the article in the browser. The cursor row stays in view.
+// opens the article in the browser. The cursor row stays in view. Keys
+// are handled by FreshRssPanel, so the list's own arrow keys are off.
 ListView {
     id: root
 
     required property ReaderModel reader
 
     clip: true
-    spacing: Theme.borderWidth
+    spacing: Theme.borderWidth * 2
+    keyNavigationEnabled: false
     boundsBehavior: Flickable.StopAtBounds
     reuseItems: true
     model: root.reader.rows
@@ -34,14 +36,27 @@ ListView {
 
     onCurrentIndexChanged: root.positionViewAtIndex(root.currentIndex, ListView.Contain)
 
+    // An opened feed or day moves to the top, so its articles show below.
+    // Later, so the new rows are in place first.
+    Connections {
+        target: root.reader
+        function onRevealRequested(key) {
+            Qt.callLater(() => {
+                const at = root.reader.rowIndex(key)
+                if (at >= 0)
+                    root.positionViewAtIndex(at, ListView.Beginning)
+            })
+        }
+    }
+
     delegate: ReaderRow {
         required property var modelData
         required property int index
         width: root.width - Theme.scrollBarWidth - Theme.tabGap
         row: modelData
         current: index === root.reader.cursor
-        chosen: modelData.kind === "item" && modelData.key === root.reader.selectedId
         onClicked: {
+            root.forceActiveFocus()
             root.reader.cursor = index
             if (modelData.kind === "item")
                 root.reader.select(modelData.item)
