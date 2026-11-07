@@ -139,7 +139,33 @@ Singleton {
     readonly property int freshRssListDefault: 340
     readonly property int freshRssListMin: 200
     readonly property int freshRssDetailMin: 280
-    readonly property int freshRssRowHeight: 26
+    readonly property int freshRssRowHeight: 30
+    // Space above and below a row's text, and the cursor bar on its left.
+    readonly property int freshRssRowPad: 6
+    readonly property int freshRssCursorBar: 3
+    // Long feed and article titles wrap up to this many lines.
+    readonly property int freshRssTitleLines: 3
+    // Site icon beside a feed title.
+    readonly property int freshRssIconSize: 16
+    // The open article's lead picture is at most this tall.
+    readonly property int freshRssLeadImageMax: 360
+    // Web page view: most page HTML read, least text that counts as an
+    // article, shortest paragraph kept, pages kept while open, and the
+    // pause after moving before a page loads by itself.
+    readonly property int freshRssPageMax: 1500000
+    readonly property int freshRssPageMinText: 200
+    readonly property int freshRssPageMinParagraph: 40
+    readonly property int freshRssPageCache: 20
+    readonly property int freshRssPageDelayMs: 400
+    // Article title size over fontPx, and the article text line spacing.
+    readonly property int freshRssTitleBoost: 6
+    readonly property real freshRssBodyLineHeight: 1.3
+    readonly property int freshRssBadgeHeight: 18
+    // The "?" shortcut sheet: card width, key column, and the dimmed backdrop.
+    readonly property int freshRssHelpWidth: 760
+    readonly property int freshRssHelpKeyColumn: 110
+    readonly property color freshRssScrim: Qt.rgba(0, 0, 0, 0.55)
+    readonly property int keyCapHeight: 20
     readonly property int freshRssPollDefault: 5
     readonly property int freshRssPollMax: 60
     readonly property int freshRssPerFeedDefault: 12

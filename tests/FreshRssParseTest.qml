@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.freshrss
 import qs.services
 import "tests"
 
@@ -8,6 +9,7 @@ import "tests"
 // cleaning article HTML, and turning API items into reader items.
 ShellRoot {
     Check { id: t }
+    PageReader { id: reader }
 
     FileView {
         id: items
@@ -41,7 +43,29 @@ ShellRoot {
             t.ok("html: no script", z.html.indexOf("script") < 0 && z.html.indexOf("bad()") < 0)
             t.ok("html: no event handlers", z.html.indexOf("onclick") < 0)
             t.ok("html: no javascript links", z.html.indexOf("javascript:") < 0)
-            t.ok("html: image becomes a link", z.html.indexOf("<img") < 0 && z.html.indexOf("[image]") >= 0)
+            t.ok("html: image becomes a link", S.cleanHtml("<img src=\"https://i.example/x.png\">") === "<a href=\"https://i.example/x.png\">[image]</a>")
+            t.eq("lead image from the text", z.image, "https://t.example/p.gif")
+            t.ok("lead image not repeated as a link", z.html.indexOf("<img") < 0 && z.html.indexOf("p.gif") < 0)
+            t.eq("lead image: YouTube still", list[1].image, "")
+            t.eq("youtube id from watch", S.youtubeId("https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=1"), "dQw4w9WgXcQ")
+            t.eq("youtube id from short link", S.youtubeId("https://youtu.be/dQw4w9WgXcQ"), "dQw4w9WgXcQ")
+            t.eq("youtube id from shorts", S.youtubeId("https://youtube.com/shorts/dQw4w9WgXcQ"), "dQw4w9WgXcQ")
+            t.eq("no youtube id elsewhere", S.youtubeId("https://example.com/watch?v=dQw4w9WgXcQ"), "")
+            t.eq("still frame url", S.leadImage({}, "", "https://youtu.be/dQw4w9WgXcQ", ""), "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg")
+            t.eq("icon url kept", S.iconUrl("https://rss.example/f.php?h=1"), "https://rss.example/f.php?h=1")
+            t.eq("icon url rejects junk", S.iconUrl("javascript:x"), "")
+
+            const page = "<html><head><title>x</title><script>bad()</script></head><body><nav><p>Menu menu menu menu menu menu menu menu</p></nav>"
+                + "<article><h1>Big title</h1><p onclick=\"x()\">" + "First paragraph of the real story. ".repeat(6) + "</p>"
+                + "<div class=\"ad\"><p>" + "Second paragraph keeps going here. ".repeat(6) + "</p></div>"
+                + "<img src=\"/pic.jpg\"><a href=\"/more\">more</a></article><footer><p>Footer footer footer footer footer footer</p></footer></body></html>"
+            const out = reader.extract(page, "https://news.example/story/1")
+            t.ok("page: keeps the article text", out.indexOf("First paragraph") >= 0 && out.indexOf("Second paragraph") >= 0)
+            t.ok("page: drops nav, footer, script", out.indexOf("Menu") < 0 && out.indexOf("Footer") < 0 && out.indexOf("bad()") < 0)
+            t.ok("page: drops divs and handlers", out.indexOf("<div") < 0 && out.indexOf("onclick") < 0)
+            t.ok("page: links made absolute", out.indexOf("https://news.example/more") >= 0)
+            t.ok("page: images stay links", out.indexOf("<img") < 0 && out.indexOf("https://news.example/pic.jpg") >= 0)
+            t.eq("page: too little text is nothing", reader.extract("<p>Short.</p>", "https://x.example/"), "")
             t.ok("search text is lowercase", list[2].search.indexOf("searchable") >= 0 && list[2].search === list[2].search.toLowerCase())
             t.done()
         }
