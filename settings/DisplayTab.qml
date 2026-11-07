@@ -20,6 +20,17 @@ Item {
     // Select whatever the monitor runs on the next refresh: on open, and
     // after a change ends (kept, gone back, or timed out).
     property bool followLive: true
+
+    // Arrangement: open with two or more monitors, folded with one. A click
+    // on its title bar overrides that until the monitor count changes.
+    readonly property int enabledCount: root.monitors.filter((m) => !m.disabled).length
+    property int arrangeOverride: -1
+    readonly property bool arrangeOpen: root.arrangeOverride < 0 ? root.enabledCount > 1 : root.arrangeOverride === 1
+    onEnabledCountChanged: root.arrangeOverride = -1
+
+    function toggleArrange() {
+        root.arrangeOverride = root.arrangeOpen ? 0 : 1
+    }
     // Bumped when the saved list of failed pairs changes.
     readonly property var rejected: DisplaySettings.rejectedList()
 
@@ -148,72 +159,225 @@ Item {
             width: scroll.width - Theme.space - Theme.tabGap
             spacing: Theme.space
 
-            SectionHeader {
+            // Two side-by-side sections with their titles on the left: the
+            // monitor's modes, and the arrangement, which folds sideways to
+            // its title bar (folded by default with a single monitor). Below
+            // the two-column width an open Arrangement drops underneath.
+            Item {
+                id: sections
                 width: parent.width
-                title: "Display"
-                hint: "Modes come from the monitor itself. Apply tries the mode, then asks you to keep it. With no answer, the old mode comes back."
-            }
+                readonly property bool stacked: width < Theme.settingsTwoColMin && root.arrangeOpen
+                readonly property real arrangeWidth: root.arrangeOpen
+                    ? Math.max(Theme.displayArrangeMin, Math.min(Theme.displayArrangeMax, width * 0.4))
+                    : Theme.sideHeaderWidth
+                height: sections.stacked
+                    ? displaySection.height + Theme.space + arrangeSection.height
+                    : Math.max(displaySection.height, arrangeSection.implicitHeight)
 
-            Column {
-                x: Theme.sectionInset
-                width: parent.width - Theme.sectionInset * 2
-                spacing: Theme.space
-
-                Text {
-                    visible: DisplayService.loading && !root.monitors.length
-                    text: "Reading monitors…"
-                    color: Theme.subtext
-                    font.family: Theme.uiFont
-                    font.pixelSize: Theme.fontPx
-                }
-
-                // Monitor card: name, model, and what it runs now.
-                Rectangle {
-                    visible: !!root.monitor
-                    width: parent.width
-                    height: monitorCol.implicitHeight + Theme.space * 2
-                    radius: Theme.radius
-                    color: Theme.pillBg
-                    border.width: Theme.borderWidth
-                    border.color: Theme.border
+                SideSection {
+                    id: displaySection
+                    title: "Display"
+                    hint: "Modes come from the monitor itself. Apply tries the mode, then asks you to keep it. With no answer, the old mode comes back."
+                    width: sections.stacked ? sections.width : sections.width - sections.arrangeWidth - Theme.space
+                    height: implicitHeight
 
                     Column {
-                        id: monitorCol
-                        x: Theme.space * 1.5
-                        y: Theme.space
-                        width: parent.width - Theme.space * 3
-                        spacing: Theme.tabGap
+                        width: parent.width
 
-                        Row {
+                        spacing: Theme.space
+
+                        Text {
+                            visible: DisplayService.loading && !root.monitors.length
+                            text: "Reading monitors…"
+                            color: Theme.subtext
+                            font.family: Theme.uiFont
+                            font.pixelSize: Theme.fontPx
+                        }
+
+                        // Monitor card: name, model, and what it runs now.
+                        Rectangle {
+                            visible: !!root.monitor
                             width: parent.width
-                            spacing: Theme.space
-
-                            Text {
-                                text: ""
-                                color: Theme.accent
-                                font.family: Theme.iconFont
-                                font.pixelSize: Theme.fontPx * 1.6
-                                anchors.verticalCenter: parent.verticalCenter
-                            }
+                            height: monitorCol.implicitHeight + Theme.space * 2
+                            radius: Theme.radius
+                            color: Theme.pillBg
+                            border.width: Theme.borderWidth
+                            border.color: Theme.border
 
                             Column {
-                                width: parent.width - Theme.fontPx * 2 - parent.spacing
-                                spacing: 0
+                                id: monitorCol
+                                x: Theme.space * 1.5
+                                y: Theme.space
+                                width: parent.width - Theme.space * 3
+                                spacing: Theme.tabGap
 
-                                Text {
+                                Row {
                                     width: parent.width
-                                    elide: Text.ElideRight
-                                    text: root.monitor ? root.monitor.label : ""
-                                    color: Theme.text
-                                    font.family: Theme.uiFont
-                                    font.pixelSize: Theme.fontPx
-                                    font.bold: true
+                                    spacing: Theme.space
+
+                                    Text {
+                                        text: ""
+                                        color: Theme.accent
+                                        font.family: Theme.iconFont
+                                        font.pixelSize: Theme.fontPx * 1.6
+                                        anchors.verticalCenter: parent.verticalCenter
+                                    }
+
+                                    Column {
+                                        width: parent.width - Theme.fontPx * 2 - parent.spacing
+                                        spacing: 0
+
+                                        Text {
+                                            width: parent.width
+                                            elide: Text.ElideRight
+                                            text: root.monitor ? root.monitor.label : ""
+                                            color: Theme.text
+                                            font.family: Theme.uiFont
+                                            font.pixelSize: Theme.fontPx
+                                            font.bold: true
+                                        }
+
+                                        Text {
+                                            width: parent.width
+                                            elide: Text.ElideRight
+                                            text: root.monitor ? root.monitor.name + "  ·  now " + root.describe(root.liveMode, root.monitor.depth) : ""
+                                            color: Theme.subtext
+                                            font.family: Theme.uiFont
+                                            font.pixelSize: Theme.smallPx
+                                        }
+                                    }
+                                }
+
+                                // More than one monitor: pick which one to set.
+                                Flow {
+                                    visible: root.monitors.length > 1
+                                    width: parent.width
+                                    spacing: Theme.tabGap
+
+                                    Repeater {
+                                        model: root.monitors
+                                        delegate: ChipButton {
+                                            id: monChip
+                                            required property var modelData
+                                            label: monChip.modelData.name
+                                            active: monChip.modelData.name === root.selName
+                                            enabled: !root.waiting
+                                            tip: monChip.modelData.label + (monChip.modelData.disabled ? " (off)" : "")
+                                            onClicked: root.pickMonitor(monChip.modelData.name)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Text {
+                            visible: root.waiting
+                            text: "Trying a change: answer in the window in the middle of the screen."
+                            color: Theme.subtext
+                            font.family: Theme.uiFont
+                            font.pixelSize: Theme.fontPx
+                        }
+
+                        // Resolutions.
+                        Text {
+                            visible: root.groups.length > 0
+                            text: "Resolution"
+                            color: Theme.subtext
+                            font.family: Theme.uiFont
+                            font.pixelSize: Theme.fontPx
+                        }
+
+                        Flow {
+                            id: tileFlow
+                            visible: root.groups.length > 0
+                            width: parent.width
+                            spacing: Theme.space
+                            // As many tiles as fit this column, stretched to fill each row.
+                            readonly property int cols: Math.max(1, Math.floor((width + spacing) / (Theme.displayTileWidth + spacing)))
+                            readonly property real tileWidth: (width - spacing * (cols - 1)) / cols
+                            enabled: !root.waiting
+                            opacity: root.waiting ? Theme.widgetOffOpacity : 1
+
+                            Repeater {
+                                model: root.groups
+                                delegate: ResolutionTile {
+                                    id: tile
+                                    required property var modelData
+                                    required property int index
+                                    width: tileFlow.tileWidth
+                                    modeWidth: tile.modelData.w
+                                    modeHeight: tile.modelData.h
+                                    topRate: tile.modelData.rates.length ? tile.modelData.rates[0].label : ""
+                                    selected: tile.modelData.key === root.selKey
+                                    current: !!root.monitor && tile.modelData.w === root.monitor.width && tile.modelData.h === root.monitor.height
+                                    largest: tile.index === 0
+                                    onClicked: root.pickResolution(tile.modelData.key)
+                                }
+                            }
+                        }
+
+                        FormRow {
+                            visible: !!root.group
+                            width: parent.width
+                            label: "Refresh rate"
+
+                            Flow {
+                                width: parent.width
+                                spacing: Theme.tabGap
+                                enabled: !root.waiting
+
+                                Repeater {
+                                    model: root.group ? root.group.rates : []
+                                    delegate: ChipButton {
+                                        id: rateChip
+                                        required property var modelData
+                                        label: rateChip.modelData.label + " Hz"
+                                        minWidth: Theme.fieldHeight * 2.5
+                                        active: rateChip.modelData.mode === root.selMode
+                                        tip: rateChip.modelData.hz.toFixed(2) + " Hz"
+                                            + (root.rejectedPair(rateChip.modelData.mode, 10) ? ". 8-bit only on this monitor." : "")
+                                        onClicked: root.pickRate(rateChip.modelData.mode)
+                                    }
+                                }
+                            }
+                        }
+
+                        FormRow {
+                            visible: !!root.group
+                            width: parent.width
+                            label: "Color depth"
+
+                            Row {
+                                width: parent.width
+                                spacing: Theme.tabGap
+                                enabled: !root.waiting
+
+                                ChipButton {
+                                    label: "8-bit"
+                                    minWidth: Theme.fieldHeight * 2.5
+                                    active: root.selDepth === 8
+                                    tip: "8 bits per color. Works with every mode."
+                                    onClicked: root.selDepth = 8
+                                }
+
+                                ChipButton {
+                                    id: tenChip
+                                    label: "10-bit"
+                                    minWidth: Theme.fieldHeight * 2.5
+                                    active: root.selDepth === 10
+                                    enabled: !!root.monitor && root.monitor.tenBit && !root.tenBitBlocked
+                                    tip: !root.monitor || !root.monitor.tenBit
+                                        ? "This monitor does not report 10-bit color"
+                                        : (root.tenBitBlocked ? "This monitor would not keep 10-bit at this mode" : "10 bits per color: smoother gradients")
+                                    onClicked: root.selDepth = 10
                                 }
 
                                 Text {
-                                    width: parent.width
+                                    width: Math.max(0, parent.width - tenChip.width * 2 - parent.spacing * 2)
+                                    height: Theme.fieldHeight
+                                    verticalAlignment: Text.AlignVCenter
                                     elide: Text.ElideRight
-                                    text: root.monitor ? root.monitor.name + "  ·  now " + root.describe(root.liveMode, root.monitor.depth) : ""
+                                    text: root.tenBitBlocked ? "10-bit is not kept at this mode" : (root.monitor && !root.monitor.tenBit ? "8-bit only" : "")
                                     color: Theme.subtext
                                     font.family: Theme.uiFont
                                     font.pixelSize: Theme.smallPx
@@ -221,278 +385,153 @@ Item {
                             }
                         }
 
-                        // More than one monitor: pick which one to set.
-                        Flow {
-                            visible: root.monitors.length > 1
+                        // What will change, and Apply.
+                        Rectangle {
+                            visible: !!root.group
                             width: parent.width
-                            spacing: Theme.tabGap
+                            height: Theme.fieldHeight + Theme.space * 2
+                            radius: Theme.radius
+                            color: Theme.pillBg
+                            border.width: Theme.borderWidth
+                            border.color: root.changed ? Theme.accent : Theme.border
 
-                            Repeater {
-                                model: root.monitors
-                                delegate: ChipButton {
-                                    id: monChip
-                                    required property var modelData
-                                    label: monChip.modelData.name
-                                    active: monChip.modelData.name === root.selName
-                                    enabled: !root.waiting
-                                    tip: monChip.modelData.label + (monChip.modelData.disabled ? " (off)" : "")
-                                    onClicked: root.pickMonitor(monChip.modelData.name)
+                            Text {
+                                anchors.left: parent.left
+                                anchors.leftMargin: Theme.space * 1.5
+                                anchors.right: applyRow.left
+                                anchors.rightMargin: Theme.space
+                                anchors.verticalCenter: parent.verticalCenter
+                                elide: Text.ElideRight
+                                text: root.changed
+                                    ? root.describe(root.liveMode, root.monitor.depth) + "   →   " + root.describe(root.selMode, root.selDepth)
+                                    : "This is the current mode."
+                                color: root.changed ? Theme.text : Theme.subtext
+                                font.family: Theme.uiFont
+                                font.pixelSize: Theme.fontPx
+                                font.bold: root.changed
+                            }
+
+                            Row {
+                                id: applyRow
+                                anchors.right: parent.right
+                                anchors.rightMargin: Theme.space
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: Theme.tabGap
+
+                                ChipButton {
+                                    label: "Current"
+                                    enabled: root.changed && !root.waiting
+                                    tip: "Put the choices back to the current mode"
+                                    onClicked: root.syncToLive()
+                                }
+
+                                ChipButton {
+                                    label: "Apply"
+                                    active: root.changed && !root.waiting && !DisplayService.busy
+                                    enabled: root.changed && !root.waiting && !DisplayService.busy
+                                    minWidth: Theme.fieldHeight * 3
+                                    tip: "Try this mode. You get " + Theme.displayConfirmSeconds + " seconds to keep it."
+                                    onClicked: root.applySelection()
                                 }
                             }
                         }
-                    }
-                }
 
-                Text {
-                    visible: root.waiting
-                    text: "Trying a change: answer in the window in the middle of the screen."
-                    color: Theme.subtext
-                    font.family: Theme.uiFont
-                    font.pixelSize: Theme.fontPx
-                }
-
-                // Resolutions.
-                Text {
-                    visible: root.groups.length > 0
-                    text: "Resolution"
-                    color: Theme.subtext
-                    font.family: Theme.uiFont
-                    font.pixelSize: Theme.fontPx
-                }
-
-                Flow {
-                    visible: root.groups.length > 0
-                    width: parent.width
-                    spacing: Theme.space
-                    enabled: !root.waiting
-                    opacity: root.waiting ? Theme.widgetOffOpacity : 1
-
-                    Repeater {
-                        model: root.groups
-                        delegate: ResolutionTile {
-                            id: tile
-                            required property var modelData
-                            required property int index
-                            modeWidth: tile.modelData.w
-                            modeHeight: tile.modelData.h
-                            topRate: tile.modelData.rates.length ? tile.modelData.rates[0].label : ""
-                            selected: tile.modelData.key === root.selKey
-                            current: !!root.monitor && tile.modelData.w === root.monitor.width && tile.modelData.h === root.monitor.height
-                            largest: tile.index === 0
-                            onClicked: root.pickResolution(tile.modelData.key)
-                        }
-                    }
-                }
-
-                FormRow {
-                    visible: !!root.group
-                    width: parent.width
-                    label: "Refresh rate"
-
-                    Flow {
-                        width: parent.width
-                        spacing: Theme.tabGap
-                        enabled: !root.waiting
-
-                        Repeater {
-                            model: root.group ? root.group.rates : []
-                            delegate: ChipButton {
-                                id: rateChip
-                                required property var modelData
-                                label: rateChip.modelData.label + " Hz"
-                                minWidth: Theme.fieldHeight * 2.5
-                                active: rateChip.modelData.mode === root.selMode
-                                tip: rateChip.modelData.hz.toFixed(2) + " Hz"
-                                    + (root.rejectedPair(rateChip.modelData.mode, 10) ? ". 8-bit only on this monitor." : "")
-                                onClicked: root.pickRate(rateChip.modelData.mode)
-                            }
-                        }
-                    }
-                }
-
-                FormRow {
-                    visible: !!root.group
-                    width: parent.width
-                    label: "Color depth"
-
-                    Row {
-                        width: parent.width
-                        spacing: Theme.tabGap
-                        enabled: !root.waiting
-
-                        ChipButton {
-                            label: "8-bit"
-                            minWidth: Theme.fieldHeight * 2.5
-                            active: root.selDepth === 8
-                            tip: "8 bits per color. Works with every mode."
-                            onClicked: root.selDepth = 8
-                        }
-
-                        ChipButton {
-                            id: tenChip
-                            label: "10-bit"
-                            minWidth: Theme.fieldHeight * 2.5
-                            active: root.selDepth === 10
-                            enabled: !!root.monitor && root.monitor.tenBit && !root.tenBitBlocked
-                            tip: !root.monitor || !root.monitor.tenBit
-                                ? "This monitor does not report 10-bit color"
-                                : (root.tenBitBlocked ? "This monitor would not keep 10-bit at this mode" : "10 bits per color: smoother gradients")
-                            onClicked: root.selDepth = 10
+                        Text {
+                            visible: DisplayService.error.length > 0
+                            width: parent.width
+                            wrapMode: Text.WordWrap
+                            text: DisplayService.error
+                            color: Theme.danger
+                            font.family: Theme.uiFont
+                            font.pixelSize: Theme.smallPx
                         }
 
                         Text {
-                            width: Math.max(0, parent.width - tenChip.width * 2 - parent.spacing * 2)
-                            height: Theme.fieldHeight
-                            verticalAlignment: Text.AlignVCenter
-                            elide: Text.ElideRight
-                            text: root.tenBitBlocked ? "10-bit is not kept at this mode" : (root.monitor && !root.monitor.tenBit ? "8-bit only" : "")
+                            visible: DisplayService.notice.length > 0
+                            width: parent.width
+                            wrapMode: Text.WordWrap
+                            text: DisplayService.notice
                             color: Theme.subtext
                             font.family: Theme.uiFont
                             font.pixelSize: Theme.smallPx
                         }
-                    }
-                }
 
-                // What will change, and Apply.
-                Rectangle {
-                    visible: !!root.group
-                    width: parent.width
-                    height: Theme.fieldHeight + Theme.space * 2
-                    radius: Theme.radius
-                    color: Theme.pillBg
-                    border.width: Theme.borderWidth
-                    border.color: root.changed ? Theme.accent : Theme.border
-
-                    Text {
-                        anchors.left: parent.left
-                        anchors.leftMargin: Theme.space * 1.5
-                        anchors.right: applyRow.left
-                        anchors.rightMargin: Theme.space
-                        anchors.verticalCenter: parent.verticalCenter
-                        elide: Text.ElideRight
-                        text: root.changed
-                            ? root.describe(root.liveMode, root.monitor.depth) + "   →   " + root.describe(root.selMode, root.selDepth)
-                            : "This is the current mode."
-                        color: root.changed ? Theme.text : Theme.subtext
-                        font.family: Theme.uiFont
-                        font.pixelSize: Theme.fontPx
-                        font.bold: root.changed
-                    }
-
-                    Row {
-                        id: applyRow
-                        anchors.right: parent.right
-                        anchors.rightMargin: Theme.space
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: Theme.tabGap
-
-                        ChipButton {
-                            label: "Current"
-                            enabled: root.changed && !root.waiting
-                            tip: "Put the choices back to the current mode"
-                            onClicked: root.syncToLive()
+                        Item {
+                            width: parent.width
+                            height: Theme.space
                         }
 
-                        ChipButton {
-                            label: "Apply"
-                            active: root.changed && !root.waiting && !DisplayService.busy
-                            enabled: root.changed && !root.waiting && !DisplayService.busy
-                            minWidth: Theme.fieldHeight * 3
-                            tip: "Try this mode. You get " + Theme.displayConfirmSeconds + " seconds to keep it."
-                            onClicked: root.applySelection()
+                        // Where Keep saves, and housekeeping.
+                        Row {
+                            width: parent.width
+                            spacing: Theme.tabGap
+
+                            Text {
+                                width: parent.width - detectChip.width - forgetChip.width - parent.spacing * 2
+                                height: Theme.fieldHeight
+                                verticalAlignment: Text.AlignVCenter
+                                elide: Text.ElideMiddle
+                                text: DisplayService.managedFile.length
+                                    ? "Keep saves to " + DisplayService.managedFile
+                                    : "Changes last until Hyprland restarts (no monitors file marked \"" + DisplaySettings.fileMarker + "\")"
+                                color: Theme.subtext
+                                font.family: Theme.uiFont
+                                font.pixelSize: Theme.smallPx
+
+                                HoverHandler {
+                                    id: fileHover
+                                }
+
+                                HoverTip {
+                                    message: DisplayService.managedFile.length
+                                        ? DisplayService.managedFile
+                                        : "To save modes, add a comment line \"-- " + DisplaySettings.fileMarker + "\" to a monitors file your Hyprland config loads, at " + DisplayService.fileCandidates.join(" or ")
+                                    show: fileHover.hovered
+                                }
+                            }
+
+                            ChipButton {
+                                id: forgetChip
+                                label: "Forget failed (" + root.rejected.length + ")"
+                                enabled: root.rejected.length > 0 && !root.waiting
+                                tip: "Let every mode and color depth be tried again"
+                                onClicked: DisplaySettings.clearRejected()
+                            }
+
+                            ChipButton {
+                                id: detectChip
+                                label: "Detect"
+                                enabled: !DisplayService.loading && !root.waiting
+                                tip: "Read the monitors again"
+                                onClicked: DisplayService.refresh()
+                            }
                         }
                     }
                 }
 
-                Text {
-                    visible: DisplayService.error.length > 0
-                    width: parent.width
-                    wrapMode: Text.WordWrap
-                    text: DisplayService.error
-                    color: Theme.danger
-                    font.family: Theme.uiFont
-                    font.pixelSize: Theme.smallPx
-                }
+                SideSection {
+                    id: arrangeSection
+                    title: "Arrangement"
+                    hint: "Drag a monitor next to another to place it left, right, above, or below; it snaps to the nearest side. Apply tries it, with Keep or Go back."
+                    collapsible: true
+                    expanded: root.arrangeOpen
+                    onToggled: root.toggleArrange()
+                    x: sections.stacked ? 0 : sections.width - width
+                    y: sections.stacked ? displaySection.height + Theme.space : 0
+                    width: sections.stacked ? sections.width : sections.arrangeWidth
+                    height: sections.stacked ? implicitHeight : Math.max(implicitHeight, displaySection.height)
 
-                Text {
-                    visible: DisplayService.notice.length > 0
-                    width: parent.width
-                    wrapMode: Text.WordWrap
-                    text: DisplayService.notice
-                    color: Theme.subtext
-                    font.family: Theme.uiFont
-                    font.pixelSize: Theme.smallPx
-                }
-
-                Item {
-                    width: parent.width
-                    height: Theme.space
-                }
-
-                // Where Keep saves, and housekeeping.
-                Row {
-                    width: parent.width
-                    spacing: Theme.tabGap
-
-                    Text {
-                        width: parent.width - detectChip.width - forgetChip.width - parent.spacing * 2
-                        height: Theme.fieldHeight
-                        verticalAlignment: Text.AlignVCenter
-                        elide: Text.ElideMiddle
-                        text: DisplayService.managedFile.length
-                            ? "Keep saves to " + DisplayService.managedFile
-                            : "Changes last until Hyprland restarts (no monitors file marked \"" + DisplaySettings.fileMarker + "\")"
-                        color: Theme.subtext
-                        font.family: Theme.uiFont
-                        font.pixelSize: Theme.smallPx
-
-                        HoverHandler {
-                            id: fileHover
-                        }
-
-                        HoverTip {
-                            message: DisplayService.managedFile.length
-                                ? DisplayService.managedFile
-                                : "To save modes, add a comment line \"-- " + DisplaySettings.fileMarker + "\" to a monitors file your Hyprland config loads, at " + DisplayService.fileCandidates.join(" or ")
-                            show: fileHover.hovered
-                        }
+                    Behavior on width {
+                        NumberAnimation { duration: Theme.popupMotionMs; easing.type: Easing.OutCubic }
                     }
 
-                    ChipButton {
-                        id: forgetChip
-                        label: "Forget failed (" + root.rejected.length + ")"
-                        enabled: root.rejected.length > 0 && !root.waiting
-                        tip: "Let every mode and color depth be tried again"
-                        onClicked: DisplaySettings.clearRejected()
-                    }
-
-                    ChipButton {
-                        id: detectChip
-                        label: "Detect"
-                        enabled: !DisplayService.loading && !root.waiting
-                        tip: "Read the monitors again"
-                        onClicked: DisplayService.refresh()
+                    MonitorLayout {
+                        width: parent.width
+                        monitors: root.monitors.filter((m) => !m.disabled)
+                        selected: root.selName
+                        onPicked: (name) => root.pickMonitor(name)
                     }
                 }
-            }
-
-            Item {
-                width: parent.width
-                height: Theme.space
-            }
-
-            SectionHeader {
-                width: parent.width
-                title: "Arrangement"
-                hint: "Drag a monitor next to another to place it left, right, above, or below; it snaps to the nearest side. Apply tries it, with Keep or Go back."
-            }
-
-            MonitorLayout {
-                x: Theme.sectionInset
-                width: parent.width - Theme.sectionInset * 2
-                monitors: root.monitors.filter((m) => !m.disabled)
-                selected: root.selName
-                onPicked: (name) => root.pickMonitor(name)
             }
         }
     }

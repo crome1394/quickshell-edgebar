@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- System → Display is two side-by-side sections with their titles turned down the left side. Arrangement folds sideways to its title bar (folded by default with one monitor, open with two or more; a click on the bar toggles it), and the resolution tiles re-flow and stretch to whatever width they get. In a narrow window an open Arrangement drops below. New: `settings/SideSection.qml`.
 - System → Display: Apply closes Settings and shows a small Keep / Go back window centered on the monitor being changed (Enter / Escape), so it stays reachable at any resolution. After Keep, Go back, or the timeout, Settings reopens on Display. The mode in use is selected again after going back; before, the tried mode stayed highlighted. New: `panels/DisplayConfirmPanel.qml`.
 - System → Display → Arrangement: the monitors drawn to scale; drag one next to another and it snaps to the nearest side (left, right, above, below) with edges lined up when close, then Apply arrangement with the same Keep / Go back. New: `settings/MonitorLayout.qml`.
 - Section tabs along the top of each Settings page are dividers too, standing on the page in shades of the parent tab's color, and no wider than 200 px. Flat turns both levels back into chips; the Inspector keeps flat tabs. New: `settings/TabColors.qml`.
