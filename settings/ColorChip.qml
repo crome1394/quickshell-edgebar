@@ -7,6 +7,9 @@ Rectangle {
 
     required property color value
     property string tip: ""
+    // Shown instead of a hex code when `value` is fully transparent.
+    property string emptyText: ""
+    readonly property bool empty: root.value.a === 0 && root.emptyText.length > 0
 
     signal clicked()
 
@@ -34,8 +37,8 @@ Rectangle {
         anchors.left: swatch.right
         anchors.leftMargin: Theme.space
         anchors.verticalCenter: parent.verticalCenter
-        text: ThemeBuilder.rgbText(root.value)
-        color: Theme.text
+        text: root.empty ? root.emptyText : ThemeBuilder.rgbText(root.value)
+        color: root.empty ? Theme.subtext : Theme.text
         font.family: Theme.fontFamily
         font.pixelSize: Theme.smallPx
     }

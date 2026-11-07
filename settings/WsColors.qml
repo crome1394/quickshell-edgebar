@@ -66,6 +66,7 @@ Column {
 
                 ColorChip {
                     value: swatchRow.value.length ? swatchRow.value : "transparent"
+                    emptyText: "Theme"
                     tip: swatchRow.modelData.tip + (swatchRow.value.length ? "" : " (theme color)")
                     onClicked: {
                         root.paintKey = swatchRow.modelData.key
