@@ -133,6 +133,8 @@ Singleton {
     property alias notificationServer: data.notificationServer
     // Do Not Disturb for the built-in server.
     property alias notificationDnd: data.notificationDnd
+    // Built-in popup look (PopupSettings), as JSON.
+    property alias notificationPopupJson: data.notificationPopupJson
     property alias notificationTimeout: data.notificationTimeout
     property alias showPowerPill: data.showPowerPill
     property alias showOpacityPill: data.showOpacityPill
@@ -544,6 +546,7 @@ Singleton {
             property string notificationCorner: "bottomRight"
             property string notificationServer: ""
             property bool notificationDnd: false
+            property string notificationPopupJson: ""
             property int notificationTimeout: 8
             property bool showPowerPill: false
             property bool showOpacityPill: false

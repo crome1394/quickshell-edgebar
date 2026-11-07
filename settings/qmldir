@@ -63,3 +63,4 @@ WsColors 1.0 WsColors.qml
 AppearanceTab 1.0 AppearanceTab.qml
 MonitorOptions 1.0 MonitorOptions.qml
 NotificationServerOptions 1.0 NotificationServerOptions.qml
+PopupStyleOptions 1.0 PopupStyleOptions.qml

@@ -189,6 +189,12 @@ Singleton {
     readonly property int notificationToastBodyLines: 4
     // Gap between the popups and the screen edge (beside any bar).
     readonly property int notificationToastMargin: 16
+    readonly property int popupAppColorsMax: 24
+    readonly property int popupStripeWidth: 4
+    readonly property int popupProgressHeight: 3
+    readonly property int popupMotionMs: 220
+    // Big image previews: height as a share of the popup width.
+    readonly property real popupPreviewRatio: 0.5
     readonly property int wallpaperTileMin: 100
     readonly property int wallpaperTileMax: 260
     readonly property int wallpaperTileStep: 10

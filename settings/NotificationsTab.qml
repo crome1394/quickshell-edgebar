@@ -218,6 +218,22 @@ Item {
                     }
                 }
             }
+
+            SectionHeader {
+                width: parent.width
+                title: "Popups"
+                hint: "How the built-in server's popups look. Apply saves this with the rest of the page."
+            }
+
+            PopupStyleOptions {
+                x: Theme.sectionInset
+                width: parent.width - Theme.sectionInset * 2
+            }
+
+            Item {
+                width: parent.width
+                height: Theme.space
+            }
         }
     }
 
@@ -228,7 +244,7 @@ Item {
         anchors.bottom: parent.bottom
         applyEnabled: NotificationSettings.editor.dirty
         undoEnabled: NotificationSettings.editor.canUndo
-        applyTip: "Save the toast corner, the timeout, and the history options"
+        applyTip: "Save the popup corner, timeout, and look, and the history options"
         undoTip: "Drop an unsaved draft, or put back the last applied one"
         resetTip: "Restore bottom right, 8 seconds, staggered rows, and the counter. Apply saves it."
         onApplyClicked: NotificationSettings.editor.apply()
