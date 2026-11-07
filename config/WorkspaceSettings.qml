@@ -241,6 +241,49 @@ Singleton {
         Config.touch()
     }
 
+    // ── Colors ──────────────────────────────────────────────────────────
+    readonly property var colorKeys: ["wsActiveBg", "wsActiveFg", "wsIdleFg", "wsHoverFg"]
+
+    // "theme" or "custom". Unset means custom when any face already has a
+    // color (so an older setup keeps its look), else theme.
+    function colorMode() {
+        const saved = String(Config.wsColorMode || "")
+        if (saved === "theme" || saved === "custom")
+            return saved
+        const slots = root.effectiveSlots()
+        const any = slots.some((s) => String(s.color || "").length) || String(Config.specialColor || "").length
+        return any ? "custom" : "theme"
+    }
+
+    function setColorMode(mode) {
+        if (mode !== "theme" && mode !== "custom")
+            return
+        Config.saveFields(() => {
+            Config.wsColorMode = mode
+        })
+    }
+
+    // A custom color, or "" for the theme's (also "" in theme mode).
+    function customColor(key) {
+        if (root.colorKeys.indexOf(key) < 0 || root.colorMode() !== "custom")
+            return ""
+        return Config.colorNorm(Config[key])
+    }
+
+    function setCustomColor(key, value) {
+        if (root.colorKeys.indexOf(key) < 0)
+            return
+        const next = value === "" ? "" : Config.colorNorm(String(value))
+        Config.saveFields(() => {
+            Config[key] = next
+        })
+    }
+
+    // A face's own label color, used only in custom mode.
+    function labelColor(face) {
+        return root.colorMode() === "custom" ? String((face && face.color) || "") : ""
+    }
+
     function setShowNumbers(enabled) {
         const next = !!enabled
         if (Config.showNumbers === next)

@@ -90,7 +90,11 @@ Rectangle {
                 symbolPx: button.face.fontPx >= 8 ? button.face.fontPx : root.theme.iconPx
                 bold: button.face.bold !== false
                 italic: !!button.face.italic
-                labelColor: String(button.face.color || "")
+                labelColor: WorkspaceSettings.labelColor(button.face)
+                activeBg: WorkspaceSettings.customColor("wsActiveBg")
+                activeFg: WorkspaceSettings.customColor("wsActiveFg")
+                idleFg: WorkspaceSettings.customColor("wsIdleFg")
+                hoverFg: WorkspaceSettings.customColor("wsHoverFg")
                 edge: root.edge
                 dockNeighbor: DockSettings.neighbor(root.hoverX, button.x + button.width / 2)
                 showNumber: {
