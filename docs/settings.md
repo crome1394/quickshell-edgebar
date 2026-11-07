@@ -1,6 +1,8 @@
 # Settings
 
 Open Settings from the spanner on the bar, or `qs ipc call settings open`.
+The tabs along the bottom are colored index dividers (or flat chips; see
+[Themes](themes.md#settings-window)).
 Most pages have **Apply**, **Undo** (drop the draft, or put back the last
 applied values), and **Reset** (draft the defaults) along the bottom.
 Nothing on those pages is saved until Apply.

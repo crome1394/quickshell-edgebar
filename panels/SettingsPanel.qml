@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.config
 import qs.settings
 import qs.theme
 
@@ -369,13 +370,18 @@ FloatingWindow {
             }
         }
 
-        TabStrip {
+        // The main tabs: index dividers (default) or flat chips, chosen in
+        // Appearance → Theme → Settings window.
+        Item {
             id: tabs
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             anchors.margins: Theme.space
-            model: [
+            anchors.topMargin: 0
+            height: (strip.item as Item)?.implicitHeight ?? Theme.tabHeight
+
+            readonly property var model: [
                 { id: "bar", label: "Bar" },
                 { id: "widgets", label: "Widgets" },
                 { id: "appearance", label: "Appearance" },
@@ -387,8 +393,31 @@ FloatingWindow {
                 { id: "system", label: "System" },
                 { id: "tools", label: "Tools" }
             ]
-            currentId: window.currentTab
-            onSelected: (tabId) => { window.currentTab = tabId }
+
+            Loader {
+                id: strip
+                width: parent.width
+                sourceComponent: Config.settingsTabStyle === "flat" ? flatTabs : indexTabs
+            }
+
+            Component {
+                id: flatTabs
+                TabStrip {
+                    model: tabs.model
+                    currentId: window.currentTab
+                    onSelected: (tabId) => { window.currentTab = tabId }
+                }
+            }
+
+            Component {
+                id: indexTabs
+                IndexTabStrip {
+                    model: tabs.model
+                    currentId: window.currentTab
+                    colorMode: Config.settingsTabColors === "accent" ? "accent" : "rainbow"
+                    onSelected: (tabId) => { window.currentTab = tabId }
+                }
+            }
         }
 
         MouseArea {
