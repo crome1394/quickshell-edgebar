@@ -22,6 +22,8 @@ Singleton {
     property string file: ""
     property string lastFile: ""
     property string error: ""
+    // Video codecs this GPU encodes in hardware, from gpu-screen-recorder --info.
+    property var codecs: []
 
     readonly property int seconds: root.recording ? Math.max(0, Math.floor((root.now - root.startedAt) / 1000)) : 0
     readonly property string elapsed: {
@@ -58,6 +60,7 @@ Singleton {
     }
 
     function launch(opts, target, geometry) {
+        opts = Object.assign({}, opts, { codec: RecorderSettings.resolveCodec(opts.codec, root.codecs) })
         root.file = opts.dir + "/Recording_" + root.stamp() + "." + opts.container
         recorder.command = RecorderSettings.argv(opts, target, geometry, root.file)
         mkdir.command = ["mkdir", "-p", "--", opts.dir]
@@ -96,6 +99,31 @@ Singleton {
         onExited: (code) => {
             root.available = code === 0
             root.checked = true
+            if (root.available)
+                info.running = true
+        }
+    }
+
+    // Which codecs the GPU can encode, read once.
+    Process {
+        id: info
+        command: ["gpu-screen-recorder", "--info"]
+        stdout: StdioCollector {
+            id: infoOut
+            waitForEnd: true
+        }
+        onExited: {
+            const lines = String(infoOut.text || "").split("\n")
+            const out = []
+            let inCodecs = false
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim()
+                if (line.startsWith("section="))
+                    inCodecs = line === "section=video_codecs"
+                else if (inCodecs && /^(h264|hevc|av1|vp8|vp9)$/.test(line))
+                    out.push(line)
+            }
+            root.codecs = out
         }
     }
 

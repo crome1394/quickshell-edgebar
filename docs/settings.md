@@ -134,8 +134,9 @@ devices.
   `~/.local/bin/ocr-region` (folder, editor, freeze, OCR languages, a
   program for OCR text). Apply writes `~/.config/hypr/capture.conf`. Your
   capture keybinds are listed read-only.
-- **Recording**: the folder (Browse or Default), codec (AV1, the default:
-  smallest files for the quality, encoded on the GPU; HEVC; H.264), MP4
+- **Recording**: the folder (Browse or Default), codec (Auto, the default:
+  the best one this GPU encodes in hardware, AV1, else HEVC, else H.264;
+  the page lists what the GPU supports and marks the rest ✕), MP4
   or MKV, quality, frame rate, audio (system, microphone, both, none), the
   cursor, what a left click records (focused monitor or a region), and a
   notification when saved. Uses `gpu-screen-recorder`.
