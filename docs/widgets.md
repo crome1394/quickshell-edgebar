@@ -26,9 +26,10 @@ not loaded at all. Tooltips open outside the bar, away from the edge.
 | **Night Light** | A moon | Left: warm the screen against blue light (needs `hyprsunset`). Wheel: warmer or cooler |
 | **Screen Recorder** | A record button; a red mark and the time while recording | Left: record (focused monitor or a region, per Settings) or stop. Right: record a region. Middle: open the folder |
 
-Caffeine holds a standard Wayland idle inhibitor, which hypridle respects.
-If Tools → Screensaver → "Always start after idle" is on, the screensaver
-ignores inhibitors on purpose, Caffeine included.
+Caffeine holds a standard Wayland idle inhibitor, and the screensaver's
+idle check also asks the bar, so it works even though the screensaver
+ignores other apps' inhibitors (so tab video does not block it). Caffeine
+wins over "Always start after idle" too.
 
 **Active Window** is not a bar pill: it shows the focused window's icon,
 class, and title in a screen corner (Widgets → Active Window).

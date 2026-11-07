@@ -4,7 +4,7 @@ import Quickshell
 import Quickshell.Io
 import qs.config
 
-// Settings → Tools → Screensaver. Talks to ~/.local/bin/screensaver-config.sh,
+// Settings → Tools → Screensaver. Talks to scripts/screensaver-config.sh,
 // which owns ~/.config/hypr/screensaver.conf and the hypridle listener:
 //   get          current settings as JSON
 //   set ...      save, patch hypridle.conf, restart hypridle, print JSON

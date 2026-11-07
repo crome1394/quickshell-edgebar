@@ -2,9 +2,14 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.config
 import qs.theme
 
 // Caffeine: keeps the screen awake (no screensaver, no idle lock) while on.
+// The state is saved (Config.caffeineUntil), so a bar restart or reload
+// keeps it; a timed Caffeine still ends on time.
+// The state is saved (Config.caffeineUntil), so a bar restart or reload
+// keeps it; a timed Caffeine still ends on time.
 // It holds a Wayland idle inhibitor through CaffeineInhibitor, a tiny
 // invisible window that exists only while Caffeine is on (shell.qml).
 // Hyprland and hypridle respect it, unless the screensaver's "Always start
@@ -14,19 +19,27 @@ import qs.theme
 Singleton {
     id: root
 
-    property bool on: false
+    // Saved: 0 off, -1 until turned off, else the end time.
+    readonly property real saved: Number(Config.caffeineUntil) || 0
+    readonly property bool on: root.saved === -1 || root.saved > root.now
     // When a timed Caffeine ends (ms since epoch), or 0 for "until off".
-    property real until: 0
+    readonly property real until: root.saved > 0 ? root.saved : 0
     // Ticks once a minute while a timer runs, for the remaining time.
     property real now: Date.now()
 
     readonly property int minutesLeft: root.on && root.until > 0 ? Math.max(0, Math.ceil((root.until - root.now) / 60000)) : 0
 
+    function save(value) {
+        Config.saveFields(() => {
+            Config.caffeineUntil = value
+        })
+    }
+
     function setOn(next) {
-        root.on = !!next
-        root.until = 0
+        root.now = Date.now()
+        root.save(next ? -1 : 0)
         // On with no timer counts as the last step ("until off").
-        root.stepIndex = root.on ? Theme.caffeineSteps.length - 1 : -1
+        root.stepIndex = next ? Theme.caffeineSteps.length - 1 : -1
     }
 
     function toggle() {
@@ -39,8 +52,7 @@ Singleton {
         if (!(n >= 0) || n > 24 * 60)
             return false
         root.now = Date.now()
-        root.until = n > 0 ? root.now + n * 60000 : 0
-        root.on = true
+        root.save(n > 0 ? root.now + n * 60000 : -1)
         root.stepIndex = Theme.caffeineSteps.indexOf(n)
         return true
     }
@@ -71,7 +83,7 @@ Singleton {
         running: root.on && root.until > 0
         onTriggered: {
             root.now = Date.now()
-            if (root.now >= root.until)
+            if (root.saved > 0 && root.now >= root.saved)
                 root.setOn(false)
         }
     }

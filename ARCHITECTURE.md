@@ -28,7 +28,7 @@ it follows (lint-clean, one component per file, no shell injection) are in
 | `services/` | Runtime singletons: talk to Hyprland, PipeWire, BlueZ, NetworkManager, D-Bus, files, and the few processes the bar runs. | `Service` |
 | `config/` | Saved settings: `Config` (the store) and one `<Feature>Settings` singleton per feature. | `Settings` |
 | `theme/` | `Theme` (sizes, timings, the live palette), `DefaultTheme`, and the theme builder and presets. | |
-| `scripts/` | The last few helper scripts (Python or shell), each run with fixed arguments. | |
+| `scripts/` | Helper scripts, each run with fixed arguments: the bar's own helpers, plus `capture-screenshot`, `ocr-region`, `screensaver.sh`, `screensaver-config.sh` (linked into `~/.local/bin` for keybinds and hypridle), and `install-deps.sh` (install, backup, restore). | |
 | `assets/` | Pictures (the region map). | |
 | `state/` | Personal saved state. Ignored by git. | |
 

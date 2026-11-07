@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- `install-deps.sh` asks about optional features by group (each group's packages listed), with Tailscale and the screenshot editor (satty) defaulting to No; `--required` skips them all and `--yes` takes the defaults. It also links the bar's helper scripts into `~/.local/bin`, keeping any real file it would replace as `.bak`.
+- `install-deps.sh --backup [FILE]` saves the bar's settings, the FreshRSS server file, notification history, and your own scripts in `~/.local/bin` to one archive readable only by you; `--restore FILE` puts it back, accepting only those paths and refusing archives with links.
+- The capture and screensaver helpers moved into `scripts/` (`capture-screenshot`, `ocr-region`, `screensaver.sh`, `screensaver-config.sh`, `screensaver-text.py`, `screensaver-mpv/`), so they are versioned with the bar; Settings uses them from there. `capture-screenshot` now reads the Pictures folder from `user-dirs.dirs` as text instead of sourcing it.
+- Caffeine now really blocks the screensaver: hypridle ignores Wayland inhibitors here (so tab video does not), so the screensaver's idle check asks the bar.
 - New widgets, each with IPC calls and a switch under Widgets:
   - Caffeine (a tea cup): keeps the screen awake with a Wayland idle inhibitor; right-click for 30 min, 1 h, 2 h, or until off. `qs ipc call caffeine toggle|on|off|forMinutes <n>|status`.
   - Night Light (a moon): warms the screen against blue light with hyprsunset; the wheel changes the warmth, and Tools → Night Light sets warmth and an optional schedule. `qs ipc call nightLight toggle|on|off|temperature <K>|status`.
