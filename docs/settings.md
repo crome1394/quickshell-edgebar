@@ -62,16 +62,35 @@ devices.
 
 ## Notifications
 
-- **Server**: SwayNC (the default) or Built-in. Built-in makes the bar the
-  notification server: its own popups (images, action buttons, pause on
-  hover, critical ones stay up), Do Not Disturb, and history, with no
-  extra processes. Only one server can run: the page shows whether SwayNC
-  is running and has a Stop SwayNC button. To keep Built-in after a
-  restart, remove SwayNC from your autostart (see
-  [Hyprland setup](hyprland.md#notifications)).
+- **Server**:
+  - **Auto** (the default) uses the notification daemon that is already
+    running (SwayNC, dunst, mako, …) and keeps the history; with none
+    running, the bar becomes the server itself.
+  - **Built-in** always makes the bar the server: its own popups, Do Not
+    Disturb, and history, with no extra processes. If another daemon holds
+    notifications, the page names it and offers to stop it. To keep
+    Built-in after a restart, don't start another daemon at login (see
+    [Hyprland setup](hyprland.md#notifications)).
+  - **SwayNC** uses SwayNC for popups; the bar keeps history and Do Not
+    Disturb.
+
+  The status line shows what is in use right now. History carries over
+  when you switch.
 - **Toasts**: popup corner and timeout (0 keeps a popup until dismissed).
 - **History**: keep expanded, stagger row colors, clear at boot, show the
-  counter. History carries over when you switch servers.
+  counter.
+- **Popups** (built-in server):
+  - **Style**: Compact (one line), Standard, or Large (images big on top,
+    more body text).
+  - **Motion**: slide, fade, or none.
+  - **Width**, **Shown at once**, **Icon size**, **Body lines**, **Edge
+    gap**, and **Glass** (or the same as menus).
+  - **Progress bar** for the time left (pauses while hovered), **Group by
+    app** (one card with a +N count), **Big image previews** for
+    screenshots and album art, and an **App color stripe**.
+  - **App colors**: give an app its own color by the name shown on its
+    popups.
+  - **Send a test** shows a popup with the applied look.
 
 ## Region & Clock
 
@@ -112,7 +131,7 @@ devices.
 - `state/theme.json`: the active theme, its fonts, and the stat and audio
   thresholds.
 - `~/.local/state/quickshell/notification-history.json`: notification
-  history (both servers).
+  history (every server mode).
 - `~/.config/freshrss-quickshell/freshrss.env`: the FreshRSS server.
 
 `state/` is ignored by git.
