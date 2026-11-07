@@ -161,6 +161,10 @@ ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `them
 - **Night Light**: `NightLightService` runs `hyprsunset -t <K>` only while
   on (restarted on a new temperature); with a schedule it checks once a
   minute via `SystemClock`.
+- **Firewall**: `FirewallService` reads `/etc/ufw/ufw.conf`,
+  `/etc/default/ufw`, and the `user*.rules` files (world-readable) and
+  watches them; changes run `pkexec /usr/bin/ufw <words>` with words built
+  by `ruleWords()` from checked values.
 - **Recording**: `RecorderService` runs `gpu-screen-recorder` with an argv
   built by `RecorderSettings.argv()` (fixed values only), optionally after
   `slurp` for a region, and stops it with SIGINT so the file is finished.
@@ -186,7 +190,7 @@ ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `them
 
 `qs ipc show` lists them while the bar runs: `settings` (open, close,
 toggle, openTab), `theme` (apply, list, current), `freshRss` (toggle, open,
-close, refresh), `caffeine`, `nightLight`, `recorder`, `inspector`, `overview`, `notificationBell`, `audioMenu`,
+close, refresh), `caffeine`, `nightLight`, `recorder`, `firewall`, `inspector`, `overview`, `notificationBell`, `audioMenu`,
 `opacityMenu`, and `shell`. Avoid naming a function `show`: `qs ipc show`
 is a command of its own. Each handler
 calls the same function as its button and validates its arguments; the

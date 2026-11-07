@@ -335,6 +335,11 @@ Singleton {
     readonly property int tailscaleStartMs: 3000
     readonly property int tailscalePopupWidth: 440
     readonly property int tailscalePopupMaxHeight: 620
+    // Firewall menu, and its shields (nf-md-shield-check / shield-off).
+    readonly property int firewallPopupWidth: 440
+    readonly property int firewallPopupMaxHeight: 620
+    readonly property string firewallOnGlyph: "\u{f0565}"
+    readonly property string firewallOffGlyph: "\u{f099e}"
     readonly property int tailscaleSearchMin: 8
     readonly property int dependencyTimeoutMs: 5000
     readonly property int audioPopupWidth: 552

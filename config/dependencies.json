@@ -278,6 +278,20 @@
             "area": "Night Light",
             "need": "optional",
             "use": "Night Light widget: warms the screen against blue light"
+        },
+        {
+            "name": "ufw",
+            "pkg": "ufw",
+            "area": "Firewall",
+            "need": "optional",
+            "use": "Firewall widget (CachyOS's default firewall)"
+        },
+        {
+            "name": "pkexec",
+            "pkg": "polkit",
+            "area": "Firewall",
+            "need": "optional",
+            "use": "Firewall widget: asks for your password for changes"
         }
     ],
     "fonts": [

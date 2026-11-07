@@ -29,6 +29,7 @@ Item {
         || cell.widgetId === "tailscale" || cell.widgetId === "hyprInsp"
         || cell.widgetId === "freshRss"
         || cell.widgetId === "caffeine" || cell.widgetId === "nightLight" || cell.widgetId === "recorder"
+        || cell.widgetId === "firewall"
         || WidgetService.isLauncherId(cell.widgetId)
     // An empty launcher, or stats with every section off, stays unloaded.
     readonly property bool shown: {
@@ -109,6 +110,8 @@ Item {
             file = "NightLightPill.qml"
         else if (cell.widgetId === "recorder")
             file = "RecorderPill.qml"
+        else if (cell.widgetId === "firewall")
+            file = "FirewallPill.qml"
         else if (WidgetService.isLauncherId(cell.widgetId)) {
             file = "LaunchPill.qml"
             props.launcher = cell.launcherIndex()

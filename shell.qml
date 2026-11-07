@@ -28,6 +28,8 @@ ShellRoot {
     property bool caffeineWatch: CaffeineService.on
     property bool nightWatch: NightLightService.on
     property bool recorderWatch: RecorderService.recording
+    // Registers the firewall IPC target; it only reads UFW's files.
+    property bool firewallWatch: FirewallService.enabled
 
     // The one tooltip window every bar widget shares (TipService).
     BarTipHost {}

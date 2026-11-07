@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Firewall widget (UFW): a shield that turns red when the firewall is off. The menu shows on/off, the default policies, and the rules (v4 and v6 shown once), deletes rules, and adds Allow, Deny, or Limit rules by port, protocol, and source. Reading needs no password (UFW's files are readable and watched, nothing polls); changes run `pkexec ufw` with a fixed, checked argv, so your polkit agent asks. Right-click toggles it. `qs ipc call firewall status|enable|disable|toggle`. New: `services/FirewallService.qml`, `pills/FirewallPill.qml`, `pills/FirewallMenu.qml`, `pills/FirewallRuleRow.qml`.
 - `install-deps.sh` asks about optional features by group (each group's packages listed), with Tailscale and the screenshot editor (satty) defaulting to No; `--required` skips them all and `--yes` takes the defaults. It also links the bar's helper scripts into `~/.local/bin`, keeping any real file it would replace as `.bak`.
 - `install-deps.sh --backup [FILE]` saves the bar's settings, the FreshRSS server file, notification history, and your own scripts in `~/.local/bin` to one archive readable only by you; `--restore FILE` puts it back, accepting only those paths and refusing archives with links.
 - The capture and screensaver helpers moved into `scripts/` (`capture-screenshot`, `ocr-region`, `screensaver.sh`, `screensaver-config.sh`, `screensaver-text.py`, `screensaver-mpv/`), so they are versioned with the bar; Settings uses them from there. `capture-screenshot` now reads the Pictures folder from `user-dirs.dirs` as text instead of sourcing it.

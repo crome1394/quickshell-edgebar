@@ -40,7 +40,7 @@ Opened from a keybind, a menu appears on the main monitor (see
 | `notificationBell toggleHistory` · `showHistory` · `hideHistory` | Notification history |
 | `notificationBell toggleDoNotDisturb` | Do not disturb (built-in, SwayNC, dunst, or mako) |
 
-## Caffeine, Night Light, recorder
+## Caffeine, Night Light, recorder, firewall
 
 | Call | Does |
 |---|---|
@@ -53,6 +53,8 @@ Opened from a keybind, a menu appears on the main monitor (see
 | `recorder toggle` | Start or stop recording, like a left click |
 | `recorder start` · `startRegion` · `stop` | Record per Settings, record a region, stop and save |
 | `recorder status` | Recording time and file, or the last file saved |
+| `firewall status` | On or off, default policies, rule count |
+| `firewall enable` · `disable` · `toggle` | Change the firewall (asks for your password) |
 
 These work whether or not the widgets are on a bar.
 
