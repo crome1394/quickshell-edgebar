@@ -17,11 +17,10 @@ Singleton {
         Config.barLayoutMode !== "dual")
 
     readonly property int screenWidth: {
-        const screens = Quickshell.screens
-        const count = screens ? screens.length : 0
-        if (count < 1)
+        const main = ScreenService.mainScreen
+        if (!main)
             return Theme.uiDesignWidth
-        const width = Number(screens[0].width)
+        const width = Number(main.width)
         return width > 0 ? width : Theme.uiDesignWidth
     }
 

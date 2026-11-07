@@ -177,7 +177,7 @@ PanelWindow {
     }
     // The window's own screen property is not read here. visible depends on
     // this flag, and reading screen while that binding runs loops back into it.
-    readonly property var hostScreen: Quickshell.screens.length > 0 ? Quickshell.screens[0] : null
+    readonly property var hostScreen: ScreenService.mainScreen
     readonly property bool onThisMonitor: {
         const focused = Hyprland.focusedMonitor
         const host = root.hostScreen

@@ -13,6 +13,7 @@ Item {
     required property string edge
     required property bool horizontal
     required property var theme
+    property string screenName: ""
 
     signal openSettings()
 
@@ -76,6 +77,9 @@ Item {
             theme: cell.theme,
             edge: cell.edge
         }
+        // Pills whose menu state is shared need to know their monitor.
+        if (cell.widgetId === "volume" || cell.widgetId === "opacity" || cell.widgetId === "notifications")
+            props.screenName = cell.screenName
         if (cell.widgetId === "tray")
             file = "TrayPill.qml"
         else if (cell.widgetId === "opacity")

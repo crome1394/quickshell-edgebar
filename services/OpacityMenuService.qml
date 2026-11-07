@@ -11,12 +11,23 @@ Singleton {
     id: root
 
     property bool open: false
+    // The monitor whose bar opened it; "" opens on the main monitor.
+    property string screen: ""
 
-    function toggle() {
-        root.open = !root.open
+    // A click from the bar on `name` opens there, or closes it if it is
+    // already open there.
+    function toggle(name) {
+        const where = String(name || "")
+        if (root.open && root.screen === where) {
+            root.open = false
+            return
+        }
+        root.screen = where
+        root.open = true
     }
 
-    function show() {
+    function show(name) {
+        root.screen = String(name || "")
         root.open = true
     }
 

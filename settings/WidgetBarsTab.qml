@@ -160,8 +160,24 @@ Item {
 
             SectionHeader {
                 width: parent.width
+                title: "Monitors"
+                hint: "Which monitors get bars, and which is the main one. Saves at once."
+            }
+
+            MonitorOptions {
+                x: Theme.sectionInset
+                width: parent.width - Theme.sectionInset * 2
+            }
+
+            Item {
+                width: 1
+                height: Theme.fieldHeight
+            }
+
+            SectionHeader {
+                width: parent.width
                 title: "Misc"
-                hint: "UI Scale Auto follows the monitor width. Uncheck it to set a manual scale. Flush pulls tiled windows up to the bar. Apply saves these with the rest of this page."
+                hint: "UI Scale Auto follows the main monitor's width. Uncheck it to set a manual scale. Flush pulls tiled windows up to the bar. Apply saves these with the rest of this page."
             }
 
             Item {

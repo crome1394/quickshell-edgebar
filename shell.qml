@@ -26,48 +26,12 @@ ShellRoot {
     // The one tooltip window every bar widget shares (TipService).
     BarTipHost {}
 
-    // A bar that is turned off is not created, so its widgets do not load.
-    Loader {
-        active: Config.ready && Config.showTopBar
-        sourceComponent: Component {
-            EdgeBar {
-                edge: "top"
-                theme: Theme.palette
-                onOpenSettings: settings.show()
-            }
-        }
-    }
-
-    Loader {
-        active: Config.ready && Config.showBottomBar
-        sourceComponent: Component {
-            EdgeBar {
-                edge: "bottom"
-                theme: Theme.palette
-                onOpenSettings: settings.show()
-            }
-        }
-    }
-
-    Loader {
-        active: Config.ready && Config.showLeftBar
-        sourceComponent: Component {
-            EdgeBar {
-                edge: "left"
-                theme: Theme.palette
-                onOpenSettings: settings.show()
-            }
-        }
-    }
-
-    Loader {
-        active: Config.ready && Config.showRightBar
-        sourceComponent: Component {
-            EdgeBar {
-                edge: "right"
-                theme: Theme.palette
-                onOpenSettings: settings.show()
-            }
+    // One set of edge bars per monitor that gets bars (Widgets → Bars →
+    // Monitors). An edge that is off is not created.
+    Variants {
+        model: ScreenService.barScreens
+        delegate: ScreenBars {
+            onOpenSettings: settings.show()
         }
     }
 

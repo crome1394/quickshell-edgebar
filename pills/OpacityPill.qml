@@ -17,7 +17,8 @@ Rectangle {
     required property var theme
     property string edge: "top"
     property real widthFactor: 1
-    readonly property bool menuOpen: OpacityMenuService.open
+    property string screenName: ""
+    readonly property bool menuOpen: OpacityMenuService.open && ScreenService.owns(OpacityMenuService.screen, root.screenName)
     property bool picking: false
     property string addError: ""
     property bool dockHot: dock.mag > 1.01 || Math.abs(dock.jumpY) > 0.5
@@ -123,7 +124,7 @@ Rectangle {
         cursorShape: Qt.PointingHandCursor
         onClicked: {
             dock.play()
-            OpacityMenuService.toggle()
+            OpacityMenuService.toggle(root.screenName)
         }
 
         BarTip {

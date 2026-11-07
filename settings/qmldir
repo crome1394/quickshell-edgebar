@@ -61,3 +61,4 @@ ChoiceChips 1.0 ChoiceChips.qml
 TextBox 1.0 TextBox.qml
 WsColors 1.0 WsColors.qml
 AppearanceTab 1.0 AppearanceTab.qml
+MonitorOptions 1.0 MonitorOptions.qml

@@ -13,6 +13,8 @@ Rectangle {
 
     required property var theme
     property string edge: "top"
+    property string screenName: ""
+    readonly property bool historyHere: NotificationService.historyOpen && ScreenService.owns(NotificationService.historyScreen, root.screenName)
     property real widthFactor: 1
     property bool dockHot: dock.mag > 1.01 || Math.abs(dock.jumpY) > 0.5
 
@@ -76,11 +78,11 @@ Rectangle {
     radius: Theme.radiusSm
     color: root.dnd
            ? Qt.rgba(root.theme.colDanger.r, root.theme.colDanger.g, root.theme.colDanger.b, bellMouse.containsMouse ? 0.38 : 0.24)
-           : (bellMouse.containsMouse || NotificationService.historyOpen ? root.theme.colHover : root.theme.colSurface)
+           : (bellMouse.containsMouse || root.historyHere ? root.theme.colHover : root.theme.colSurface)
     border.width: Theme.borderWidth
     border.color: root.dnd
                   ? root.theme.colDanger
-                  : (bellMouse.containsMouse || NotificationService.historyOpen ? root.theme.colAccent : root.theme.colBorder)
+                  : (bellMouse.containsMouse || root.historyHere ? root.theme.colAccent : root.theme.colBorder)
     transform: [
         Scale {
             xScale: dock.mag
@@ -140,13 +142,13 @@ Rectangle {
             if (mouse.button === Qt.RightButton)
                 NotificationService.toggleDnd()
             else
-                NotificationService.toggleHistory()
+                NotificationService.toggleHistory(root.screenName)
         }
 
         BarTip {
             edge: root.edge
             message: root.tipText
-            show: bellMouse.containsMouse && !NotificationService.historyOpen
+            show: bellMouse.containsMouse && !root.historyHere
         }
     }
 
@@ -154,7 +156,7 @@ Rectangle {
     PopupWindow {
     // qmllint enable uncreatable-type
         id: historyPopup
-        visible: NotificationService.historyOpen && Config.showNotificationPill
+        visible: root.historyHere && Config.showNotificationPill
         color: "transparent"
         grabFocus: true
         implicitWidth: Theme.notificationPanelWidth

@@ -24,6 +24,7 @@ Item {
             { tab: "bar", section: "overview", title: "Bar · Overview", keys: "overview layout strip preview motion workspace" },
             { tab: "bar", section: "dock", title: "Bar · Dock", keys: "dock magnify jump hover icon launcher tray running dot" },
             { tab: "widgets", section: "bars", title: "Widgets · Bars", keys: "bar edge widget placement show" },
+            { tab: "widgets", section: "bars", title: "Widgets · Bars · Monitors", keys: "monitor monitors screen screens display multi multiple main primary every all" },
             { tab: "widgets", section: "activewindow", title: "Widgets · Active Window", keys: "active window corner width exclude title class" },
             { tab: "widgets", section: "stats", title: "Widgets · System Stats", keys: "cpu memory gpu vram font bold italic threshold terminal btop" },
             { tab: "appearance", section: "wallpaper", title: "Appearance · Wallpaper", keys: "wallpaper image hyprpaper folder" },

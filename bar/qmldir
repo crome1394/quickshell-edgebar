@@ -1,3 +1,4 @@
 module bar
 BarSlot 1.0 BarSlot.qml
 EdgeBar 1.0 EdgeBar.qml
+ScreenBars 1.0 ScreenBars.qml

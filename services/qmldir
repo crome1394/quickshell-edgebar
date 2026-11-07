@@ -24,3 +24,4 @@ singleton OpacityMenuService 1.0 OpacityMenuService.qml
 singleton FreshRssService 1.0 FreshRssService.qml
 singleton TipService 1.0 TipService.qml
 singleton FontService 1.0 FontService.qml
+singleton ScreenService 1.0 ScreenService.qml
