@@ -131,10 +131,11 @@ ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `them
   and settings pages exist only while open.
 - Services start work only when something reads them. Pollers run at slow
   rates (`Theme.*Ms` intervals) and faster only while their menu is open.
-- Long-running processes are kept to a few watchers (`nvidia-smi` in loop
-  mode for the GPU, `swaync-client --subscribe`, the notification history
-  watcher). Everything else is read from `/proc`, `/sys`, D-Bus, or
-  Hyprland's socket through Quickshell's native modules.
+- Long-running processes are kept to a few watchers: `nvidia-smi` in loop
+  mode for the GPU, and, only when another notification daemon is in use,
+  the history watcher (plus `swaync-client --subscribe` for SwayNC).
+  Everything else is read from `/proc`, `/sys`, D-Bus, or Hyprland's
+  socket through Quickshell's native modules.
 - `shell.qml` reads a property from a few services (`OpacityService`,
   `OverviewService`, `NotificationService`, `ThemeSettings`, `FreshRssService`) so they load at
   start and register their IPC targets. Add to that list only when a
@@ -142,12 +143,15 @@ ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `them
 
 ## Outside the bar
 
-- **Notifications**: with the SwayNC server, `NotificationService` runs a
-  history watcher and `swaync-client --subscribe` while the bell is shown.
-  With the built-in server, `BuiltinNotifications` owns
-  `org.freedesktop.Notifications` (Quickshell's `NotificationServer`),
-  `NotificationToasts` draws the popups, and nothing else runs. Both keep
-  history in `~/.local/state/quickshell/notification-history.json`.
+- **Notifications**: `NotificationDaemon` decides the mode. Auto asks
+  D-Bus who owns `org.freedesktop.Notifications` once at start (and again
+  only while the Notifications page is open). Built-in mode:
+  `BuiltinNotifications` owns the name (Quickshell's `NotificationServer`),
+  `NotificationToasts` draws the popups (look from `PopupSettings`), and
+  nothing else runs. SwayNC or another daemon: `NotificationService` runs
+  the history watcher (plus `swaync-client --subscribe` for SwayNC) while
+  the bell is shown. Every mode keeps history in
+  `~/.local/state/quickshell/notification-history.json`.
 - **Fonts**: `FontService` reads `fc-list` once per session for every font
   picker.
 

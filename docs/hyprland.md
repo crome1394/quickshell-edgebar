@@ -45,15 +45,22 @@ Hyprland restarts.
 
 ## Notifications
 
-With Settings → Notifications → Server set to **Built-in**, the bar is the
-notification server, so SwayNC must not start. Remove its line from your
-autostart:
+Nothing is needed with **Auto** (the default): if a notification daemon
+starts at login (SwayNC, dunst, mako), the bar uses it; if none does, the
+bar is the server itself. A notification daemon is therefore optional.
+
+With **Built-in**, make sure no other daemon starts first. Remove its line
+from your autostart, for example:
 
 ```lua
 -- hl.exec_cmd("systemctl --user start swaync.service")
 ```
 
-With **SwayNC** (the default), keep it.
+A daemon that is installed can also be started by D-Bus on its own when a
+notification arrives while the bar is restarting, so uninstall it if you
+use Built-in for good (`sudo pacman -Rns swaync`).
+
+With **SwayNC**, keep SwayNC in your autostart.
 
 ## Window rules
 
