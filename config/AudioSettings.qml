@@ -5,7 +5,7 @@ import qs.theme
 
 // Audio page: scroll step, the percent readout, the audio menu's level
 // meters, and the level thresholds.
-// The thresholds and colors are saved in theme/theme.json by Theme.
+// The thresholds and colors are saved in state/theme.json by Theme.
 Singleton {
     id: root
 

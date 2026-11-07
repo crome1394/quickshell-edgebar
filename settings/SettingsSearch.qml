@@ -27,6 +27,7 @@ Item {
             { tab: "widgets", section: "activewindow", title: "Widgets · Active Window", keys: "active window corner width exclude title class" },
             { tab: "widgets", section: "stats", title: "Widgets · System Stats", keys: "cpu memory gpu vram font bold italic threshold terminal btop" },
             { tab: "wallpaper", section: "", title: "Wallpaper", keys: "wallpaper image hyprpaper folder" },
+            { tab: "theme", section: "", title: "Theme", keys: "theme preset color colour accent alert tint glass light dark import export save palette look" },
             { tab: "applications", section: "launcher", title: "Applications · App Launcher", keys: "pin launcher application command" },
             { tab: "applications", section: "menu", title: "Applications · Application Menu", keys: "menu symbol glyph command font" },
             { tab: "connectivity", section: "network", title: "Connectivity · Network", keys: "network ip address wifi octet device" },

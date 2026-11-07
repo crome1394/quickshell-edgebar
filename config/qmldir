@@ -19,3 +19,4 @@ singleton BarSettings 1.0 BarSettings.qml
 singleton DisplaySettings 1.0 DisplaySettings.qml
 singleton ScreensaverSettings 1.0 ScreensaverSettings.qml
 singleton CaptureSettings 1.0 CaptureSettings.qml
+singleton ThemeSettings 1.0 ThemeSettings.qml
