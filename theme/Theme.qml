@@ -182,6 +182,13 @@ Singleton {
     readonly property int notificationSyncMs: 2500
     readonly property int notificationThumbWidth: 112
     readonly property int notificationThumbHeight: 72
+    // Built-in server popups.
+    readonly property int notificationToastWidth: 380
+    readonly property int notificationToastImage: 48
+    readonly property int notificationToastMax: 4
+    readonly property int notificationToastBodyLines: 4
+    // Gap between the popups and the screen edge (beside any bar).
+    readonly property int notificationToastMargin: 16
     readonly property int wallpaperTileMin: 100
     readonly property int wallpaperTileMax: 260
     readonly property int wallpaperTileStep: 10

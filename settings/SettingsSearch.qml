@@ -40,7 +40,7 @@ Item {
             { tab: "audio", section: "", title: "Audio · Input", keys: "microphone input source volume mute device" },
             { tab: "region", section: "clock", title: "Region & Clock · Clock", keys: "clock font format calendar time date" },
             { tab: "region", section: "region", title: "Region & Clock · Region", keys: "timezone region map city" },
-            { tab: "notifications", section: "", title: "Notifications · Toasts", keys: "notification toast corner timeout swaync popup" },
+            { tab: "notifications", section: "", title: "Notifications · Toasts", keys: "notification toast corner timeout swaync popup server swaync builtin built-in popup dnd do not disturb" },
             { tab: "notifications", section: "", title: "Notifications · History", keys: "notification history bell counter dnd expand stagger boot" },
             { tab: "system", section: "dependencies", title: "System · Dependencies", keys: "dependencies packages programs fonts services missing install reinstall check" },
             { tab: "system", section: "transparency", title: "System · Transparency", keys: "transparency opacity transparent dim glass override satty window application" },

@@ -42,6 +42,17 @@ Item {
                 font.pixelSize: Theme.smallPx
             }
 
+            SectionHeader {
+                width: parent.width
+                title: "Server"
+                hint: "Who shows notifications: SwayNC, or the bar itself. Saves at once."
+            }
+
+            NotificationServerOptions {
+                x: Theme.sectionInset
+                width: parent.width - Theme.sectionInset * 2
+            }
+
             Item {
                 width: parent.width
                 height: root.wide
@@ -56,7 +67,7 @@ Item {
                     SectionHeader {
                         width: parent.width
                         title: "Toasts"
-                        hint: "Where notify-send toasts appear, and how long a normal one stays. Apply writes this to SwayNC."
+                        hint: "Where popups appear, and how long a normal one stays (0 keeps it until dismissed). Apply saves it, and writes it to SwayNC when SwayNC is the server."
                     }
 
                     Item {
