@@ -105,6 +105,8 @@ Singleton {
     readonly property int opacityStep: 5
     readonly property int opacityOverrideMax: 32
     readonly property int opacityOverrideDefault: 85
+    // Tallest the Transparency menu's open-window list grows before it scrolls.
+    readonly property int opacityPickMaxHeight: 220
     readonly property int volumeMax: 150
     readonly property int volumeStep: 5
     readonly property int volumeOsdMs: 40

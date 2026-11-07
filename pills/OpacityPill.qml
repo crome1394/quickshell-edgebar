@@ -7,16 +7,19 @@ import qs.services
 import qs.settings
 import qs.theme
 
-// Transparency menu: one level for every application, plus a quick slider
-// for each override. Settings → System → Transparency adds and edits the
-// overrides. Changes save at once; OpacityService applies them.
+// Transparency menu: one level for every application, a quick slider for
+// each override, and Add override to pick an open window. Settings → System
+// → Transparency edits the rest. Changes save at once; OpacityService
+// applies them.
 Rectangle {
     id: root
 
     required property var theme
     property string edge: "top"
     property real widthFactor: 1
-    property bool menuOpen: false
+    readonly property bool menuOpen: OpacityMenuService.open
+    property bool picking: false
+    property string addError: ""
     property bool dockHot: dock.mag > 1.01 || Math.abs(dock.jumpY) > 0.5
 
     readonly property real ui: WidgetService.uiScale
@@ -59,6 +62,29 @@ Rectangle {
     }
 
     readonly property var overrides: OpacitySettings.savedOverrides().filter((r) => r.on)
+    // Every saved override's class, switched off ones too, for "Added".
+    readonly property var overrideClasses: OpacitySettings.savedOverrides().map((r) => r.cls)
+
+    onMenuOpenChanged: {
+        if (!root.menuOpen) {
+            root.picking = false
+            root.addError = ""
+        }
+    }
+
+    function togglePicker() {
+        root.picking = !root.picking
+        root.addError = ""
+        if (root.picking)
+            OpacityService.listWindows()
+    }
+
+    function addPicked(cls, label) {
+        if (OpacitySettings.addOverrideLive(cls, label))
+            root.addError = ""
+        else if (!OpacitySettings.hasOverride(cls))
+            root.addError = "No room for more overrides (" + Theme.opacityOverrideMax + " at most)."
+    }
 
     implicitWidth: root.cell
     implicitHeight: root.cell
@@ -97,7 +123,7 @@ Rectangle {
         cursorShape: Qt.PointingHandCursor
         onClicked: {
             dock.play()
-            root.menuOpen = !root.menuOpen
+            OpacityMenuService.toggle()
         }
 
         BarTip {
@@ -118,7 +144,7 @@ Rectangle {
         // qmllint disable missing-property
         implicitHeight: menuCol.implicitHeight + Theme.space * 2
         // qmllint enable missing-property
-        onClosed: root.menuOpen = false
+        onClosed: OpacityMenuService.hide()
         // qmllint disable missing-property
         anchor.item: root
         anchor.adjustment: PopupAdjustment.Slide
@@ -197,23 +223,121 @@ Rectangle {
                             font.pixelSize: root.theme.smallPx
                         }
 
-                        IntSlider {
+                        Item {
                             width: parent.width
-                            from: Theme.opacityMin
-                            to: Theme.opacityMax
-                            step: Theme.opacityStep
-                            value: overrideRow.modelData.active
-                            readout: overrideRow.modelData.active + "%"
-                            tip: overrideRow.modelData.label + " (" + overrideRow.modelData.cls + ") while focused"
-                            onChanged: (value) => OpacitySettings.setOverrideLive(overrideRow.modelData.cls, value)
+                            height: overrideSlider.implicitHeight
+
+                            Rectangle {
+                                id: removeButton
+                                anchors.left: parent.left
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: Theme.chip
+                                height: Theme.chip
+                                radius: Theme.radiusSm
+                                color: removeMouse.containsMouse ? root.theme.colHover : "transparent"
+                                border.width: Theme.borderWidth
+                                border.color: removeMouse.containsMouse ? root.theme.colDanger : root.theme.colBorder
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "✕"
+                                    color: removeMouse.containsMouse ? root.theme.colDanger : root.theme.colFgMuted
+                                    font.family: root.theme.uiFont
+                                    font.pixelSize: root.theme.smallPx
+                                    font.bold: true
+                                }
+
+                                MouseArea {
+                                    id: removeMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: OpacitySettings.removeOverrideLive(overrideRow.modelData.cls)
+
+                                    HoverTip {
+                                        message: "Remove the " + overrideRow.modelData.label + " override"
+                                        show: removeMouse.containsMouse
+                                    }
+                                }
+                            }
+
+                            IntSlider {
+                                id: overrideSlider
+                                anchors.left: removeButton.right
+                                anchors.leftMargin: Theme.space
+                                anchors.right: parent.right
+                                anchors.verticalCenter: parent.verticalCenter
+                                from: Theme.opacityMin
+                                to: Theme.opacityMax
+                                step: Theme.opacityStep
+                                value: overrideRow.modelData.active
+                                readout: overrideRow.modelData.active + "%"
+                                tip: overrideRow.modelData.label + " (" + overrideRow.modelData.cls + ") while focused"
+                                onChanged: (value) => OpacitySettings.setOverrideLive(overrideRow.modelData.cls, value)
+                            }
+                        }
+                    }
+                }
+
+                MenuChip {
+                    theme: root.theme
+                    label: root.picking ? "Hide open windows" : "Add override"
+                    accent: root.picking
+                    tip: "Add an override for one of the windows open now"
+                    onClicked: root.togglePicker()
+                }
+
+                Text {
+                    visible: root.picking && (OpacityService.listing || OpacityService.windows.length === 0)
+                    width: parent.width
+                    text: OpacityService.listing ? "Reading open windows…" : "No open windows found."
+                    color: root.theme.colFgMuted
+                    font.family: root.theme.uiFont
+                    font.pixelSize: root.theme.smallPx
+                }
+
+                Flickable {
+                    visible: root.picking && OpacityService.windows.length > 0
+                    width: parent.width
+                    height: Math.min(pickCol.implicitHeight, Theme.opacityPickMaxHeight)
+                    contentHeight: pickCol.implicitHeight
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
+                    flickableDirection: Flickable.VerticalFlick
+
+                    Column {
+                        id: pickCol
+                        width: parent.width
+                        spacing: Theme.borderWidth
+
+                        Repeater {
+                            model: root.picking ? OpacityService.windows : []
+                            delegate: OpacityAddRow {
+                                required property var modelData
+                                width: pickCol.width
+                                theme: root.theme
+                                cls: modelData.cls
+                                added: root.overrideClasses.indexOf(modelData.cls) >= 0
+                                onPicked: (cls, label) => root.addPicked(cls, label)
+                            }
                         }
                     }
                 }
 
                 Text {
+                    visible: root.addError.length > 0
                     width: parent.width
                     wrapMode: Text.WordWrap
-                    text: "Settings and fullscreen windows stay solid. Add or edit overrides in Settings → System → Transparency."
+                    text: root.addError
+                    color: root.theme.colDanger
+                    font.family: root.theme.uiFont
+                    font.pixelSize: root.theme.smallPx
+                }
+
+                Text {
+                    width: parent.width
+                    wrapMode: Text.WordWrap
+                    text: "Settings and fullscreen windows stay solid. Edit unfocused levels in Settings → System → Transparency."
                     color: root.theme.colFgMuted
                     font.family: root.theme.uiFont
                     font.pixelSize: root.theme.smallPx

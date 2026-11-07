@@ -26,3 +26,4 @@ TailscaleMenu 1.0 TailscaleMenu.qml
 AudioMenu 1.0 AudioMenu.qml
 AudioDeviceSection 1.0 AudioDeviceSection.qml
 AudioStreamRow 1.0 AudioStreamRow.qml
+OpacityAddRow 1.0 OpacityAddRow.qml

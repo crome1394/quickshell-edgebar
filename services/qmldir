@@ -20,3 +20,4 @@ singleton AudioMenuService 1.0 AudioMenuService.qml
 singleton InspectorService 1.0 InspectorService.qml
 singleton BindingsService 1.0 BindingsService.qml
 singleton SystemInfoService 1.0 SystemInfoService.qml
+singleton OpacityMenuService 1.0 OpacityMenuService.qml
