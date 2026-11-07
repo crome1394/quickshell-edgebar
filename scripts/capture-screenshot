@@ -1,0 +1,498 @@
+#!/usr/bin/env bash
+#
+# Capture screenshot helper for CachyOS + Hyprland, adapted from Omarchy's
+# omarchy-capture-screenshot so it works without Omarchy's helper binaries.
+#
+# Usage:
+#   capture-screenshot [smart|region|windows|fullscreen] [both|copy|save|edit]
+#   capture-screenshot edit-latest
+#
+# Modes:
+#   smart       Freeze the screen, drag a region, or click a window/monitor
+#   region      Freeze the screen and drag any region
+#   windows     Choose from predefined window/monitor outlines
+#   fullscreen  Capture the focused monitor immediately
+#
+# Actions:
+#   both        Save to the screenshot folder, copy, notify (default)
+#   copy        Copy to clipboard only
+#   save        Save to the screenshot folder only
+#   edit        Save to the screenshot folder, then open it in Tack
+#
+# Command:
+#   edit-latest Open the most recent saved screenshot in the editor
+#
+# The completion notification is actionable, like Omarchy's: click the toast
+# (or Edit) to annotate in satty, or choose Open for the default image viewer.
+#
+# `slurp` is accepted as a legacy alias for `both` (Omarchy's name).
+#
+# Settings come from ~/.config/hypr/capture.conf, written by the Quickshell
+# bar (Settings → Tools → Capture). Missing keys use the defaults below:
+#   screenshot_dir     save folder (default: XDG Pictures)
+#   screenshot_editor  program for the toast's Edit action (default: satty,
+#                      swappy, or tensaku-edit if installed)
+#   screenshot_freeze  1 freezes the screen while you select (needs hyprpicker)
+#   screenshot_notify  1 shows the "Screenshot saved" toast
+#
+# Environment:
+#   SCREENSHOT_DIR          Override screenshot_dir and the XDG Pictures folder
+#   OMARCHY_SCREENSHOT_DIR  Backwards-compatible alias for SCREENSHOT_DIR
+#   SCREENSHOT_EDITOR       Override screenshot_editor
+
+set -uo pipefail
+
+CAPTURE_CONF="${CAPTURE_CONF:-${XDG_CONFIG_HOME:-$HOME/.config}/hypr/capture.conf}"
+CONF_DIR=""
+CONF_EDITOR=""
+CONF_FREEZE=1
+CONF_NOTIFY=1
+
+# key=value lines. Never sourced, so the file cannot run code.
+read_conf() {
+  [[ -r $CAPTURE_CONF ]] || return 0
+  local line key val
+  while IFS= read -r line || [[ -n $line ]]; do
+    [[ $line =~ ^[[:space:]]*(#|$) ]] && continue
+    key=${line%%=*}
+    val=${line#*=}
+    key=${key// /}
+    case $key in
+      screenshot_dir) CONF_DIR=$val ;;
+      screenshot_editor) CONF_EDITOR=$val ;;
+      screenshot_freeze) [[ $val == 0 ]] && CONF_FREEZE=0 || CONF_FREEZE=1 ;;
+      screenshot_notify) [[ $val == 0 ]] && CONF_NOTIFY=0 || CONF_NOTIFY=1 ;;
+    esac
+  done <"$CAPTURE_CONF"
+  # One program name or path; anything else falls back to auto-detect.
+  [[ $CONF_EDITOR =~ ^([A-Za-z0-9._/~+][A-Za-z0-9._/~+-]*)?$ ]] || CONF_EDITOR=""
+  CONF_EDITOR=${CONF_EDITOR/#\~/$HOME}
+}
+read_conf
+
+usage() {
+  cat <<'EOF'
+Usage: capture-screenshot [smart|region|windows|fullscreen] [both|copy|save|edit]
+       capture-screenshot edit-latest
+
+Modes:
+  smart       Freeze the screen, drag a region, or click a window/monitor
+  region      Freeze the screen and drag any region
+  windows     Choose from predefined window/monitor outlines
+  fullscreen  Capture the focused monitor immediately
+
+Actions:
+  both        Save to the screenshot folder, copy, notify (default)
+  copy        Copy to clipboard only
+  save        Save to the screenshot folder only
+  edit        Save to the screenshot folder, then open it in Tack
+
+Command:
+  edit-latest Open the most recent saved screenshot in the editor
+
+The completion toast is actionable: click it (or Edit) to annotate in satty,
+or choose Open for the default image viewer.
+
+`slurp` is accepted as a legacy alias for `both` (Omarchy's name).
+
+Environment:
+  SCREENSHOT_DIR          Override the menu setting and XDG Pictures folder
+  OMARCHY_SCREENSHOT_DIR  Backwards-compatible alias for SCREENSHOT_DIR
+  SCREENSHOT_EDITOR       Executable opened by the notification's Edit action
+                          (default: satty, swappy, or tensaku-edit if installed)
+EOF
+}
+
+case ${1:-} in
+  -h | --help)
+    usage
+    exit 0
+    ;;
+esac
+
+MODE=smart
+PROCESSING=both
+EDIT_LATEST=0
+
+case ${1:-} in
+  edit-latest | edit)
+    EDIT_LATEST=1
+    shift
+    if (($#)); then
+      echo "edit-latest takes no other arguments" >&2
+      exit 2
+    fi
+    ;;
+esac
+
+if ((!EDIT_LATEST)); then
+  for arg in "$@"; do
+    case $arg in
+      smart | region | windows | fullscreen) MODE=$arg ;;
+      both | slurp) PROCESSING=both ;;
+      copy | save | edit) PROCESSING=$arg ;;
+      -h | --help)
+        usage
+        exit 0
+        ;;
+      *)
+        echo "Unknown argument: $arg" >&2
+        usage >&2
+        exit 2
+        ;;
+    esac
+  done
+fi
+
+notify() {
+  command -v notify-send >/dev/null 2>&1 || return 0
+  local summary=$1 message=${2:-} image=${3:-}
+  if [[ -n $image ]]; then
+    notify-send -a "Screenshot" -i "$image" "$summary" "$message" 2>/dev/null || true
+  else
+    notify-send -a "Screenshot" "$summary" "$message" 2>/dev/null || true
+  fi
+}
+
+# Omarchy's screenshot toast had a default action: clicking it opened the
+# capture in an annotation editor. SwayNC runs that default action on click.
+screenshot_editor() {
+  local editor=${SCREENSHOT_EDITOR:-$CONF_EDITOR}
+  if [[ -n $editor ]] && command -v "$editor" >/dev/null 2>&1; then
+    printf '%s\n' "$editor"
+    return 0
+  fi
+  for editor in satty swappy tensaku-edit; do
+    if command -v "$editor" >/dev/null 2>&1; then
+      printf '%s\n' "$editor"
+      return 0
+    fi
+  done
+  return 1
+}
+
+open_screenshot() {
+  local file=$1 editor
+  if editor=$(screenshot_editor); then
+    case $editor in
+      satty)
+        satty --filename "$file" --output-filename "$file" \
+          --actions-on-enter save-to-clipboard --save-after-copy \
+          --copy-command 'wl-copy' >/dev/null 2>&1 &
+        ;;
+      swappy)
+        swappy -f "$file" >/dev/null 2>&1 &
+        ;;
+      *)
+        "$editor" "$file" >/dev/null 2>&1 &
+        ;;
+    esac
+  else
+    xdg-open "$file" >/dev/null 2>&1 &
+  fi
+}
+
+# Opens a saved screenshot in Tack: Save writes back to the same file,
+# Enter copies (and saves). Without Tack, the usual editor opens instead.
+open_in_tack() {
+  local file=$1 tack
+  # Keybinds may run without ~/.local/bin on PATH.
+  tack=$(command -v tack 2>/dev/null || true)
+  [[ -z $tack && -x $HOME/.local/bin/tack ]] && tack=$HOME/.local/bin/tack
+  if [[ -n $tack ]]; then
+    "$tack" --filename "$file" --output-filename "$file" \
+      --actions-on-enter save-to-clipboard --save-after-copy \
+      --copy-command wl-copy >/dev/null 2>&1 &
+  else
+    open_screenshot "$file"
+  fi
+}
+
+notify_saved() {
+  ((CONF_NOTIFY)) || return 0
+  command -v notify-send >/dev/null 2>&1 || return 0
+  local file=$1
+  local actions=(-a "Screenshot" -u normal -t 12000 -i "$file"
+    --hint="string:image-path:$file")
+  local summary="Screenshot saved"
+  local body="Click to edit · Super+Alt+,"
+
+  if screenshot_editor >/dev/null; then
+    actions+=(-A "default=Edit" -A "edit=Edit" -A "open=Open")
+  else
+    actions+=(-A "default=Open")
+    body="Click to open · Super+Alt+,"
+  fi
+
+  (
+    chosen=$(notify-send "${actions[@]}" "$summary" "$body" 2>/dev/null)
+    case $chosen in
+      default | edit)
+        open_screenshot "$file"
+        ;;
+      open)
+        xdg-open "$file" >/dev/null 2>&1 &
+        ;;
+    esac
+  ) >/dev/null 2>&1 &
+}
+
+SCREENSHOT_STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/capture-screenshot"
+SCREENSHOT_LAST_FILE="$SCREENSHOT_STATE_DIR/last"
+
+remember_screenshot() {
+  mkdir -p "$SCREENSHOT_STATE_DIR" 2>/dev/null || return 0
+  printf '%s\n' "$1" >"$SCREENSHOT_LAST_FILE" 2>/dev/null || true
+}
+
+last_screenshot() {
+  local candidate=""
+  if [[ -r $SCREENSHOT_LAST_FILE ]]; then
+    IFS= read -r candidate <"$SCREENSHOT_LAST_FILE" || true
+    if [[ -n $candidate && -f $candidate ]]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  fi
+
+  candidate=$(find "$OUTPUT_DIR" -maxdepth 1 -type f -name 'screenshot-*.png' \
+    -printf '%T@\t%p\n' 2>/dev/null | sort -nr | head -n 1 | cut -f2-)
+  [[ -n $candidate && -f $candidate ]] || return 1
+  printf '%s\n' "$candidate"
+}
+
+edit_latest() {
+  local file
+  if ! file=$(last_screenshot); then
+    echo "capture-screenshot: no saved screenshot found" >&2
+    notify "No screenshot found" "Take a screenshot first"
+    exit 1
+  fi
+  open_screenshot "$file"
+}
+
+fail() {
+  echo "screenshot: $*" >&2
+  notify "Screenshot failed" "$*"
+  exit 1
+}
+
+if ((!EDIT_LATEST)); then
+  for cmd in hyprctl grim slurp wl-copy jq; do
+    command -v "$cmd" >/dev/null 2>&1 || fail "required command not found: $cmd"
+  done
+fi
+
+# The Pictures folder from the XDG user-dirs file, read as text (never sourced).
+user_dirs="${XDG_CONFIG_HOME:-$HOME/.config}/user-dirs.dirs"
+if [[ -z ${XDG_PICTURES_DIR:-} && -r $user_dirs ]]; then
+  line=$(grep -m1 '^XDG_PICTURES_DIR=' "$user_dirs" || true)
+  val=${line#XDG_PICTURES_DIR=}
+  val=${val#\"}
+  val=${val%\"}
+  val=${val//\$HOME/$HOME}
+  [[ $val == /* ]] && XDG_PICTURES_DIR=$val
+fi
+
+# The environment variable still wins, so scripts can override one capture.
+OUTPUT_DIR="${SCREENSHOT_DIR:-${OMARCHY_SCREENSHOT_DIR:-${CONF_DIR:-${XDG_PICTURES_DIR:-$HOME/Pictures}}}}"
+OUTPUT_DIR="${OUTPUT_DIR/#\~/$HOME}"
+if ((!EDIT_LATEST)) && [[ ! -d $OUTPUT_DIR ]]; then
+  mkdir -p "$OUTPUT_DIR" || fail "could not create $OUTPUT_DIR"
+fi
+
+if ((EDIT_LATEST)); then
+  edit_latest
+  exit 0
+fi
+
+# A second invocation while slurp is open cancels the pending selection.
+if pkill -x slurp 2>/dev/null; then
+  exit 0
+fi
+
+JQ_MONITOR_GEO='
+  def format_geo:
+    .x as $x | .y as $y |
+    (.width / .scale | floor) as $w |
+    (.height / .scale | floor) as $h |
+    .transform as $t |
+    if $t == 1 or $t == 3 then
+      "\($x),\($y) \($h)x\($w)"
+    else
+      "\($x),\($y) \($w)x\($h)"
+    end;
+'
+
+active_workspace() {
+  hyprctl monitors -j 2>/dev/null |
+    jq -r '.[] | select(.focused == true) | .activeWorkspace.id' 2>/dev/null
+}
+
+window_rects() {
+  local ws
+  ws=$(active_workspace)
+  hyprctl clients -j 2>/dev/null |
+    jq -r --argjson ws "${ws:-0}" \
+      '[.[] | select(.workspace.id == $ws and .hidden != true) |
+        "\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"] | unique[]' 2>/dev/null
+}
+
+monitor_rects() {
+  local ws
+  ws=$(active_workspace)
+  hyprctl monitors -j 2>/dev/null |
+    jq -r --argjson ws "${ws:-0}" \
+      "${JQ_MONITOR_GEO} .[] | select(.activeWorkspace.id == \$ws) | format_geo" 2>/dev/null
+}
+
+get_rectangles() {
+  monitor_rects
+  window_rects
+}
+
+focused_monitor_geo() {
+  hyprctl monitors -j 2>/dev/null |
+    jq -r "${JQ_MONITOR_GEO} .[] | select(.focused == true) | format_geo" 2>/dev/null
+}
+
+# Keep Hyprland's software-composited cursor out of the capture. On GPUs
+# without hardware cursor support Hyprland bakes the cursor into the frame
+# that grim reads. Restore the previous setting when we exit.
+ORIGINAL_NO_HW_CURSORS=$(
+  hyprctl getoption cursor:no_hardware_cursors -j 2>/dev/null |
+    jq -r '.int // empty' 2>/dev/null
+)
+
+set_no_hw_cursors() {
+  [[ -n $ORIGINAL_NO_HW_CURSORS ]] || return 0
+  hyprctl eval "hl.config({ cursor = { no_hardware_cursors = $1 } })" >/dev/null 2>&1 ||
+    hyprctl keyword cursor:no_hardware_cursors "$1" >/dev/null 2>&1
+}
+
+FREEZE_PID=""
+
+# hyprpicker shows a still copy of the screen while slurp runs, and grim
+# captures that copy. -z and -d hide its zoom lens and color preview so
+# neither lands in the capture.
+freeze_screen() {
+  ((CONF_FREEZE)) || return 0
+  command -v hyprpicker >/dev/null 2>&1 || return 0
+  hyprpicker -r -z -d -q >/dev/null 2>&1 &
+  FREEZE_PID=$!
+  sleep 0.1
+}
+
+cleanup() {
+  if [[ -n $FREEZE_PID ]]; then
+    kill "$FREEZE_PID" 2>/dev/null
+    FREEZE_PID=""
+  fi
+  [[ -n $ORIGINAL_NO_HW_CURSORS ]] && set_no_hw_cursors "$ORIGINAL_NO_HW_CURSORS"
+}
+
+trap cleanup EXIT
+trap 'exit 130' INT HUP TERM
+
+pick() {
+  local selection
+  selection=$(slurp "$@" 2>/dev/null) || selection=""
+  printf '%s' "$selection"
+}
+
+# Snap an accidental bare click (a sliver of a selection) to the window or
+# monitor rectangle it landed in. Coordinates may be negative on multi-monitor
+# layouts.
+snap_bare_click() {
+  local selection=$1 rects=$2
+  if [[ ! $selection =~ ^(-?[0-9]+),(-?[0-9]+)[[:space:]]([0-9]+)x([0-9]+)$ ]]; then
+    printf '%s\n' "$selection"
+    return 0
+  fi
+
+  # Anything larger than a stray click is a real selection; keep it as-is.
+  if ((BASH_REMATCH[3] * BASH_REMATCH[4] >= 20)); then
+    printf '%s\n' "$selection"
+    return 0
+  fi
+
+  local click_x=${BASH_REMATCH[1]} click_y=${BASH_REMATCH[2]}
+  local rect rect_x rect_y rect_width rect_height
+  local best_rect="" best_area=0
+
+  while IFS= read -r rect; do
+    [[ $rect =~ ^(-?[0-9]+),(-?[0-9]+)[[:space:]]([0-9]+)x([0-9]+)$ ]] || continue
+    rect_x=${BASH_REMATCH[1]}
+    rect_y=${BASH_REMATCH[2]}
+    rect_width=${BASH_REMATCH[3]}
+    rect_height=${BASH_REMATCH[4]}
+
+    ((click_x >= rect_x && click_x < rect_x + rect_width && click_y >= rect_y && click_y < rect_y + rect_height)) || continue
+
+    local area=$((rect_width * rect_height))
+    if [[ -z $best_rect ]] || ((area < best_area)); then
+      best_rect=$rect
+      best_area=$area
+    fi
+  done <<<"$rects"
+
+  # Prefer the smallest rectangle under the click, so a window wins over the
+  # monitor behind it.
+  printf '%s\n' "${best_rect:-$selection}"
+  return 0
+}
+
+set_no_hw_cursors 0
+
+SELECTION=""
+case $MODE in
+  fullscreen)
+    SELECTION=$(focused_monitor_geo)
+    ;;
+  region)
+    freeze_screen
+    SELECTION=$(pick </dev/null)
+    ;;
+  windows)
+    freeze_screen
+    SELECTION=$(get_rectangles | pick -r)
+    ;;
+  smart)
+    RECTS=$(get_rectangles)
+    freeze_screen
+    SELECTION=$(printf '%s\n' "$RECTS" | pick)
+    SELECTION=$(snap_bare_click "$SELECTION" "$RECTS")
+    ;;
+esac
+
+[[ -n $SELECTION ]] || exit 0
+
+FILEPATH="$OUTPUT_DIR/screenshot-$(date +'%Y-%m-%d_%H-%M-%S').png"
+if [[ -e $FILEPATH ]]; then
+  FILEPATH="${FILEPATH%.png}-$(date +%3N).png"
+fi
+
+case $PROCESSING in
+  copy)
+    grim -g "$SELECTION" - 2>/dev/null | wl-copy --type image/png ||
+      fail "could not copy the screenshot"
+    ;;
+  save)
+    grim -g "$SELECTION" "$FILEPATH" 2>/dev/null || fail "could not save the screenshot"
+    remember_screenshot "$FILEPATH"
+    printf '%s\n' "$FILEPATH"
+    ;;
+  edit)
+    grim -g "$SELECTION" "$FILEPATH" 2>/dev/null || fail "could not save the screenshot"
+    remember_screenshot "$FILEPATH"
+    printf '%s\n' "$FILEPATH"
+    open_in_tack "$FILEPATH"
+    ;;
+  both)
+    grim -g "$SELECTION" "$FILEPATH" 2>/dev/null || fail "could not save the screenshot"
+    remember_screenshot "$FILEPATH"
+    printf '%s\n' "$FILEPATH"
+    wl-copy --type image/png <"$FILEPATH" || true
+    notify_saved "$FILEPATH"
+    ;;
+esac

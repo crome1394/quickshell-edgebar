@@ -97,6 +97,8 @@ Singleton {
     property alias showCaffeinePill: data.showCaffeinePill
     property alias showNightLightPill: data.showNightLightPill
     property alias showRecorderPill: data.showRecorderPill
+    // Caffeine: 0 off, -1 on until turned off, else when it ends (ms since epoch).
+    property alias caffeineUntil: data.caffeineUntil
     // Night light (NightLightSettings): Kelvin, schedule on/off, and HH:MM times.
     property alias nightTemp: data.nightTemp
     property alias nightSchedule: data.nightSchedule
@@ -533,6 +535,7 @@ Singleton {
             property bool showCaffeinePill: false
             property bool showNightLightPill: false
             property bool showRecorderPill: false
+            property real caffeineUntil: 0
             property int nightTemp: 0
             property bool nightSchedule: false
             property string nightStart: "20:00"

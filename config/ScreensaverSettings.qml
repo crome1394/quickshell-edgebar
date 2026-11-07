@@ -5,7 +5,7 @@ import qs.theme
 
 // Tools → Screensaver: value helpers and the page draft. The saved values
 // are not in bar-layout.json: they live in ~/.config/hypr/screensaver.conf,
-// owned by ~/.local/bin/screensaver-config.sh. ScreensaverService reads
+// owned by scripts/screensaver-config.sh. ScreensaverService reads
 // them into `saved` and writes them when commit() asks for a save.
 //
 // The program runs as `<program> start` after idle and `<program> stop`
@@ -18,8 +18,9 @@ Singleton {
     }
 
     readonly property string home: String(Quickshell.env("HOME") || "")
-    readonly property string helperPath: root.home + "/.local/bin/screensaver-config.sh"
-    readonly property string builtInProgram: root.home + "/.local/bin/screensaver.sh"
+    // In the bar's scripts/ (install-deps.sh links them into ~/.local/bin).
+    readonly property string helperPath: Quickshell.shellDir + "/scripts/screensaver-config.sh"
+    readonly property string builtInProgram: Quickshell.shellDir + "/scripts/screensaver.sh"
     readonly property string defaultVideo: root.home + "/Videos/screensaver/g9-screen-saver.mp4"
 
     // The Look choices: Video, or one of the built-in text styles.
@@ -69,7 +70,7 @@ Singleton {
 
     function isBuiltIn(text) {
         const p = root.pathArg(text)
-        return p.length === 0 || p === root.builtInProgram || p === "~/.local/bin/screensaver.sh"
+        return p.length === 0 || p === root.builtInProgram || p === "~/.local/bin/screensaver.sh" || p === root.home + "/.local/bin/screensaver.sh"
     }
 
     function timeoutLabel(minutes) {

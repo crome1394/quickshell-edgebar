@@ -19,8 +19,13 @@ qs -d
 ```
 
 `install-deps.sh` installs whatever is missing (pacman, plus paru or yay
-for AUR packages) and starts the services the bar uses. It asks before
-each step; `--dry-run` just shows the plan.
+for AUR packages), asks about optional features one by one (Tailscale,
+screenshot editor, …), starts the services the bar uses, and links its
+helper scripts into `~/.local/bin`. `--dry-run` just shows the plan.
+
+**Reinstalling?** Save your settings first with
+`scripts/install-deps.sh --backup`, then after cloning run
+`scripts/install-deps.sh --restore <file>`.
 
 Then click the spanner on the bar to open **Settings** and turn on widgets.
 

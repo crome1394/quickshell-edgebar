@@ -1,5 +1,5 @@
 {
-    "_comment": "Programs, fonts, and services the bar uses. Read by services/DependencyService.qml (Settings -> System -> Dependencies) and scripts/install-deps.sh. need: required or optional. scope: user (systemctl --user) or system. when: \"swaync\" means only used when SwayNC is running (found by Auto); never installed by install-deps.sh.",
+    "_comment": "Programs, fonts, and services the bar uses. Read by services/DependencyService.qml (Settings -> System -> Dependencies) and scripts/install-deps.sh. need: required or optional. scope: user (systemctl --user) or system. when: \"swaync\" means only used when SwayNC is running (found by Auto); never installed by install-deps.sh. ask: \"no\" makes install-deps.sh default to No for that optional group.",
     "programs": [
         {
             "name": "qs",
@@ -155,14 +155,16 @@
             "pkg": "tailscale",
             "area": "Tailscale",
             "need": "optional",
-            "use": "Tailscale widget"
+            "use": "Tailscale widget",
+            "ask": "no"
         },
         {
             "name": "zenity",
             "pkg": "zenity",
             "area": "Tailscale",
             "need": "optional",
-            "use": "File pickers for Taildrop, the screensaver, and capture"
+            "use": "File pickers for Taildrop, the screensaver, and capture",
+            "ask": "no"
         },
         {
             "name": "hyprpaper",
@@ -216,9 +218,10 @@
         {
             "name": "satty",
             "pkg": "satty",
-            "area": "Capture",
+            "area": "Screenshot editor",
             "need": "optional",
-            "use": "Edit a screenshot from its toast"
+            "use": "Annotate screenshots (Capture settings also accept swappy, tensaku-edit, or Tack)",
+            "ask": "no"
         },
         {
             "name": "hypridle",
@@ -338,7 +341,8 @@
             "scope": "system",
             "pkg": "tailscale",
             "need": "optional",
-            "use": "Tailscale widget"
+            "use": "Tailscale widget",
+            "ask": "no"
         }
     ]
 }

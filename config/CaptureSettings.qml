@@ -5,7 +5,7 @@ import qs.theme
 
 // Tools → Capture: value helpers and the page draft. The saved values are
 // not in bar-layout.json: they live in ~/.config/hypr/capture.conf, read by
-// ~/.local/bin/capture-screenshot and ~/.local/bin/ocr-region. The file is
+// scripts/capture-screenshot and scripts/ocr-region. The file is
 // key=value lines; the scripts parse it (never source it) and check every
 // value again, so a hand edit cannot run code.
 Singleton {
@@ -21,8 +21,9 @@ Singleton {
         return xdg.length ? xdg : root.home + "/.config"
     }
     readonly property string confPath: root.configHome + "/hypr/capture.conf"
-    readonly property string screenshotScript: root.home + "/.local/bin/capture-screenshot"
-    readonly property string ocrScript: root.home + "/.local/bin/ocr-region"
+    // In the bar's scripts/ (install-deps.sh links them into ~/.local/bin for keybinds).
+    readonly property string screenshotScript: Quickshell.shellDir + "/scripts/capture-screenshot"
+    readonly property string ocrScript: Quickshell.shellDir + "/scripts/ocr-region"
     readonly property string defaultFolder: root.home + "/Pictures"
 
     // Screenshot modes the script takes, for the Try buttons.
@@ -187,7 +188,7 @@ Singleton {
         const flag = (b) => b ? "1" : "0"
         return [
             "# Managed by Quickshell (Settings → Tools → Capture).",
-            "# Read by ~/.local/bin/capture-screenshot and ~/.local/bin/ocr-region.",
+            "# Read by the bar's scripts/capture-screenshot and scripts/ocr-region.",
             "screenshot_dir=" + n.shotDir.trim(),
             "screenshot_editor=" + n.shotEditor.trim(),
             "screenshot_freeze=" + flag(n.shotFreeze),

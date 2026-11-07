@@ -3,6 +3,15 @@
 What to add to your Hyprland config (Lua, Hyprland 0.57+). Only the first
 item is needed to run the bar; the rest turn on optional features.
 
+## Keep it in git
+
+The Hyprland config is not part of this repo. Keep `~/.config/hypr` in a
+git repo of its own (a private one is fine), so a reinstall is a clone.
+The bar's helper scripts (`capture-screenshot`, `ocr-region`,
+`screensaver.sh`, `screensaver-config.sh`) live in this repo's `scripts/`;
+`install-deps.sh` links them into `~/.local/bin`, where keybinds and
+hypridle call them.
+
 ## Start the bar
 
 In your autostart:

@@ -1,0 +1,141 @@
+#!/usr/bin/env bash
+#
+# OCR a screen region: freeze the screen, drag a region, read its text with
+# tesseract, copy it, and notify. A second press while selecting cancels.
+#
+# Settings come from ~/.config/hypr/capture.conf, written by the Quickshell
+# bar (Settings → Tools → Capture). Missing keys use these defaults:
+#   ocr_lang     tesseract language, e.g. eng or eng+deu (default: eng)
+#   ocr_freeze   1 freezes the screen while you select (needs hyprpicker)
+#   ocr_copy     1 copies the text to the clipboard
+#   ocr_notify   1 shows a toast with the start of the text
+#   ocr_command  optional program that gets the text on stdin, e.g. a
+#                translator or a script that appends to a notes file
+
+set -uo pipefail
+
+CAPTURE_CONF="${CAPTURE_CONF:-${XDG_CONFIG_HOME:-$HOME/.config}/hypr/capture.conf}"
+LANG_OCR=eng
+FREEZE=1
+COPY=1
+NOTIFY=1
+COMMAND=""
+
+# key=value lines. Never sourced, so the file cannot run code.
+read_conf() {
+  [[ -r $CAPTURE_CONF ]] || return 0
+  local line key val
+  while IFS= read -r line || [[ -n $line ]]; do
+    [[ $line =~ ^[[:space:]]*(#|$) ]] && continue
+    key=${line%%=*}
+    val=${line#*=}
+    key=${key// /}
+    case $key in
+      ocr_lang) LANG_OCR=$val ;;
+      ocr_freeze) [[ $val == 0 ]] && FREEZE=0 || FREEZE=1 ;;
+      ocr_copy) [[ $val == 0 ]] && COPY=0 || COPY=1 ;;
+      ocr_notify) [[ $val == 0 ]] && NOTIFY=0 || NOTIFY=1 ;;
+      ocr_command) COMMAND=$val ;;
+    esac
+  done <"$CAPTURE_CONF"
+  [[ $LANG_OCR =~ ^[A-Za-z0-9_]+(\+[A-Za-z0-9_]+)*$ ]] || LANG_OCR=eng
+  # One program name or path, no arguments; anything else is ignored.
+  [[ $COMMAND =~ ^([A-Za-z0-9._/~+][A-Za-z0-9._/~+-]*)?$ ]] || COMMAND=""
+  COMMAND=${COMMAND/#\~/$HOME}
+}
+
+notify() {
+  ((NOTIFY)) || return 0
+  command -v notify-send >/dev/null 2>&1 || return 0
+  notify-send -a "OCR" "$1" "${2:-}" 2>/dev/null || true
+}
+
+fail() {
+  echo "ocr-region: $*" >&2
+  notify "OCR failed" "$*"
+  exit 1
+}
+
+read_conf
+
+for cmd in grim slurp tesseract; do
+  command -v "$cmd" >/dev/null 2>&1 || fail "required command not found: $cmd"
+done
+if ((COPY)) && ! command -v wl-copy >/dev/null 2>&1; then
+  fail "required command not found: wl-copy"
+fi
+
+# A second press while slurp is open cancels the pending selection.
+if pkill -x slurp 2>/dev/null; then
+  exit 0
+fi
+
+# Keep a software cursor out of the capture (see capture-screenshot).
+ORIGINAL_NO_HW_CURSORS=$(
+  hyprctl getoption cursor:no_hardware_cursors -j 2>/dev/null |
+    jq -r '.int // empty' 2>/dev/null
+)
+
+set_no_hw_cursors() {
+  [[ -n $ORIGINAL_NO_HW_CURSORS ]] || return 0
+  hyprctl eval "hl.config({ cursor = { no_hardware_cursors = $1 } })" >/dev/null 2>&1 ||
+    hyprctl keyword cursor:no_hardware_cursors "$1" >/dev/null 2>&1
+}
+
+FREEZE_PID=""
+
+# hyprpicker shows a still copy of the screen while slurp runs, and grim
+# captures that copy. -z and -d hide its zoom lens and color preview.
+freeze_screen() {
+  ((FREEZE)) || return 0
+  command -v hyprpicker >/dev/null 2>&1 || return 0
+  hyprpicker -r -z -d -q >/dev/null 2>&1 &
+  FREEZE_PID=$!
+  sleep 0.1
+}
+
+cleanup() {
+  if [[ -n $FREEZE_PID ]]; then
+    kill "$FREEZE_PID" 2>/dev/null
+    FREEZE_PID=""
+  fi
+  if [[ -n $ORIGINAL_NO_HW_CURSORS ]]; then
+    set_no_hw_cursors "$ORIGINAL_NO_HW_CURSORS"
+    ORIGINAL_NO_HW_CURSORS=""
+  fi
+}
+
+trap cleanup EXIT
+trap 'exit 130' INT HUP TERM
+
+set_no_hw_cursors 0
+freeze_screen
+
+region=$(slurp 2>/dev/null </dev/null) || region=""
+[[ -n $region ]] || exit 0
+
+text=$(grim -g "$region" - 2>/dev/null | tesseract stdin stdout -l "$LANG_OCR" 2>/dev/null)
+cleanup
+
+if [[ -z ${text//[[:space:]]/} ]]; then
+  notify "OCR" "No text found"
+  exit 0
+fi
+
+if ((COPY)); then
+  printf '%s' "$text" | wl-copy || fail "could not copy the text"
+fi
+
+if [[ -n $COMMAND ]]; then
+  if command -v "$COMMAND" >/dev/null 2>&1; then
+    printf '%s' "$text" | setsid "$COMMAND" >/dev/null 2>&1 &
+  else
+    notify "OCR" "Program not found: $COMMAND"
+  fi
+fi
+
+if ((COPY)); then
+  notify "OCR copied" "${text:0:100}"
+else
+  notify "OCR done" "${text:0:100}"
+fi

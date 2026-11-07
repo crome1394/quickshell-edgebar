@@ -122,7 +122,7 @@ Item {
                             id: builtInButton
                             label: "Built-in"
                             active: root.builtIn
-                            tip: "Use ~/.local/bin/screensaver.sh"
+                            tip: "Use the built-in player (scripts/screensaver.sh)"
                             onClicked: ScreensaverSettings.editor.set("program", ScreensaverSettings.builtInProgram)
                         }
                     }
