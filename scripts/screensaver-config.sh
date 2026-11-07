@@ -5,7 +5,7 @@ set -euo pipefail
 
 CONF="${SCREENSAVER_CONF:-$HOME/.config/hypr/screensaver.conf}"
 HYPRIDLE="${HYPRIDLE_CONF:-$HOME/.config/hypr/hypridle.conf}"
-DEFAULT_VIDEO="${HOME}/Videos/screensaver/g9-screen-saver.mp4"
+DEFAULT_VIDEO="${HOME}/Videos/screensaver/screensaver.mp4"
 SELF="$(readlink -f "$0" 2>/dev/null || echo "$0")"
 # The built-in player sits next to this script (in the bar's scripts/).
 DEFAULT_SCRIPT="$(dirname "$SELF")/screensaver.sh"

@@ -239,6 +239,20 @@
             "use": "Dim the monitor while the screensaver runs"
         },
         {
+            "name": "kitty",
+            "pkg": "kitty",
+            "area": "Screensaver",
+            "need": "optional",
+            "use": "Text screensaver (and the default terminal for System Stats clicks)"
+        },
+        {
+            "name": "socat",
+            "pkg": "socat",
+            "area": "Screensaver",
+            "need": "optional",
+            "use": "Closes the screensaver video cleanly"
+        },
+        {
             "name": "fastfetch",
             "pkg": "fastfetch",
             "area": "Inspector",
@@ -257,7 +271,7 @@
             "pkg": "mpv",
             "area": "FreshRSS",
             "need": "optional",
-            "use": "Play in mpv for video articles"
+            "use": "Play in mpv for video articles; also plays the screensaver video"
         },
         {
             "name": "yt-dlp",
