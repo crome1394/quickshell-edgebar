@@ -1,0 +1,17 @@
+[
+  { "id": "tag:google.com,2005:reader/item/0001", "title": "Zeta article &amp; more", "published": 1794000000,
+    "categories": ["user/-/state/com.google/reading-list", "user/-/state/com.google/read"],
+    "origin": { "streamId": "feed/2", "title": "Zeta Feed" },
+    "alternate": [{ "href": "https://example.com/z" }],
+    "summary": { "content": "<p onclick=\"x()\">Hi <img src=\"https://t.example/p.gif\"><script>bad()</script><a href=\"javascript:evil()\">x</a></p>" } },
+  { "id": "tag:google.com,2005:reader/item/0002", "title": "Video one", "published": 1794003600,
+    "categories": ["user/-/state/com.google/reading-list", "user/-/state/com.google/starred"],
+    "origin": { "streamId": "feed/1", "title": "Alpha Feed" },
+    "alternate": [{ "href": "https://www.youtube.com/watch?v=abc" }],
+    "summary": { "content": "Watch this" } },
+  { "id": "tag:google.com,2005:reader/item/0003", "title": "Older alpha", "published": 1793800000,
+    "categories": ["user/-/state/com.google/reading-list"],
+    "origin": { "streamId": "feed/1", "title": "Alpha Feed" },
+    "canonical": [{ "href": "https://example.com/a" }],
+    "summary": { "content": "plain words searchable" } }
+]

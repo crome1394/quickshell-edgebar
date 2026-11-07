@@ -247,9 +247,9 @@ QtObject {
         const list = root.rows.filter((r) => r.kind === "item")
         if (!list.length) {
             const feeds = root.rows.filter((r) => r.kind === "feed")
-            if (feeds.length) {
+            if (feeds.length && !feeds[0].open) {
                 root.setOpen(feeds[0], true)
-                Qt.callLater(() => root.nextArticle(step))
+                root.nextArticle(step)
             }
             return
         }
