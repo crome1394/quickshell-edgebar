@@ -126,13 +126,27 @@ Item {
                             model: RecorderSettings.codecs
                             delegate: ChipButton {
                                 required property var modelData
-                                label: modelData.label
-                                tip: modelData.tip
+                                readonly property bool unsupported: modelData.id !== "auto" && RecorderService.codecs.length > 0
+                                    && RecorderService.codecs.indexOf(modelData.id) < 0
+                                label: modelData.label + (unsupported ? " ✕" : "")
+                                tip: unsupported ? "This GPU cannot encode " + modelData.label + " in hardware" : modelData.tip
                                 active: root.draft.codec === modelData.id
                                 onClicked: RecorderSettings.editor.set("codec", modelData.id)
                             }
                         }
                     }
+                }
+
+                Text {
+                    visible: RecorderService.codecs.length > 0
+                    width: parent.width
+                    wrapMode: Text.WordWrap
+                    text: "This GPU encodes " + RecorderService.codecs.map((c) => c.toUpperCase()).join(", ") + " in hardware. Auto uses "
+                        + RecorderSettings.resolveCodec("auto", RecorderService.codecs).toUpperCase() + "."
+                        + (root.draft.codec !== "auto" && RecorderService.codecs.indexOf(root.draft.codec) < 0 ? " The chosen codec is not one of them, so recording would fail." : "")
+                    color: root.draft.codec !== "auto" && RecorderService.codecs.indexOf(root.draft.codec) < 0 ? Theme.danger : Theme.subtext
+                    font.family: Theme.uiFont
+                    font.pixelSize: Theme.smallPx
                 }
 
                 FormRow {
@@ -269,7 +283,7 @@ Item {
         undoEnabled: RecorderSettings.editor.canUndo
         applyTip: "Save the recording options"
         undoTip: "Drop an unsaved draft, or put back the last applied one"
-        resetTip: "AV1, very high, MP4, 60 fps, system audio, the cursor, the focused monitor, " + RecorderSettings.defaultDir + ". Apply saves it."
+        resetTip: "Auto codec, very high, MP4, 60 fps, system audio, the cursor, the focused monitor, " + RecorderSettings.defaultDir + ". Apply saves it."
         onApplyClicked: RecorderSettings.editor.apply()
         onUndoClicked: RecorderSettings.editor.undo()
         onResetClicked: RecorderSettings.editor.reset()

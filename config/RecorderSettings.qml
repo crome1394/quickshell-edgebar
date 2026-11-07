@@ -4,10 +4,11 @@ import Quickshell
 import qs.theme
 
 // Screen recorder options (gpu-screen-recorder). Settings → Tools →
-// Recording edits them through `editor`. Defaults: AV1 at very high
+// Recording edits them through `editor`. Defaults: Auto codec at very high
 // quality in MP4, 60 fps, system audio, the cursor, the focused monitor,
-// saved to ~/Videos/Recordings. AV1 is encoded on the GPU (NVENC, VCN, or
-// Quick Sync), so recording costs the CPU almost nothing.
+// saved to ~/Videos/Recordings. Auto picks the best codec this GPU encodes
+// in hardware (AV1, then HEVC, then H.264), so recording costs the CPU
+// almost nothing on NVIDIA, AMD, and Intel alike.
 Singleton {
     id: root
 
@@ -19,6 +20,7 @@ Singleton {
     readonly property string defaultDir: root.home + "/Videos/Recordings"
 
     readonly property var codecs: [
+        { id: "auto", label: "Auto", tip: "The best codec this GPU encodes in hardware: AV1, else HEVC, else H.264" },
         { id: "av1", label: "AV1", tip: "Smallest files for the quality, encoded on the GPU. Plays in browsers, VLC, and mpv; some editors want HEVC." },
         { id: "hevc", label: "HEVC", tip: "Small files, encoded on the GPU, and the widest editor support of the efficient codecs" },
         { id: "h264", label: "H.264", tip: "Plays everywhere; larger files" }
@@ -54,7 +56,7 @@ Singleton {
         const fps = Math.round(Number(s.fps))
         return {
             dir: root.dirNorm(s.dir),
-            codec: root.pick(root.codecs.map((c) => c.id), s.codec, "av1"),
+            codec: root.pick(root.codecs.map((c) => c.id), s.codec, "auto"),
             container: root.pick(root.containers, s.container, "mp4"),
             quality: root.pick(root.qualities.map((q) => q.id), s.quality, "very_high"),
             fps: Theme.recFpsChoices.indexOf(fps) >= 0 ? fps : 60,
@@ -90,6 +92,23 @@ Singleton {
             Config.recTarget = c.target
             Config.recNotify = c.notify
         })
+    }
+
+    // The codec to record with: the chosen one, or for Auto the first of
+    // AV1, HEVC, H.264 the GPU can encode. `supported` is the list from
+    // gpu-screen-recorder --info; empty (not read yet) falls back to HEVC,
+    // which nearly every GPU of the last ten years encodes.
+    function resolveCodec(choice, supported) {
+        if (choice !== "auto")
+            return choice
+        if (!supported || !supported.length)
+            return "hevc"
+        const order = ["av1", "hevc", "h264"]
+        for (let i = 0; i < order.length; i++) {
+            if (supported.indexOf(order[i]) >= 0)
+                return order[i]
+        }
+        return "h264"
     }
 
     // The gpu-screen-recorder argv for a capture target ("DP-1" or

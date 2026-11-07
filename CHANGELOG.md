@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Screen Recorder: a new Auto codec (the default) reads `gpu-screen-recorder --info` once and records AV1 when the GPU encodes it, else HEVC, else H.264, so older NVIDIA, AMD, and Intel GPUs work out of the box. Recording marks codecs this GPU cannot encode.
+- Caffeine and idle rules: only the screensaver's hypridle listener ignores inhibitors now (`ignore_inhibit` in that listener), so lock and suspend rules still respect video players and Caffeine.
 - Applications → App Launcher: Launchers and Installed apps sit side by side with titles down the left; Installed apps folds sideways to its title bar (remembered), and the launcher columns re-flow to the space left (two when they fit, else one). Custom sits below. In a narrow window an open apps panel drops underneath.
 - Firewall widget (UFW): a shield that turns red when the firewall is off. The menu shows on/off, the default policies, and the rules (v4 and v6 shown once), deletes rules, and adds Allow, Deny, or Limit rules by port, protocol, and source. Reading needs no password (UFW's files are readable and watched, nothing polls); changes run `pkexec ufw` with a fixed, checked argv, so your polkit agent asks. Right-click toggles it. `qs ipc call firewall status|enable|disable|toggle`. New: `services/FirewallService.qml`, `pills/FirewallPill.qml`, `pills/FirewallMenu.qml`, `pills/FirewallRuleRow.qml`.
 - `install-deps.sh` asks about optional features by group (each group's packages listed), with Tailscale and the screenshot editor (satty) defaulting to No; `--required` skips them all and `--yes` takes the defaults. It also links the bar's helper scripts into `~/.local/bin`, keeping any real file it would replace as `.bak`.

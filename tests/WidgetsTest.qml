@@ -36,13 +36,19 @@ ShellRoot {
 
         const R = RecorderSettings
         const o = R.normalize({})
-        t.eq("recorder defaults", [o.codec, o.quality, o.container, o.fps, o.audio], ["av1", "very_high", "mp4", 60, "output"])
-        t.eq("bad values fall back", R.normalize({ codec: "rm -rf", fps: 7, dir: "relative/path" }).codec, "av1")
+        t.eq("recorder defaults", [o.codec, o.quality, o.container, o.fps, o.audio], ["auto", "very_high", "mp4", 60, "output"])
+        t.eq("bad values fall back", R.normalize({ codec: "rm -rf", fps: 7, dir: "relative/path" }).codec, "auto")
+        t.eq("auto picks AV1 when the GPU has it", R.resolveCodec("auto", ["h264", "hevc", "av1"]), "av1")
+        t.eq("auto picks HEVC on older GPUs", R.resolveCodec("auto", ["h264", "hevc"]), "hevc")
+        t.eq("auto picks H.264 last", R.resolveCodec("auto", ["h264"]), "h264")
+        t.eq("auto before the GPU is read: HEVC", R.resolveCodec("auto", []), "hevc")
+        t.eq("a chosen codec is kept", R.resolveCodec("h264", ["av1"]), "h264")
         t.eq("relative folders are refused", R.normalize({ dir: "relative/path" }).dir, R.defaultDir)
         t.eq("~ expands", R.normalize({ dir: "~/Clips/" }).dir, R.home + "/Clips")
-        t.eq("argv for a monitor", R.argv(o, "DP-1", "", "/tmp/a.mp4"),
+        const av1 = R.normalize({ codec: "av1" })
+        t.eq("argv for a monitor", R.argv(av1, "DP-1", "", "/tmp/a.mp4"),
             ["gpu-screen-recorder", "-w", "DP-1", "-c", "mp4", "-k", "av1", "-q", "very_high", "-f", "60", "-cursor", "yes", "-a", "default_output", "-ac", "aac", "-o", "/tmp/a.mp4"])
-        const mkv = R.normalize({ container: "mkv", audio: "none" })
+        const mkv = R.normalize({ codec: "av1", container: "mkv", audio: "none" })
         t.eq("argv for a region, no audio", R.argv(mkv, "region", "800x600+10+20", "/tmp/b.mkv"),
             ["gpu-screen-recorder", "-w", "region", "-region", "800x600+10+20", "-c", "mkv", "-k", "av1", "-q", "very_high", "-f", "60", "-cursor", "yes", "-o", "/tmp/b.mkv"])
         t.done()
