@@ -22,3 +22,4 @@ singleton BindingsService 1.0 BindingsService.qml
 singleton SystemInfoService 1.0 SystemInfoService.qml
 singleton OpacityMenuService 1.0 OpacityMenuService.qml
 singleton FreshRssService 1.0 FreshRssService.qml
+singleton TipService 1.0 TipService.qml
