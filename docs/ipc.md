@@ -24,17 +24,21 @@ hl.bind("SUPER + R", hl.dsp.exec_cmd("qs ipc call freshRss toggle"))
 | `overview desktop` · `all` | Windows in place / every workspace |
 | `overview next` · `prev` | Step cards while it is open |
 
-Settings tab ids: `bar`, `widgets`, `wallpaper`, `theme`, `applications`,
+Settings tab ids: `bar`, `widgets`, `appearance`, `applications`,
 `connectivity`, `audio`, `notifications`, `region`, `system`, `tools`.
+`theme` and `wallpaper` still work and open those sections of Appearance.
 
 ## Menus (while the widget is on a bar)
+
+Opened from a keybind, a menu appears on the main monitor (see
+[Settings → Widgets → Bars → Monitors](settings.md#widgets)).
 
 | Call | Does |
 |---|---|
 | `audioMenu toggle` · `open` · `close` | Audio menu |
 | `opacityMenu toggle` · `open` · `close` | Transparency menu |
 | `notificationBell toggleHistory` · `showHistory` · `hideHistory` | Notification history |
-| `notificationBell toggleDoNotDisturb` | Do not disturb |
+| `notificationBell toggleDoNotDisturb` | Do not disturb (works with either server) |
 
 ## Themes
 

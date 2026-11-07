@@ -41,8 +41,10 @@ restart the bar.
 
 ```
 shell.qml
- └─ Loader (only while that edge is on)
-     └─ EdgeBar  edge, theme
+ └─ Variants over ScreenService.barScreens (the monitors that get bars)
+     └─ ScreenBars  one monitor
+         └─ Loader (only while that edge is on)
+             └─ EdgeBar  edge, theme, screen
          └─ Repeater over WidgetService's layout for that edge
              └─ BarSlot  widgetId, theme
                  └─ Loader → pills/<Name>Pill.qml  (only while the widget is on)
@@ -56,6 +58,13 @@ shell.qml
   URL, so a widget that is off never creates its component.
 - Every pill takes `theme` (the live palette) and `edge` as properties, and
   reports `menuOpen` so an auto-hide bar stays out while a menu is open.
+- **Tooltips**: a pill puts a `BarTip` inside itself; after the hover delay
+  it asks `TipService` for the one shared tooltip, which `BarTipHost` (in
+  `shell.qml`) draws outside the bar. No pill owns a window for its tip.
+- **Monitors**: `ScreenService` decides which monitors get bars and which
+  is main. Menus with shared state (Audio, Transparency, notification
+  history) record the monitor that opened them, and each pill shows the
+  menu only when it is on that monitor (`ScreenService.owns()`).
 - A menu that can be opened from a keybind has a tiny `<Name>MenuService`
   with `open`, `toggle()`, `show()`, `hide()`, and an `IpcHandler`. The
   pill's click and IPC call the same functions. The service loads with the
@@ -84,9 +93,9 @@ state/bar-layout.json ── Config (FileView + JsonAdapter, one save timer)
 - Changes that should take effect at once (the Transparency menu sliders,
   saving a theme to My themes) call `Config.saveFields()` directly.
 
-`state/theme.json` is a second store, owned by `Theme`: the active theme
-and the stat and audio thresholds. It is written in one go when a theme is
-applied.
+`state/theme.json` is a second store, owned by `ThemeStore`: the active
+theme (with its fonts) and the stat and audio thresholds. It is written in
+one go when a theme is applied.
 
 ## Theme
 
@@ -94,9 +103,9 @@ applied.
 ThemePresets / My themes / theme file
         │  a theme: tone, accent, alert, tint, glass, menu, colors, temp
         ▼
-ThemeSettings.editor (Draft) ── Apply ──▶ Theme.saveLook() ──▶ state/theme.json
-                                                                   │
-Theme.activeTheme ◀────────────────────────────────────────────────┘
+ThemeSettings.editor (Draft) ── Apply ──▶ ThemeStore.saveLook() ──▶ state/theme.json
+                                                                        │
+ThemeStore.activeTheme ◀────────────────────────────────────────────────┘
         │
 ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `theme`,
                                                           and Theme.accent, Theme.text, …
@@ -107,8 +116,9 @@ ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `them
   workspace = accent at 26%, and so on), then applies the theme's own
   `colors` on top. One new accent restyles everything that should follow it.
 - **ThemePalette** has the same property names as `DefaultTheme`, so pills
-  read `theme.colAccent` without caring where it came from. Fonts and the
-  default stat and audio colors still come from `DefaultTheme`.
+  read `theme.colAccent` without caring where it came from. The theme's
+  fonts and text size flow through it too; the default stat and audio
+  colors still come from `DefaultTheme`.
 - Presets carry colors only. Saved and imported themes also carry the stat
   and audio thresholds and colors, which Apply writes with the theme.
 - Import accepts this bar's theme files and the old bar's exports, mapping
@@ -131,6 +141,15 @@ ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `them
   feature has to work before any pill touches it.
 
 ## Outside the bar
+
+- **Notifications**: with the SwayNC server, `NotificationService` runs a
+  history watcher and `swaync-client --subscribe` while the bell is shown.
+  With the built-in server, `BuiltinNotifications` owns
+  `org.freedesktop.Notifications` (Quickshell's `NotificationServer`),
+  `NotificationToasts` draws the popups, and nothing else runs. Both keep
+  history in `~/.local/state/quickshell/notification-history.json`.
+- **Fonts**: `FontService` reads `fc-list` once per session for every font
+  picker.
 
 - **Hyprland**: `services/OpacityService` writes `~/.config/hypr/opacity.lua`
   and swaps the live rules with `hyprctl repl`; `DisplayService` changes

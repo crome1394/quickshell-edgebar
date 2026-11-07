@@ -43,6 +43,18 @@ Load the file from `hyprland.lua`, for example
 `require("config.monitors")`. Without the marker, mode changes last until
 Hyprland restarts.
 
+## Notifications
+
+With Settings → Notifications → Server set to **Built-in**, the bar is the
+notification server, so SwayNC must not start. Remove its line from your
+autostart:
+
+```lua
+-- hl.exec_cmd("systemctl --user start swaync.service")
+```
+
+With **SwayNC** (the default), keep it.
+
 ## Window rules
 
 The bar's windows have the class `org.quickshell` and these titles:
@@ -69,6 +81,7 @@ the bar's layers so they are not processed twice. With HyprGlass:
 ```lua
 hg.layer("quickshell", { exclude = true })
 hg.layer("quickshell-overview", { exclude = true })
+hg.layer("quickshell-notifications", { exclude = true })  -- built-in popups
 ```
 
 ## Keybinds
