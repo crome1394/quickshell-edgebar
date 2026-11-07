@@ -85,7 +85,7 @@ FloatingWindow {
 
     // qs ipc call settings open
     // qs ipc call settings openTab applications menu
-    // Tab ids: bar, widgets, wallpaper, theme, applications, connectivity, audio,
+    // Tab ids: bar, widgets, appearance (theme, wallpaper), applications, connectivity, audio,
     // notifications, region, system, tools. The section is optional ("" for none)
     // and each tab ignores sections it does not have.
     IpcHandler {
@@ -107,10 +107,15 @@ FloatingWindow {
         }
 
         function openTab(tab: string, section: string): string {
-            const id = String(tab || "").trim()
+            let id = String(tab || "").trim()
+            let part = String(section || "").trim()
+            // Theme and Wallpaper became sections of Appearance.
+            if (id === "theme" || id === "wallpaper") {
+                part = id
+                id = "appearance"
+            }
             if (!window.knownTab(id))
                 return "unknown tab: " + id
-            const part = String(section || "").trim()
             window.jump(id, /^[A-Za-z0-9_-]{0,40}$/.test(part) ? part : "")
             window.show()
             return "ok"
@@ -123,6 +128,7 @@ FloatingWindow {
     }
 
     onRevealSerialChanged: {
+        window.pushReveal(appearancePage, "appearance")
         window.pushReveal(applicationsPage, "applications")
         window.pushReveal(connectivityPage, "connectivity")
         window.pushReveal(systemPage, "system")
@@ -248,28 +254,19 @@ FloatingWindow {
             }
         }
 
-        Loader {
-            id: wallpaperPage
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: header.bottom
-            anchors.bottom: tabs.top
-            anchors.margins: Theme.space
-            active: window.visible && window.currentTab === "wallpaper"
-            visible: window.currentTab === "wallpaper"
-            source: wallpaperPage.active ? Qt.resolvedUrl("../settings/WallpaperTab.qml") : ""
-        }
+
 
         Loader {
-            id: themePage
+            id: appearancePage
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: header.bottom
             anchors.bottom: tabs.top
             anchors.margins: Theme.space
-            active: window.visible && window.currentTab === "theme"
-            visible: window.currentTab === "theme"
-            source: themePage.active ? Qt.resolvedUrl("../settings/ThemeTab.qml") : ""
+            active: window.visible && window.currentTab === "appearance"
+            visible: window.currentTab === "appearance"
+            source: appearancePage.active ? Qt.resolvedUrl("../settings/AppearanceTab.qml") : ""
+            onLoaded: window.pushReveal(appearancePage, "appearance")
         }
 
         Loader {
@@ -381,8 +378,7 @@ FloatingWindow {
             model: [
                 { id: "bar", label: "Bar" },
                 { id: "widgets", label: "Widgets" },
-                { id: "wallpaper", label: "Wallpaper" },
-                { id: "theme", label: "Theme" },
+                { id: "appearance", label: "Appearance" },
                 { id: "applications", label: "Applications" },
                 { id: "connectivity", label: "Connectivity" },
                 { id: "audio", label: "Audio" },
