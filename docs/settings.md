@@ -107,9 +107,15 @@ devices.
   and gives one `pacman -S` line for what is missing. The same list drives
   `scripts/install-deps.sh`.
 - **Display**: resolution, refresh rate, and 8/10-bit color per monitor,
-  from the modes the monitor reports. Apply tries the mode and asks you to
-  keep it; it goes back on its own after 15 seconds. Saving it for good
-  needs the marker described in [Hyprland setup](hyprland.md#display).
+  from the modes the monitor reports. Apply closes Settings and tries the
+  mode; a small window in the middle of that monitor asks **Keep** or **Go
+  back** (Enter or Escape), and with no answer it goes back after 15
+  seconds. Either way Settings reopens on Display with the mode in use
+  selected. **Arrangement** shows the monitors to scale: drag one next to
+  another and it snaps to the nearest side (left, right, above, below),
+  edges lined up when close; Apply arrangement asks the same Keep or Go
+  back. Saving for good needs the marker described in
+  [Hyprland setup](hyprland.md#display).
 - **Transparency**: one opacity for every app, plus per-app overrides with
   focused and unfocused levels. Add an app from the open windows or by its
   class. The Settings and Inspector windows, Tack pins, and fullscreen

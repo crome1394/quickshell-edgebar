@@ -263,6 +263,11 @@ Singleton {
 
     // Settings → System → Display.
     readonly property int displayConfirmSeconds: 15
+    readonly property int displayConfirmWidth: 420
+    // Settings → System → Display → Arrangement.
+    readonly property int displayLayoutHeight: 240
+    // Snap a dropped monitor's edges to a neighbor's within this many logical pixels.
+    readonly property int displaySnapPx: 160
     readonly property int displaySettleMs: 1500
     readonly property int displayTileWidth: 150
     readonly property int displayTileHeight: 92

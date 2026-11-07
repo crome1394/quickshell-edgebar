@@ -11,3 +11,4 @@ InspectorPanel 1.0 InspectorPanel.qml
 FreshRssPanel 1.0 FreshRssPanel.qml
 NotificationToast 1.0 NotificationToast.qml
 NotificationToasts 1.0 NotificationToasts.qml
+DisplayConfirmPanel 1.0 DisplayConfirmPanel.qml

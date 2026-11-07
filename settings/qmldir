@@ -66,3 +66,4 @@ NotificationServerOptions 1.0 NotificationServerOptions.qml
 PopupStyleOptions 1.0 PopupStyleOptions.qml
 IndexTabStrip 1.0 IndexTabStrip.qml
 singleton TabColors 1.0 TabColors.qml
+MonitorLayout 1.0 MonitorLayout.qml

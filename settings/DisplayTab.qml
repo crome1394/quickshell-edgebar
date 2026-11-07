@@ -17,6 +17,9 @@ Item {
     property string selKey: ""
     property string selMode: ""
     property int selDepth: 8
+    // Select whatever the monitor runs on the next refresh: on open, and
+    // after a change ends (kept, gone back, or timed out).
+    property bool followLive: true
     // Bumped when the saved list of failed pairs changes.
     readonly property var rejected: DisplaySettings.rejectedList()
 
@@ -105,13 +108,16 @@ Item {
             if (!root.monitor && root.monitors.length) {
                 const first = root.monitors.find((m) => !m.disabled) || root.monitors[0]
                 root.pickMonitor(first.name)
-            } else if (!root.changed || !root.groupFor(root.selKey)) {
+            } else if (root.followLive || !root.changed || !root.groupFor(root.selKey)) {
                 root.syncToLive()
             }
+            // Stop following once the data is newer than the last apply.
+            if (DisplayService.settled)
+                root.followLive = false
         }
         function onPendingChanged() {
             if (!root.waiting)
-                root.syncToLive()
+                root.followLive = true
         }
     }
 
@@ -237,83 +243,9 @@ Item {
                     }
                 }
 
-                // Keep or go back, with a countdown.
-                Rectangle {
-                    visible: root.waiting && DisplayService.countdown > 0
-                    width: parent.width
-                    height: confirmCol.implicitHeight + Theme.space * 2
-                    radius: Theme.radius
-                    color: Theme.accentDim
-                    border.width: Theme.borderWidth * 2
-                    border.color: Theme.accent
-
-                    Column {
-                        id: confirmCol
-                        x: Theme.space * 1.5
-                        y: Theme.space
-                        width: parent.width - Theme.space * 3
-                        spacing: Theme.tabGap
-
-                        Text {
-                            text: "Keep this display mode?"
-                            color: Theme.wsActiveText
-                            font.family: Theme.uiFont
-                            font.pixelSize: Theme.fontPx
-                            font.bold: true
-                        }
-
-                        Text {
-                            width: parent.width
-                            wrapMode: Text.WordWrap
-                            text: (DisplayService.pending ? root.describe(DisplayService.pending.mode, DisplayService.pending.depth) : "")
-                                + ". Going back in " + DisplayService.countdown + " s."
-                            color: Theme.wsActiveText
-                            font.family: Theme.uiFont
-                            font.pixelSize: Theme.smallPx
-                        }
-
-                        Rectangle {
-                            width: parent.width
-                            height: 4
-                            radius: 2
-                            color: Theme.pillBg
-
-                            Rectangle {
-                                width: parent.width * DisplayService.countdown / Theme.displayConfirmSeconds
-                                height: parent.height
-                                radius: parent.radius
-                                color: Theme.accent
-
-                                Behavior on width {
-                                    NumberAnimation { duration: 950 }
-                                }
-                            }
-                        }
-
-                        Row {
-                            spacing: Theme.tabGap
-
-                            ChipButton {
-                                label: "Keep"
-                                active: true
-                                minWidth: Theme.fieldHeight * 3
-                                tip: "Keep this mode" + (DisplayService.managedFile.length ? " and save it" : "")
-                                onClicked: DisplayService.keep()
-                            }
-
-                            ChipButton {
-                                label: "Go back"
-                                minWidth: Theme.fieldHeight * 3
-                                tip: "Return to the previous mode now"
-                                onClicked: DisplayService.revert("Back to the previous mode.")
-                            }
-                        }
-                    }
-                }
-
                 Text {
-                    visible: root.waiting && DisplayService.countdown <= 0
-                    text: "Applying and checking…"
+                    visible: root.waiting
+                    text: "Trying a change: answer in the window in the middle of the screen."
                     color: Theme.subtext
                     font.family: Theme.uiFont
                     font.pixelSize: Theme.fontPx
@@ -542,6 +474,25 @@ Item {
                         onClicked: DisplayService.refresh()
                     }
                 }
+            }
+
+            Item {
+                width: parent.width
+                height: Theme.space
+            }
+
+            SectionHeader {
+                width: parent.width
+                title: "Arrangement"
+                hint: "Drag a monitor next to another to place it left, right, above, or below; it snaps to the nearest side. Apply tries it, with Keep or Go back."
+            }
+
+            MonitorLayout {
+                x: Theme.sectionInset
+                width: parent.width - Theme.sectionInset * 2
+                monitors: root.monitors.filter((m) => !m.disabled)
+                selected: root.selName
+                onPicked: (name) => root.pickMonitor(name)
             }
         }
     }

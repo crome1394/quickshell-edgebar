@@ -132,6 +132,87 @@ Singleton {
     }
 
     // Whole monitors.lua text for these monitors, or "" when one is off.
+    // ── Arrangement ─────────────────────────────────────────────────────
+    // A monitor's size in layout space: logical pixels, turned by its
+    // transform (1, 3, 5, 7 swap width and height).
+    function logicalSize(m) {
+        const scale = Number(m.scale) > 0 ? Number(m.scale) : 1
+        const w = Math.round(Number(m.width) / scale)
+        const h = Math.round(Number(m.height) / scale)
+        return Number(m.transform) % 2 === 1 ? { w: h, h: w } : { w: w, h: h }
+    }
+
+    function overlaps(a, b) {
+        return a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h
+    }
+
+    // Where a monitor dropped at (x, y) lands: touching the nearest free
+    // side of another monitor (left, right, above, below), edges aligned
+    // when within `near`, never overlapping. rect: { x, y, w, h };
+    // others: the same for the rest. With no others it goes to 0, 0.
+    function snap(rect, others, near) {
+        if (!others.length)
+            return { x: 0, y: 0 }
+        const pull = (value, targets) => {
+            for (let i = 0; i < targets.length; i++) {
+                if (Math.abs(value - targets[i]) <= near)
+                    return targets[i]
+            }
+            return value
+        }
+        let best = null
+        let bestGap = Infinity
+        for (let i = 0; i < others.length; i++) {
+            const o = others[i]
+            // Along a side, keep at least one pixel of shared edge.
+            const y = Math.min(o.y + o.h - 1, Math.max(o.y - rect.h + 1, pull(rect.y, [o.y, o.y + o.h - rect.h, o.y + (o.h - rect.h) / 2])))
+            const x = Math.min(o.x + o.w - 1, Math.max(o.x - rect.w + 1, pull(rect.x, [o.x, o.x + o.w - rect.w, o.x + (o.w - rect.w) / 2])))
+            const spots = [
+                { x: o.x + o.w, y: y },
+                { x: o.x - rect.w, y: y },
+                { x: x, y: o.y + o.h },
+                { x: x, y: o.y - rect.h }
+            ]
+            for (let k = 0; k < spots.length; k++) {
+                const spot = { x: Math.round(spots[k].x), y: Math.round(spots[k].y), w: rect.w, h: rect.h }
+                if (others.some((other) => root.overlaps(spot, other)))
+                    continue
+                const gap = Math.hypot(spot.x - rect.x, spot.y - rect.y)
+                if (gap < bestGap) {
+                    bestGap = gap
+                    best = { x: spot.x, y: spot.y }
+                }
+            }
+        }
+        return best || { x: Math.round(rect.x), y: Math.round(rect.y) }
+    }
+
+    // Shift a layout { name: { x, y } } so its top-left corner is 0, 0.
+    function normalized(layout) {
+        const names = Object.keys(layout)
+        if (!names.length)
+            return layout
+        const minX = Math.min.apply(null, names.map((n) => layout[n].x))
+        const minY = Math.min.apply(null, names.map((n) => layout[n].y))
+        const out = {}
+        for (let i = 0; i < names.length; i++)
+            out[names[i]] = { x: layout[names[i]].x - minX, y: layout[names[i]].y - minY }
+        return out
+    }
+
+    // "DP-2 is to the right of DP-1": how b sits next to a, or "".
+    function relation(a, b) {
+        if (b.x >= a.x + a.w)
+            return "right of"
+        if (b.x + b.w <= a.x)
+            return "left of"
+        if (b.y >= a.y + a.h)
+            return "below"
+        if (b.y + b.h <= a.y)
+            return "above"
+        return ""
+    }
+
     function monitorsFile(specs, stamp) {
         const blocks = []
         for (let i = 0; i < specs.length; i++) {
