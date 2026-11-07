@@ -149,6 +149,8 @@ FloatingWindow {
 
         TabStrip {
             id: tabs
+            // The Inspector keeps flat tabs; dividers are a Settings look.
+            indexAllowed: false
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: header.bottom

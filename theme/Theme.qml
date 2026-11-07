@@ -78,6 +78,10 @@ Singleton {
     readonly property int indexTabInset: 5
     readonly property real indexTabIdleOpacity: 0.8
     readonly property int indexTabMinPx: 8
+    // Section dividers along the top of a page: widest tab, and how much
+    // each next tab's shade steps away from the parent color.
+    readonly property int indexTabMaxWidth: 200
+    readonly property real indexTabShadeStep: 0.14
     readonly property color indexTabDarkInk: "#1c1917"
     readonly property color indexTabLightInk: "#ffffff"
     // Rainbow divider colors, one per Settings tab in order.

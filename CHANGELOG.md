@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Section tabs along the top of each Settings page are dividers too, standing on the page in shades of the parent tab's color, and no wider than 200 px. Flat turns both levels back into chips; the Inspector keeps flat tabs. New: `settings/TabColors.qml`.
+- `tests/run.sh` checks that the whole shell loads before running the logic tests, catching load errors that lint does not.
 - Settings tabs look like index dividers: colored tabs hanging from the page, the active one raised with its color along the page edge, labels shrinking to fit, and dark or light text chosen per color. Appearance → Theme → Settings window switches between Index dividers and Flat (the old chips) and between Rainbow and From accent colors. New: `settings/IndexTabStrip.qml`.
 - Notification server Auto (the new default): the bar uses the daemon already running (SwayNC, dunst, mako, …) and keeps history, or becomes the server itself when there is none, so a notification daemon is optional. At start Auto waits a few seconds for a daemon launched at login before taking over. The manual SwayNC choice is gone (Auto covers it; an older saved SwayNC choice reads as Auto), leaving Auto and Built-in. Do Not Disturb also works with dunst and mako. New: `services/NotificationDaemon.qml`.
 - Built-in popups are customizable under Settings → Notifications → Popups: style (compact, standard, large), motion (slide, fade, none), width, how many show, icon size, body lines, edge gap, glass, a progress bar that pauses on hover, grouping by app, big image previews, an app color stripe, and your own color per app, plus Send a test. New: `config/PopupSettings.qml`, `settings/PopupStyleOptions.qml`.

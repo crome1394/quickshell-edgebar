@@ -25,6 +25,23 @@ else
 fi
 
 failed=0
+
+# Load check: start the real shell.qml (bars off, so nothing shows) and
+# fail if Quickshell cannot load it. Catches errors lint misses, such as
+# a property that clashes with one Qt already defines.
+load="$work/ShellLoad"
+mkdir -p -- "$load/home" "$load/state"
+(cd -- "$repo" && tar --exclude=./.git --exclude=./state --exclude=./tests -cf - .) | tar -xf - -C "$load"
+printf '{"showTopBar": false, "showBottomBar": false, "showLeftBar": false, "showRightBar": false}\n' >"$load/state/bar-layout.json"
+HOME="$load/home" XDG_CONFIG_HOME="$load/home/.config" timeout 8 qs -p "$load" >"$load/run.log" 2>&1 || true
+if grep -qE 'Failed to load configuration|is not a type|unavailable|Cannot override' "$load/run.log"; then
+    printf '%-22s failed to load\n' "ShellLoad"
+    grep -E 'ERROR|caused by' "$load/run.log" | sed 's/^/    /' | head -10
+    failed=1
+else
+    printf '%-22s loaded\n' "ShellLoad"
+fi
+
 for name in "${tests[@]}"; do
     if [[ ! "$name" =~ ^[A-Za-z0-9]+Test$ || ! -f "$here/$name.qml" ]]; then
         printf 'unknown test: %s\n' "$name" >&2
