@@ -1,0 +1,59 @@
+# Widgets
+
+Each screen edge can have a bar. Turn widgets on and place them under
+**Settings → Widgets → Bars**, then press Apply. A widget that is off is
+not loaded at all. Tooltips open outside the bar, away from the edge.
+
+| Widget | Shows | Click |
+|---|---|---|
+| **Workspaces** | Each workspace with its symbol, label, and font | Switch to it |
+| **Clock** | Time in your format and font | Opens the calendar (the click is configurable) |
+| **Config Menu Icon** | A spanner | Opens Settings |
+| **System Tray** | App tray icons | As each app defines |
+| **Power** | Power icon | Menu: Lock, Logout, Reboot, Shutdown |
+| **Transparency** | Opacity icon | Menu with sliders (see below) |
+| **Network** | Address or adapter name | Left: menu. Right: Wi-Fi on/off |
+| **Bluetooth** | Icon, plus the lowest battery of connected devices | Left: menu. Right: adapter power |
+| **App Launcher** (up to 4) | Your pinned apps in one pill | Launch; a dot marks running apps |
+| **Application Menu** | A symbol or an SVG/PNG image | Runs your command |
+| **System Stats** | CPU, memory, GPU, VRAM: bar, percent, second value | Each group runs a command (btop, nvtop by default) |
+| **Audio** | Speaker and microphone levels | Left: menu. Right: mute that side. Wheel: volume |
+| **Notifications** | Bell with a count | Left: history. Right: do not disturb |
+| **Tailscale** | The Tailscale mark (dim when off) | Left: menu. Right: on/off |
+| **Inspector** | A search icon | Opens the [Inspector](inspector.md) |
+| **FreshRSS** | Unread count | Opens the [reader](freshrss.md) |
+
+**Active Window** is not a bar pill: it shows the focused window's icon,
+class, and title in a screen corner (Widgets → Active Window).
+
+## Menus
+
+- **Audio**: Active Streams (each app's volume, mute, and level), Playback
+  and Recording (device, sound profile, volume, left/right levels), and
+  pw-top and Restart Audio at the bottom. Playback and Recording collapse
+  to one line. Optional volume limit of 100%.
+- **Network**: the connected Wi-Fi network on top, then the rest; Connection
+  editor, Refresh IP, and Flush DNS at the bottom.
+- **Bluetooth**: devices, Scan, Discoverable, and power. Pairing trusts and
+  connects the device, so headsets reconnect on their own.
+- **Tailscale**: on/off, this device's addresses with copy buttons, exit
+  node (searchable), options (DNS, subnet routes, Shields up, SSH, …), and
+  the machines on the tailnet with Taildrop send. Checks every 30 seconds,
+  every 3 while the menu is open.
+- **Transparency**: one slider for every app, a slider per override, ✕ to
+  remove an override, and Add override to pick an open window. Changes
+  save at once. See [Settings → Transparency](settings.md#system).
+- **Notifications**: the history list beside the bar, with copy, dismiss,
+  and clear.
+
+## Bar behavior
+
+- **Auto-hide** (the H chip on a bar in Widgets → Bars): the bar slides off
+  its edge and gives the space back to windows. Touch the edge to bring it
+  back. It stays out while hovered or while one of its menus is open.
+- **Dock hover** (Bar → Dock): Mac-style magnify, jump, or both, on the app
+  launchers or every icon widget.
+- **Side bars** turn launcher icons 90° so they stay upright.
+- **Overview**: a workspace overview overlay, opened with
+  `qs ipc call overview toggle` (see [IPC calls](ipc.md)). Set up under
+  Bar → Overview.
