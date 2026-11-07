@@ -10,6 +10,7 @@ Singleton {
     readonly property ThemePalette palette: ThemePalette {
         colors: ThemeBuilder.build(ThemeStore.activeTheme)
         temp: ThemeStore.activeTheme.temp
+        fonts: ThemeStore.activeTheme.fonts
     }
 
 

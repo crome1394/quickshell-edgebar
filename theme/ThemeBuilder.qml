@@ -110,6 +110,23 @@ Singleton {
         return text.length ? text.substring(0, 48) : "Custom"
     }
 
+    // A font family name, or "" for the default.
+    function fontName(value) {
+        const text = String(value || "").replace(/[\u0000-\u001f]/g, "").trim()
+        return text.length <= 80 ? text : ""
+    }
+
+    // { ui, bar, size }: "" fonts use DefaultTheme's; size is a percent.
+    function fontsNorm(src) {
+        const f = src && typeof src === "object" ? src : {}
+        const size = Math.round(Number(f.size) / 5) * 5
+        return {
+            ui: root.fontName(f.ui),
+            bar: root.fontName(f.bar),
+            size: size >= 80 && size <= 130 ? size : 100
+        }
+    }
+
     // A clean theme: known fields only, valid colors, percents in range.
     function normalize(src) {
         const s = src && typeof src === "object" ? src : {}
@@ -138,7 +155,8 @@ Singleton {
             glass: root.percent(s.glass, light ? 100 : 56, 0),
             menu: root.percent(s.menu, light ? 100 : 90, 50),
             colors: colors,
-            temp: { warmAt: warm, hotAt: hot }
+            temp: { warmAt: warm, hotAt: hot },
+            fonts: root.fontsNorm(s.fonts)
         }
     }
 

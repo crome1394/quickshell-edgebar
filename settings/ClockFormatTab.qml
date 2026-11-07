@@ -5,6 +5,7 @@ import QtQuick.Dialogs
 import Quickshell
 import Quickshell.Io
 import qs.config
+import qs.services
 import qs.theme
 
 Item {
@@ -13,8 +14,16 @@ Item {
     property bool formReady: false
     property bool fontOpen: false
     property bool fontWaiting: false
-    property var fontNames: []
-    property bool fontReady: false
+
+    // The shared font list arrived while a picker was waiting for it.
+    onFontReadyChanged: {
+        if (root.fontReady && root.fontWaiting) {
+            root.fontWaiting = false
+            root.fontOpen = true
+        }
+    }
+    readonly property var fontNames: FontService.families
+    readonly property bool fontReady: FontService.ready
 
     readonly property int styleWidth: Theme.chip + Theme.borderWidth * 4
     readonly property var weekChoices: [
@@ -56,62 +65,13 @@ Item {
     }
     readonly property color previewColor: ClockSettings.editor.value.color.length ? ClockSettings.editor.value.color : Theme.text
 
-    function takeFonts(text) {
-        const lines = String(text || "").split("\n")
-        const seen = {}
-        const out = []
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i]
-            const bar = line.lastIndexOf("|")
-            if (bar <= 0)
-                continue
-            if (line.substring(bar + 1).trim() !== "True")
-                continue
-            const families = line.substring(0, bar).split(",")
-            for (let j = 0; j < families.length; j++) {
-                const name = families[j].trim()
-                if (!name.length || seen[name])
-                    continue
-                seen[name] = true
-                out.push(name)
-            }
-        }
-        out.sort((a, b) => String(a).localeCompare(String(b)))
-        return out
-    }
-
-    function fallbackFonts() {
-        const all = Qt.fontFamilies()
-        const out = []
-        for (let i = 0; i < all.length; i++) {
-            const name = String(all[i] || "")
-            if (!name.length || /\.(pcf|bdf|psf|otb|fon)$/i.test(name))
-                continue
-            out.push(name)
-        }
-        return out
-    }
-
     function openFont() {
         if (root.fontReady) {
             root.fontOpen = true
             return
         }
         root.fontWaiting = true
-        if (!fontList.running)
-            fontList.running = true
-    }
-
-    function fontsArrived(text) {
-        if (root.fontReady)
-            return
-        const parsed = root.takeFonts(text)
-        root.fontNames = parsed.length ? parsed : root.fallbackFonts()
-        root.fontReady = true
-        if (!root.fontWaiting)
-            return
-        root.fontWaiting = false
-        root.fontOpen = true
+        FontService.load()
     }
 
     function commitFormat() {
@@ -123,7 +83,7 @@ Item {
     Component.onCompleted: {
         formatField.text = ClockSettings.editor.value.format
         root.formReady = true
-        fontList.running = true
+        FontService.load()
     }
 
     // Undo, Apply, and saves elsewhere change the draft; keep the field in step.
@@ -138,16 +98,6 @@ Item {
     SystemClock {
         id: previewClock
         precision: ClockSettings.hasSeconds(root.previewFormat) ? SystemClock.Seconds : SystemClock.Minutes
-    }
-
-    Process {
-        id: fontList
-        command: ["fc-list", "-f", "%{family}|%{scalable}\n"]
-        stdout: StdioCollector {
-            id: fontOut
-            waitForEnd: true
-        }
-        onExited: (code) => root.fontsArrived(code === 0 ? fontOut.text : "")
     }
 
     ColorDialog {

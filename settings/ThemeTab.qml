@@ -5,6 +5,7 @@ import QtQuick.Dialogs
 import Quickshell
 import Quickshell.Io
 import qs.config
+import qs.services
 import qs.theme
 
 // Settings → Theme: pick a preset or one of your saved themes, adjust it
@@ -23,6 +24,8 @@ Item {
     readonly property string home: Quickshell.env("HOME") || "/"
 
     property string paintKey: ""
+    // Which font the picker is choosing: "ui", "bar", or "" (closed).
+    property string fontKey: ""
     property string status: ""
     property bool statusBad: false
 
@@ -121,7 +124,7 @@ Item {
             SectionHeader {
                 width: parent.width
                 title: "Current theme"
-                hint: "Choose a theme below, adjust it here, then Apply. Presets change colors only; your stat and audio thresholds stay."
+                hint: "Choose a theme below, adjust it here, then Apply. Presets change colors only; your fonts and stat and audio thresholds stay."
             }
 
             Column {
@@ -247,6 +250,72 @@ Item {
                         readout: root.theme.temp.hotAt + "°"
                         tip: "System Stats shows the CPU temperature in the alert color above this"
                         onChanged: (value) => ThemeSettings.setTemp("hotAt", value)
+                    }
+                }
+
+                FormRow {
+                    width: parent.width
+                    label: "UI font"
+
+                    Row {
+                        spacing: Theme.tabGap
+
+                        ChipButton {
+                            label: root.theme.fonts.ui.length ? root.theme.fonts.ui : "Default (" + DefaultTheme.uiFont + ")"
+                            tip: "Font for menus, Settings, and labels"
+                            onClicked: {
+                                root.fontKey = "ui"
+                                FontService.load()
+                            }
+                        }
+
+                        ChipButton {
+                            visible: root.theme.fonts.ui.length > 0
+                            label: "Default"
+                            tip: "Use " + DefaultTheme.uiFont
+                            onClicked: ThemeSettings.setFont("ui", "")
+                        }
+                    }
+                }
+
+                FormRow {
+                    width: parent.width
+                    label: "Bar font"
+
+                    Row {
+                        spacing: Theme.tabGap
+
+                        ChipButton {
+                            label: root.theme.fonts.bar.length ? root.theme.fonts.bar : "Default (" + DefaultTheme.fontFamily + ")"
+                            tip: "Font for text on the bar (clock, stats, workspace names) unless a widget sets its own"
+                            onClicked: {
+                                root.fontKey = "bar"
+                                FontService.load()
+                            }
+                        }
+
+                        ChipButton {
+                            visible: root.theme.fonts.bar.length > 0
+                            label: "Default"
+                            tip: "Use " + DefaultTheme.fontFamily
+                            onClicked: ThemeSettings.setFont("bar", "")
+                        }
+                    }
+                }
+
+                FormRow {
+                    width: parent.width
+                    label: "Text size"
+
+                    IntSlider {
+                        width: parent.width
+                        from: 80
+                        to: 130
+                        step: 5
+                        value: root.theme.fonts.size
+                        readout: root.theme.fonts.size + "%"
+                        tip: "Scales text and icons on the bar, in menus, and in Settings"
+                        onChanged: (value) => ThemeSettings.setFont("size", value)
                     }
                 }
 
@@ -459,6 +528,23 @@ Item {
         onApplyClicked: ThemeSettings.editor.apply()
         onUndoClicked: ThemeSettings.editor.undo()
         onResetClicked: ThemeSettings.editor.reset()
+    }
+
+    // Font list over the page while choosing a font.
+    Loader {
+        anchors.fill: parent
+        z: 3
+        active: root.fontKey.length > 0 && FontService.ready
+        sourceComponent: Component {
+            FontPicker {
+                families: FontService.families
+                onChosen: (family) => {
+                    ThemeSettings.setFont(root.fontKey, family)
+                    root.fontKey = ""
+                }
+                onDismiss: root.fontKey = ""
+            }
+        }
     }
 
     ColorDialog {

@@ -68,7 +68,21 @@ Singleton {
     function choose(entry) {
         if (!entry)
             return
-        root.editor.edit({ theme: entry, stats: entry.stats || null, audio: entry.audio || null })
+        const theme = Object.assign({}, entry)
+        // Presets carry no fonts: keep the ones on the page.
+        if (!entry.fonts)
+            theme.fonts = root.editor.value.theme.fonts
+        root.editor.edit({ theme: theme, stats: entry.stats || null, audio: entry.audio || null })
+    }
+
+    // A font ("ui" or "bar"; "" for the default) or the text size percent.
+    function setFont(key, value) {
+        if (key !== "ui" && key !== "bar" && key !== "size")
+            return
+        const next = Object.assign({}, root.editor.value.theme)
+        next.fonts = Object.assign({}, next.fonts)
+        next.fonts[key] = value
+        root.editor.set("theme", next)
     }
 
     // One simple edit to the drafted theme (accent, alert, tint, glass,
