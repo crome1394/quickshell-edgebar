@@ -20,7 +20,10 @@ Item {
             Qt.callLater(() => root.settled = root.target !== null)
     }
 
-    // Point on the outer edge of the target's bar window, centered on it.
+    // Point on the outer edge of the target's bar window, centered on the
+    // target. It is worked out in window coordinates, then mapped into the
+    // target's own coordinates (the anchor rect is relative to the anchor
+    // item), which also undoes the 90° turn of pills on side bars.
     function place() {
         const item = root.target
         if (!item)
@@ -28,25 +31,28 @@ Item {
         const content = item.Window.contentItem
         if (!content)
             return
-        const bounds = item.mapToItem(content, 0, 0, item.width, item.height)
-        const cx = Math.round(bounds.x + bounds.width / 2)
-        const cy = Math.round(bounds.y + bounds.height / 2)
+        const box = item.mapToItem(content, 0, 0, item.width, item.height)
+        const cx = box.x + box.width / 2
+        const cy = box.y + box.height / 2
         const edge = TipService.edge
-        let x = cx
-        let y = Math.round(content.height)
+        let wx = cx
+        let wy = content.height
         let flags = Edges.Bottom
         if (edge === "bottom") {
-            y = 0
+            wy = 0
             flags = Edges.Top
         } else if (edge === "left") {
-            x = Math.round(content.width)
-            y = cy
+            wx = content.width
+            wy = cy
             flags = Edges.Right
         } else if (edge === "right") {
-            x = 0
-            y = cy
+            wx = 0
+            wy = cy
             flags = Edges.Left
         }
+        const local = item.mapFromItem(content, wx, wy)
+        const x = Math.round(local.x)
+        const y = Math.round(local.y)
         const anchor = tipPopup.anchor
         // qmllint disable missing-property
         anchor.edges = flags

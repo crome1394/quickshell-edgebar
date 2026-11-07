@@ -103,15 +103,15 @@
             "name": "swaync-client",
             "pkg": "swaync",
             "area": "Notifications",
-            "need": "required",
-            "use": "Do Not Disturb and the bell"
+            "need": "optional",
+            "use": "Only for the SwayNC notification server (Settings → Notifications → Server). Not needed with Built-in."
         },
         {
             "name": "dbus-monitor",
             "pkg": "dbus",
             "area": "Notifications",
-            "need": "required",
-            "use": "Notification history"
+            "need": "optional",
+            "use": "Notification history with the SwayNC server only"
         },
         {
             "name": "wl-copy",
