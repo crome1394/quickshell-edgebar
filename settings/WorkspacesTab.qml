@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Dialogs
-import Quickshell.Io
 import qs.config
+import qs.services
 import qs.theme
 
 Item {
@@ -15,9 +15,15 @@ Item {
     property bool undoReady: false
     property int fontTarget: -1
     property int colorTarget: -1
-    property var fontNames: []
-    property bool fontReady: false
+    readonly property var fontNames: FontService.families
+    readonly property bool fontReady: FontService.ready
     property bool fontWaiting: false
+
+    // The shared font list arrived while a picker was waiting for it.
+    onFontReadyChanged: {
+        if (root.fontReady)
+            root.showPendingFont()
+    }
     property int fontPending: -1
 
     readonly property bool twoCol: width >= Theme.settingsTwoColMin
@@ -309,8 +315,8 @@ Item {
         root.fontWaiting = true
         if (root.fontReady)
             root.showPendingFont()
-        else if (!fontList.running)
-            fontList.running = true
+        else
+            FontService.load()
     }
 
     function showPendingFont() {
@@ -318,51 +324,6 @@ Item {
             return
         root.fontTarget = root.fontPending
         root.fontWaiting = false
-    }
-
-    function takeFonts(text) {
-        const seen = {}
-        const out = []
-        const lines = String(text || "").split("\n")
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim()
-            const bar = line.lastIndexOf("|")
-            if (bar <= 0)
-                continue
-            if (line.substring(bar + 1).trim() !== "True")
-                continue
-            const families = line.substring(0, bar).split(",")
-            for (let j = 0; j < families.length; j++) {
-                const name = families[j].trim()
-                if (!name.length || seen[name])
-                    continue
-                seen[name] = true
-                out.push(name)
-            }
-        }
-        out.sort((a, b) => String(a).localeCompare(String(b)))
-        return out
-    }
-
-    function fallbackFonts() {
-        const all = Qt.fontFamilies()
-        const out = []
-        for (let i = 0; i < all.length; i++) {
-            const name = String(all[i] || "")
-            if (!name.length || /\.(pcf|bdf|psf|otb|fon)$/i.test(name))
-                continue
-            out.push(name)
-        }
-        return out
-    }
-
-    function fontsArrived(text) {
-        if (root.fontReady)
-            return
-        const parsed = root.takeFonts(text)
-        root.fontNames = parsed.length ? parsed : root.fallbackFonts()
-        root.fontReady = true
-        root.showPendingFont()
     }
 
     function applyFont(family) {
@@ -455,17 +416,6 @@ Item {
 
     // Bitmap faces (cursor.pcf, Arabic Newspaper, …) make Qt remeasure and
     // warn on every resize. Only scalable families are offered.
-    Process {
-        id: fontList
-        command: ["fc-list", "-f", "%{family}|%{scalable}\n"]
-        stdout: StdioCollector {
-            id: fontOut
-            waitForEnd: true
-        }
-        onExited: (code) => {
-            root.fontsArrived(code === 0 ? fontOut.text : "")
-        }
-    }
 
     ColorDialog {
         id: colors

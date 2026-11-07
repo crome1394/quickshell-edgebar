@@ -40,6 +40,12 @@ ShellRoot {
         t.eq("light tone defaults", B.normalize({ tone: "light" }).tint, B.lightTint)
         t.ok("light text is dark", B.luminance(B.build({ tone: "light" }).colFg) < 0.2)
 
+        // Fonts: names cleaned, size on a 5% step inside 80..130.
+        t.eq("fonts default", B.normalize({}).fonts, { ui: "", bar: "", size: 100 })
+        t.eq("fonts keep names", B.normalize({ fonts: { ui: "Inter", bar: "JetBrains Mono", size: 112 } }).fonts, { ui: "Inter", bar: "JetBrains Mono", size: 110 })
+        t.eq("fonts size clamps", B.normalize({ fonts: { size: 300 } }).fonts.size, 100)
+        t.eq("fonts strip control chars", B.normalize({ fonts: { ui: "In\nter" } }).fonts.ui, "Inter")
+
         // Every preset builds a full palette.
         for (let k = 0; k < ThemePresets.list.length; k++) {
             const pal = B.build(ThemePresets.list[k])

@@ -1,8 +1,8 @@
 import QtQuick
 
 // The palette every pill and menu reads (passed down as `theme`). Colors
-// come from the active theme through ThemeBuilder; fonts, the default
-// stat and audio colors, and the opacity defaults stay in DefaultTheme.
+// come from the active theme through ThemeBuilder, and so do the fonts
+// and text size. The default stat and audio colors stay in DefaultTheme.
 // Property names match DefaultTheme, so either can stand in for the other.
 QtObject {
     id: root
@@ -11,6 +11,8 @@ QtObject {
     required property var colors
     // The active theme's temperature steps, { warmAt, hotAt }.
     required property var temp
+    // The active theme's fonts, { ui, bar, size }; "" keeps DefaultTheme's.
+    required property var fonts
 
     readonly property color colBar: root.colors.colBar
     readonly property color colBarBorder: root.colors.colBarBorder
@@ -50,10 +52,11 @@ QtObject {
     readonly property int statUtilThreshold2: DefaultTheme.statUtilThreshold2
     readonly property int statUtilThreshold3: DefaultTheme.statUtilThreshold3
 
-    readonly property string fontFamily: DefaultTheme.fontFamily
-    readonly property string uiFont: DefaultTheme.uiFont
+    readonly property real scale: root.fonts.size / 100
+    readonly property string fontFamily: root.fonts.bar.length ? root.fonts.bar : DefaultTheme.fontFamily
+    readonly property string uiFont: root.fonts.ui.length ? root.fonts.ui : DefaultTheme.uiFont
     readonly property string iconFont: DefaultTheme.iconFont
-    readonly property int fontPx: DefaultTheme.fontPx
-    readonly property int smallPx: DefaultTheme.smallPx
-    readonly property int iconPx: DefaultTheme.iconPx
+    readonly property int fontPx: Math.round(DefaultTheme.fontPx * root.scale)
+    readonly property int smallPx: Math.round(DefaultTheme.smallPx * root.scale)
+    readonly property int iconPx: Math.round(DefaultTheme.iconPx * root.scale)
 }
