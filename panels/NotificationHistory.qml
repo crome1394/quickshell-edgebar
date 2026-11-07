@@ -335,6 +335,7 @@ Item {
                             NotificationService.setExpanded(row.index, !row.modelData.expanded)
                             root.focusKeys()
                         }
+                    }
 
                     Column {
                         id: rowCol
@@ -523,7 +524,6 @@ Item {
                                 }
                             }
                         }
-                    }
                     }
                 }
             }

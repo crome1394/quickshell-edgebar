@@ -38,7 +38,9 @@ Rectangle {
     }
 
     // Sit outside the bar: under a top bar, over a bottom bar, and beside a side bar.
-    function placeHistory() {
+    // nudge forces a reposition on open. From onAnchoring it must stay off and
+    // only write changed values, or each write re-polishes the popup forever.
+    function placeHistory(nudge) {
         const content = root.Window.contentItem
         if (!content)
             return
@@ -66,10 +68,15 @@ Rectangle {
         }
         const anchor = historyPopup.anchor
         // qmllint disable missing-property
-        anchor.edges = edgeFlags
-        anchor.gravity = grow
-        anchor.rect = Qt.rect(x + 3, y + 3, 1, 1)
-        anchor.rect = Qt.rect(x, y, 1, 1)
+        if (anchor.edges !== edgeFlags)
+            anchor.edges = edgeFlags
+        if (anchor.gravity !== grow)
+            anchor.gravity = grow
+        if (nudge)
+            anchor.rect = Qt.rect(x + 3, y + 3, 1, 1)
+        const r = anchor.rect
+        if (nudge || r.x !== x || r.y !== y || r.width !== 1 || r.height !== 1)
+            anchor.rect = Qt.rect(x, y, 1, 1)
         // qmllint enable missing-property
     }
 
@@ -170,7 +177,7 @@ Rectangle {
         // qmllint enable missing-property
         onVisibleChanged: {
             if (visible) {
-                root.placeHistory()
+                root.placeHistory(true)
                 if (historyBody)
                     historyBody.focusKeys()
             }

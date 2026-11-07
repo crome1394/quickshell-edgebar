@@ -308,6 +308,10 @@ Singleton {
         let path = String(raw || "").trim()
         if (path.indexOf("file://") === 0)
             path = path.substring(7)
+        // Quickshell passes image paths as image://icon/<path>; the icon
+        // loader squares and crops them, so use the file itself.
+        else if (path.indexOf("image://icon/") === 0)
+            path = path.substring(13)
         if (path.charAt(0) !== "/" || path.indexOf("\u0000") >= 0)
             return ""
         if (!/\.(png|jpe?g|webp|gif|bmp)$/i.test(path))

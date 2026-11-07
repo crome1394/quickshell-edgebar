@@ -36,6 +36,9 @@ Item {
         const img = root.latest ? String(root.latest.image || "") : ""
         if (!img.length)
             return ""
+        const path = NotificationService.localImagePath(img)
+        if (path.length)
+            return "file://" + path
         return img.charAt(0) === "/" ? "file://" + img : img
     }
     readonly property string icon: root.latest ? IconService.url(String(root.latest.appIcon || "")) : ""
@@ -184,14 +187,25 @@ Item {
             spacing: Theme.tabGap
 
             // Big image on top: large style, or any style with previews on.
-            Image {
-                visible: root.preview && status === Image.Ready
+            // The whole image is fitted (scaled up when small), not cropped.
+            Rectangle {
+                visible: root.preview && previewImage.status === Image.Ready
                 width: parent.width
                 height: visible ? Math.round(width * Theme.popupPreviewRatio) : 0
-                source: root.preview ? root.picture : ""
-                sourceSize.width: root.look.width * 2
-                fillMode: Image.PreserveAspectCrop
-                asynchronous: true
+                radius: Theme.radiusSm
+                color: Theme.thumbBackdrop
+
+                Image {
+                    id: previewImage
+                    anchors.fill: parent
+                    source: root.preview ? root.picture : ""
+                    sourceSize.width: root.look.width * 2
+                    sourceSize.height: Math.round(root.look.width * 2 * Theme.popupPreviewRatio)
+                    fillMode: Image.PreserveAspectFit
+                    smooth: true
+                    mipmap: true
+                    asynchronous: true
+                }
             }
 
             Row {
