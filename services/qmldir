@@ -27,3 +27,6 @@ singleton FontService 1.0 FontService.qml
 singleton ScreenService 1.0 ScreenService.qml
 singleton BuiltinNotifications 1.0 BuiltinNotifications.qml
 singleton NotificationDaemon 1.0 NotificationDaemon.qml
+singleton CaffeineService 1.0 CaffeineService.qml
+singleton NightLightService 1.0 NightLightService.qml
+singleton RecorderService 1.0 RecorderService.qml

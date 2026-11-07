@@ -22,6 +22,13 @@ not loaded at all. Tooltips open outside the bar, away from the edge.
 | **Tailscale** | The Tailscale mark (dim when off) | Left: menu. Right: on/off |
 | **Inspector** | A search icon | Opens the [Inspector](inspector.md) |
 | **FreshRSS** | Unread count | Opens the [reader](freshrss.md) |
+| **Caffeine** | A tea cup, filled while on | Left: keep the screen awake (no screensaver or idle lock). Right: 30 min → 1 h → 2 h → until off |
+| **Night Light** | A moon | Left: warm the screen against blue light (needs `hyprsunset`). Wheel: warmer or cooler |
+| **Screen Recorder** | A record button; a red mark and the time while recording | Left: record (focused monitor or a region, per Settings) or stop. Right: record a region. Middle: open the folder |
+
+Caffeine holds a standard Wayland idle inhibitor, which hypridle respects.
+If Tools → Screensaver → "Always start after idle" is on, the screensaver
+ignores inhibitors on purpose, Caffeine included.
 
 **Active Window** is not a bar pill: it shows the focused window's icon,
 class, and title in a screen corner (Widgets → Active Window).

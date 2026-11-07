@@ -261,6 +261,20 @@
             "area": "FreshRSS",
             "need": "optional",
             "use": "Lets mpv play YouTube and other video pages"
+        },
+        {
+            "name": "gpu-screen-recorder",
+            "pkg": "gpu-screen-recorder",
+            "area": "Recording",
+            "need": "optional",
+            "use": "Screen Recorder widget (GPU-encoded AV1, HEVC, or H.264)"
+        },
+        {
+            "name": "hyprsunset",
+            "pkg": "hyprsunset",
+            "area": "Night Light",
+            "need": "optional",
+            "use": "Night Light widget: warms the screen against blue light"
         }
     ],
     "fonts": [

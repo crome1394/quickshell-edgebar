@@ -127,6 +127,9 @@ Singleton {
             rows.push({ id: root.launcherId(n), label: root.launcherLabel(n) })
         rows.push(
             { id: "freshRss", label: "FreshRSS" },
+            { id: "caffeine", label: "Caffeine" },
+            { id: "nightLight", label: "Night Light" },
+            { id: "recorder", label: "Screen Recorder" },
             { id: "workspaces", label: "Workspaces" },
             { id: "stats", label: "System Stats" },
             { id: "tray", label: "System Tray" },
@@ -162,6 +165,9 @@ Singleton {
             rows.push({ id: root.launcherId(n), zone: "bottom" })
         rows.push(
             { id: "freshRss", zone: "bottom" },
+            { id: "caffeine", zone: "bottom" },
+            { id: "nightLight", zone: "bottom" },
+            { id: "recorder", zone: "bottom" },
             { id: "opacity", zone: "bottom" },
             { id: "networkPanel", zone: "bottom" },
             { id: "bluetooth", zone: "bottom" },
@@ -216,6 +222,7 @@ Singleton {
             || key === "networkPanel" || key === "bluetooth" || key === "launcher"
             || key === "stats" || key === "notifications" || key === "volume"
             || key === "tailscale" || key === "hyprInsp" || key === "freshRss"
+            || key === "caffeine" || key === "nightLight" || key === "recorder"
             || root.isLauncherId(key)
     }
 

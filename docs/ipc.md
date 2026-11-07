@@ -40,6 +40,22 @@ Opened from a keybind, a menu appears on the main monitor (see
 | `notificationBell toggleHistory` · `showHistory` · `hideHistory` | Notification history |
 | `notificationBell toggleDoNotDisturb` | Do not disturb (built-in, SwayNC, dunst, or mako) |
 
+## Caffeine, Night Light, recorder
+
+| Call | Does |
+|---|---|
+| `caffeine toggle` · `on` · `off` | Keep the screen awake |
+| `caffeine forMinutes <n>` | Awake for n minutes (0 = until off) |
+| `caffeine status` | On or off, and the time left |
+| `nightLight toggle` · `on` · `off` | Warm the screen |
+| `nightLight temperature <K>` | Set the warmth, 2500 to 6500 |
+| `nightLight status` | On or off, warmth, schedule |
+| `recorder toggle` | Start or stop recording, like a left click |
+| `recorder start` · `startRegion` · `stop` | Record per Settings, record a region, stop and save |
+| `recorder status` | Recording time and file, or the last file saved |
+
+These work whether or not the widgets are on a bar.
+
 ## Themes
 
 | Call | Does |
@@ -70,4 +86,6 @@ hl.bind("SUPER + SLASH",       hl.dsp.exec_cmd("qs ipc call inspector toggle"))
 hl.bind("SUPER + R",           hl.dsp.exec_cmd("qs ipc call freshRss toggle"))
 hl.bind("SUPER + COMMA",       hl.dsp.exec_cmd("qs ipc call settings toggle"))
 hl.bind("SUPER + N",           hl.dsp.exec_cmd("qs ipc call notificationBell toggleHistory"))
+hl.bind("SUPER + SHIFT + R",   hl.dsp.exec_cmd("qs ipc call recorder toggle"))
+hl.bind("SUPER + SHIFT + C",   hl.dsp.exec_cmd("qs ipc call caffeine toggle"))
 ```

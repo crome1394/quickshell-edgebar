@@ -131,6 +131,14 @@ devices.
   `~/.local/bin/ocr-region` (folder, editor, freeze, OCR languages, a
   program for OCR text). Apply writes `~/.config/hypr/capture.conf`. Your
   capture keybinds are listed read-only.
+- **Recording**: the folder (Browse or Default), codec (AV1, the default:
+  smallest files for the quality, encoded on the GPU; HEVC; H.264), MP4
+  or MKV, quality, frame rate, audio (system, microphone, both, none), the
+  cursor, what a left click records (focused monitor or a region), and a
+  notification when saved. Uses `gpu-screen-recorder`.
+- **Night Light**: on/off now, warmth (2500–6500 K), and an optional
+  schedule (from – to, crossing midnight is fine; a click on the widget
+  holds until the next switch). Uses `hyprsunset`.
 - **Screensaver**: the program run after idle, idle time, whether it
   starts over fullscreen video, the look, and brightness. Needs
   `~/.local/bin/screensaver-config.sh`.

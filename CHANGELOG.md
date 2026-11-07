@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- New widgets, each with IPC calls and a switch under Widgets:
+  - Caffeine (a tea cup): keeps the screen awake with a Wayland idle inhibitor; right-click for 30 min, 1 h, 2 h, or until off. `qs ipc call caffeine toggle|on|off|forMinutes <n>|status`.
+  - Night Light (a moon): warms the screen against blue light with hyprsunset; the wheel changes the warmth, and Tools → Night Light sets warmth and an optional schedule. `qs ipc call nightLight toggle|on|off|temperature <K>|status`.
+  - Screen Recorder: records the focused monitor or a region with gpu-screen-recorder, encoded on the GPU; AV1 by default (smallest files for the quality), with HEVC and H.264. Shows the time while recording; Tools → Recording sets the folder, codec, file type, quality, frame rate, audio, cursor, default target, and a saved notification. `qs ipc call recorder toggle|start|startRegion|stop|status`.
+
+  New: `services/CaffeineService.qml`, `panels/CaffeineInhibitor.qml`, `services/NightLightService.qml`, `config/NightLightSettings.qml`, `services/RecorderService.qml`, `config/RecorderSettings.qml`, `pills/CaffeinePill.qml`, `pills/NightLightPill.qml`, `pills/RecorderPill.qml`, `settings/RecordingTab.qml`, `settings/NightLightTab.qml`.
 - System → Display is two side-by-side sections with their titles turned down the left side. Arrangement folds sideways to its title bar (folded by default with one monitor, open with two or more; a click on the bar toggles it), and the resolution tiles re-flow and stretch to whatever width they get. In a narrow window an open Arrangement drops below. New: `settings/SideSection.qml`.
 - System → Display: Apply closes Settings and shows a small Keep / Go back window centered on the monitor being changed (Enter / Escape), so it stays reachable at any resolution. After Keep, Go back, or the timeout, Settings reopens on Display. The mode in use is selected again after going back; before, the tried mode stayed highlighted. New: `panels/DisplayConfirmPanel.qml`.
 - System → Display → Arrangement: the monitors drawn to scale; drag one next to another and it snaps to the nearest side (left, right, above, below) with edges lined up when close, then Apply arrangement with the same Keep / Go back. New: `settings/MonitorLayout.qml`.

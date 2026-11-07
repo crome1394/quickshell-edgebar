@@ -46,6 +46,8 @@ Item {
             { tab: "system", section: "transparency", title: "System · Transparency", keys: "transparency opacity transparent dim glass override satty window application" },
             { tab: "system", section: "display", title: "System · Display", keys: "display monitor resolution screen refresh rate hz bit depth 10-bit color mode" },
             { tab: "tools", section: "screensaver", title: "Tools · Screensaver", keys: "screensaver idle hypridle timeout inhibit fullscreen video program script brightness dim ddcutil" },
+            { tab: "tools", section: "recording", title: "Tools · Recording", keys: "record recording screen video capture gpu-screen-recorder av1 hevc codec folder fps audio" },
+            { tab: "tools", section: "nightlight", title: "Tools · Night Light", keys: "night light blue light warm temperature kelvin hyprsunset schedule evening" },
             { tab: "tools", section: "capture", title: "Tools · Capture", keys: "capture screenshot screen shot print grim slurp freeze ocr text tesseract language satty editor folder keybind" }
         ]
     }

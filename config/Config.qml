@@ -94,6 +94,24 @@ Singleton {
     property alias menuImagePath: data.menuImagePath
     property alias menuImageTint: data.menuImageTint
     property alias showFreshRssPill: data.showFreshRssPill
+    property alias showCaffeinePill: data.showCaffeinePill
+    property alias showNightLightPill: data.showNightLightPill
+    property alias showRecorderPill: data.showRecorderPill
+    // Night light (NightLightSettings): Kelvin, schedule on/off, and HH:MM times.
+    property alias nightTemp: data.nightTemp
+    property alias nightSchedule: data.nightSchedule
+    property alias nightStart: data.nightStart
+    property alias nightEnd: data.nightEnd
+    // Screen recorder (RecorderSettings). Empty or 0 means the default.
+    property alias recDir: data.recDir
+    property alias recCodec: data.recCodec
+    property alias recContainer: data.recContainer
+    property alias recQuality: data.recQuality
+    property alias recFps: data.recFps
+    property alias recAudio: data.recAudio
+    property alias recCursor: data.recCursor
+    property alias recTarget: data.recTarget
+    property alias recNotify: data.recNotify
     property alias showWorkspacesPill: data.showWorkspacesPill
     property alias showStatsWidget: data.showStatsWidget
     property alias showStatCpu: data.showStatCpu
@@ -512,6 +530,22 @@ Singleton {
             property string menuImagePath: ""
             property bool menuImageTint: false
             property bool showFreshRssPill: false
+            property bool showCaffeinePill: false
+            property bool showNightLightPill: false
+            property bool showRecorderPill: false
+            property int nightTemp: 0
+            property bool nightSchedule: false
+            property string nightStart: "20:00"
+            property string nightEnd: "07:00"
+            property string recDir: ""
+            property string recCodec: ""
+            property string recContainer: ""
+            property string recQuality: ""
+            property int recFps: 0
+            property string recAudio: ""
+            property bool recCursor: true
+            property string recTarget: ""
+            property bool recNotify: true
             property bool showWorkspacesPill: true
             property bool showStatsWidget: false
             property bool showStatCpu: true

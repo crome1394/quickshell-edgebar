@@ -1,8 +1,8 @@
 import QtQuick
 import qs.theme
 
-// Settings → Tools: settings for desktop helpers the bar does not draw,
-// started by Hyprland keybinds or hypridle: Capture and Screensaver.
+// Settings → Tools: desktop helpers: Capture and Screensaver (started by
+// Hyprland keybinds or hypridle), Recording, and Night Light.
 Item {
     id: root
 
@@ -12,7 +12,7 @@ Item {
 
     function applyReveal() {
         const id = root.revealSection
-        if (id === "capture" || id === "screensaver")
+        if (id === "capture" || id === "screensaver" || id === "recording" || id === "nightlight")
             root.section = id
     }
 
@@ -26,7 +26,9 @@ Item {
         anchors.top: parent.top
         model: [
             { id: "capture", label: "Capture" },
-            { id: "screensaver", label: "Screensaver" }
+            { id: "screensaver", label: "Screensaver" },
+            { id: "recording", label: "Recording" },
+            { id: "nightlight", label: "Night Light" }
         ]
         currentId: root.section
         onSelected: (tabId) => { root.section = tabId }
@@ -52,5 +54,27 @@ Item {
         anchors.topMargin: Theme.space
         active: root.section === "screensaver"
         source: screensaverPage.active ? Qt.resolvedUrl("ScreensaverTab.qml") : ""
+    }
+
+    Loader {
+        id: recordingPage
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: sections.bottom
+        anchors.bottom: parent.bottom
+        anchors.topMargin: Theme.space
+        active: root.section === "recording"
+        source: recordingPage.active ? Qt.resolvedUrl("RecordingTab.qml") : ""
+    }
+
+    Loader {
+        id: nightPage
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: sections.bottom
+        anchors.bottom: parent.bottom
+        anchors.topMargin: Theme.space
+        active: root.section === "nightlight"
+        source: nightPage.active ? Qt.resolvedUrl("NightLightTab.qml") : ""
     }
 }
