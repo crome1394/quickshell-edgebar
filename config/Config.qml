@@ -179,6 +179,8 @@ Singleton {
     property alias opacityOverridesJson: data.opacityOverridesJson
     // Settings → Theme: saved themes (ThemeSettings).
     property alias themeLibraryJson: data.themeLibraryJson
+    // App Launcher page: Installed apps open (true) or folded.
+    property alias launcherAppsOpen: data.launcherAppsOpen
     // Settings window tabs: "" (index dividers) or "flat"; colors "" (rainbow) or "accent".
     property alias settingsTabStyle: data.settingsTabStyle
     property alias settingsTabColors: data.settingsTabColors
@@ -612,6 +614,7 @@ Singleton {
             property int opacitySatty: 0
             property string opacityOverridesJson: ""
             property string themeLibraryJson: ""
+            property bool launcherAppsOpen: true
             property string settingsTabStyle: ""
             property string settingsTabColors: ""
             property int freshRssPollMin: 0

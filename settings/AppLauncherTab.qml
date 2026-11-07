@@ -19,9 +19,13 @@ Item {
     property real sceneY: 0
 
     readonly property int scrollGutter: Theme.space + Theme.tabGap
-    readonly property int cols: LauncherSettings.draftSlots() <= 1 ? 1 : 2
+    // The width the launcher columns get (set by the Launchers section).
+    property real boardWidth: 1
+    // Two launcher columns when they fit, else one.
+    readonly property int cols: LauncherSettings.draftSlots() <= 1
+        || root.boardWidth < Theme.launcherColumnMin * 2 + Theme.space ? 1 : 2
     readonly property int cellWidth: {
-        const inner = Math.max(1, (scroll.width - root.scrollGutter) - Theme.sectionInset * 2)
+        const inner = Math.max(1, root.boardWidth)
         if (root.cols <= 1)
             return inner
         return Math.max(1, (inner - Theme.space) / root.cols)
@@ -311,247 +315,285 @@ Item {
                 font.pixelSize: Theme.smallPx
             }
 
-            SectionHeader {
-                width: parent.width
-                title: "Launchers"
-                hint: "Apply saves the count and the pins. Each launcher is its own bar widget. It stays off the bar until you enable it under Widgets and press Apply."
-            }
-
+            // Launchers and the installed apps side by side, titles down the
+            // left; Installed apps folds sideways to its title (remembered).
+            // Below the two-column width an open apps panel drops underneath.
             Item {
+                id: sections
                 width: parent.width
-                implicitHeight: countCol.implicitHeight
-                height: countCol.implicitHeight
+                readonly property bool appsOpen: Config.launcherAppsOpen
+                readonly property bool stacked: width < Theme.settingsTwoColMin && sections.appsOpen
+                readonly property real appsWidth: sections.appsOpen
+                    ? Math.max(Theme.launcherAppsMin, Math.min(Theme.launcherAppsMax, width * 0.4))
+                    : Theme.sideHeaderWidth
+                height: sections.stacked
+                    ? launchersSection.height + Theme.space + appsSection.height
+                    : Math.max(launchersSection.height, appsSection.implicitHeight)
 
-                Column {
-                    id: countCol
-                    x: Theme.sectionInset
-                    width: parent.width - Theme.sectionInset * 2
-                    spacing: Theme.tabGap
+                SideSection {
+                    id: launchersSection
+                    title: "Launchers"
+                    hint: "Apply saves the count and the pins. Each launcher is its own bar widget. It stays off the bar until you enable it under Widgets and press Apply."
+                    width: sections.stacked ? sections.width : sections.width - sections.appsWidth - Theme.space
+                    height: implicitHeight
 
-                    Text {
+                    Column {
                         width: parent.width
-                        text: "How many launchers"
-                        color: Theme.text
-                        font.family: Theme.uiFont
-                        font.pixelSize: Theme.fontPx
-                    }
+                        spacing: Theme.space
+                        onWidthChanged: root.boardWidth = width
+                        Component.onCompleted: root.boardWidth = width
 
-                    IntSlider {
-                        width: parent.width
-                        from: Theme.launcherMin
-                        to: Theme.launcherMax
-                        step: 1
-                        value: LauncherSettings.draftSlots()
-                        readout: String(LauncherSettings.draftSlots())
-                        tip: "How many app launchers to keep. Four is the maximum."
-                        onChanged: (value) => LauncherSettings.setCount(value)
-                    }
-                }
-            }
+                        Item {
+                            width: parent.width
+                            implicitHeight: countCol.implicitHeight
+                            height: countCol.implicitHeight
 
-            Item {
-                width: parent.width
-                implicitHeight: boardGrid.implicitHeight
-                height: boardGrid.implicitHeight
+                            Column {
+                                id: countCol
+                                width: parent.width
+                                spacing: Theme.tabGap
 
-                Grid {
-                    id: boardGrid
-                    x: Theme.sectionInset
-                    width: parent.width - Theme.sectionInset * 2
-                    columns: root.cols
-                    columnSpacing: Theme.space
-                    rowSpacing: Theme.space
-
-                    Repeater {
-                        id: columns
-                        model: LauncherSettings.draftSlots()
-                        delegate: LaunchColumn {
-                            id: column
-                            required property int index
-                            width: root.cellWidth
-                            launcher: column.index + 1
-                            dragging: root.dragging
-                            dragKey: root.dragKey
-                            sceneX: root.sceneX
-                            sceneY: root.sceneY
-                            onRowDragged: (pinKey, x, y) => root.noteDrag(pinKey, x, y)
-                            onRowDropped: (commit) => root.noteDrop(commit)
-                            onPinRemoved: (at) => root.removePin(column.launcher, at)
-                        }
-                    }
-                }
-            }
-
-            Item {
-                visible: root.formError.length > 0
-                width: parent.width
-                implicitHeight: errorText.implicitHeight
-                height: errorText.implicitHeight
-
-                Text {
-                    id: errorText
-                    x: Theme.sectionInset
-                    width: parent.width - Theme.sectionInset * 2
-                    wrapMode: Text.WordWrap
-                    text: root.formError
-                    color: Theme.danger
-                    font.family: Theme.uiFont
-                    font.pixelSize: Theme.smallPx
-                }
-            }
-
-            SectionHeader {
-                width: parent.width
-                title: "Installed apps"
-                hint: "Pin adds the app to Launcher 1. Search matches the name, the id, or the generic name."
-            }
-
-            Item {
-                width: parent.width
-                implicitHeight: appCol.implicitHeight
-                height: appCol.implicitHeight
-
-                Column {
-                    id: appCol
-                    x: Theme.sectionInset
-                    width: parent.width - Theme.sectionInset * 2
-                    spacing: Theme.tabGap
-
-                    LineField {
-                        id: searchField
-                        width: parent.width
-                        placeholderText: "Search installed apps"
-                        tip: "Filter by name, id, or generic name"
-                        onTextChanged: {
-                            root.query = searchField.text
-                            root.listLimit = Theme.launcherListMax
-                        }
-                    }
-
-                    Repeater {
-                        model: root.appPack.rows
-                        delegate: LaunchAppRow {
-                            id: app
-                            required property var modelData
-                            required property int index
-                            width: appCol.width
-                            name: String(app.modelData.name || "")
-                            iconName: String(app.modelData.icon || "")
-                            onPinRequested: {
-                                const pinned = {
-                                    id: String(app.modelData.id || ""),
-                                    name: String(app.modelData.name || ""),
-                                    icon: String(app.modelData.icon || "")
+                                Text {
+                                    width: parent.width
+                                    text: "How many launchers"
+                                    color: Theme.text
+                                    font.family: Theme.uiFont
+                                    font.pixelSize: Theme.fontPx
                                 }
-                                Qt.callLater(() => root.pinDesktop(pinned))
+
+                                IntSlider {
+                                    width: parent.width
+                                    from: Theme.launcherMin
+                                    to: Theme.launcherMax
+                                    step: 1
+                                    value: LauncherSettings.draftSlots()
+                                    readout: String(LauncherSettings.draftSlots())
+                                    tip: "How many app launchers to keep. Four is the maximum."
+                                    onChanged: (value) => LauncherSettings.setCount(value)
+                                }
+                            }
+                        }
+
+                        Item {
+                            width: parent.width
+                            implicitHeight: boardGrid.implicitHeight
+                            height: boardGrid.implicitHeight
+
+                            Grid {
+                                id: boardGrid
+                                width: parent.width
+                                columns: root.cols
+                                columnSpacing: Theme.space
+                                rowSpacing: Theme.space
+
+                                Repeater {
+                                    id: columns
+                                    model: LauncherSettings.draftSlots()
+                                    delegate: LaunchColumn {
+                                        id: column
+                                        required property int index
+                                        width: root.cellWidth
+                                        launcher: column.index + 1
+                                        dragging: root.dragging
+                                        dragKey: root.dragKey
+                                        sceneX: root.sceneX
+                                        sceneY: root.sceneY
+                                        onRowDragged: (pinKey, x, y) => root.noteDrag(pinKey, x, y)
+                                        onRowDropped: (commit) => root.noteDrop(commit)
+                                        onPinRemoved: (at) => root.removePin(column.launcher, at)
+                                    }
+                                }
+                            }
+                        }
+
+                        Item {
+                            visible: root.formError.length > 0
+                            width: parent.width
+                            implicitHeight: errorText.implicitHeight
+                            height: errorText.implicitHeight
+
+                            Text {
+                                id: errorText
+                                width: parent.width
+                                wrapMode: Text.WordWrap
+                                text: root.formError
+                                color: Theme.danger
+                                font.family: Theme.uiFont
+                                font.pixelSize: Theme.smallPx
+                            }
+                        }
+
+                    }
+                }
+
+                SideSection {
+                    id: appsSection
+                    title: "Installed apps"
+                    hint: "Pin adds the app to Launcher 1. Search matches the name, the id, or the generic name."
+                    collapsible: true
+                    expanded: sections.appsOpen
+                    onToggled: Config.saveFields(() => { Config.launcherAppsOpen = !Config.launcherAppsOpen })
+                    x: sections.stacked ? 0 : sections.width - width
+                    y: sections.stacked ? launchersSection.height + Theme.space : 0
+                    width: sections.stacked ? sections.width : sections.appsWidth
+                    height: sections.stacked ? implicitHeight : Math.max(implicitHeight, launchersSection.height)
+
+                    Behavior on width {
+                        NumberAnimation { duration: Theme.popupMotionMs; easing.type: Easing.OutCubic }
+                    }
+
+                    Item {
+                        width: parent.width
+                        implicitHeight: appCol.implicitHeight
+                        height: appCol.implicitHeight
+
+                        Column {
+                            id: appCol
+                            width: parent.width
+                            spacing: Theme.tabGap
+
+                            LineField {
+                                id: searchField
+                                width: parent.width
+                                placeholderText: "Search installed apps"
+                                tip: "Filter by name, id, or generic name"
+                                onTextChanged: {
+                                    root.query = searchField.text
+                                    root.listLimit = Theme.launcherListMax
+                                }
+                            }
+
+                            Repeater {
+                                model: root.appPack.rows
+                                delegate: LaunchAppRow {
+                                    id: app
+                                    required property var modelData
+                                    required property int index
+                                    width: appCol.width
+                                    name: String(app.modelData.name || "")
+                                    iconName: String(app.modelData.icon || "")
+                                    onPinRequested: {
+                                        const pinned = {
+                                            id: String(app.modelData.id || ""),
+                                            name: String(app.modelData.name || ""),
+                                            icon: String(app.modelData.icon || "")
+                                        }
+                                        Qt.callLater(() => root.pinDesktop(pinned))
+                                    }
+                                }
+                            }
+
+                            Text {
+                                visible: !root.appPack.rows.length
+                                width: parent.width
+                                text: "No matching apps."
+                                color: Theme.subtext
+                                font.family: Theme.uiFont
+                                font.pixelSize: Theme.fontPx
+                            }
+
+                            Rectangle {
+                                visible: root.appPack.hidden > 0
+                                width: moreLabel.implicitWidth + Theme.space * 2
+                                height: Theme.fieldHeight
+                                radius: Theme.radiusSm
+                                color: moreMouse.containsMouse ? Theme.hover : Theme.pillBg
+                                border.width: Theme.borderWidth
+                                border.color: Theme.border
+
+                                Text {
+                                    id: moreLabel
+                                    anchors.centerIn: parent
+                                    text: "Show more (" + root.appPack.hidden + " left)"
+                                    color: Theme.text
+                                    font.family: Theme.uiFont
+                                    font.pixelSize: Theme.smallPx
+                                }
+
+                                MouseArea {
+                                    id: moreMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: root.listLimit += Theme.launcherListMax
+                                }
                             }
                         }
                     }
-
-                    Text {
-                        visible: !root.appPack.rows.length
-                        width: parent.width
-                        text: "No matching apps."
-                        color: Theme.subtext
-                        font.family: Theme.uiFont
-                        font.pixelSize: Theme.fontPx
-                    }
-
-                    Rectangle {
-                        visible: root.appPack.hidden > 0
-                        width: moreLabel.implicitWidth + Theme.space * 2
-                        height: Theme.fieldHeight
-                        radius: Theme.radiusSm
-                        color: moreMouse.containsMouse ? Theme.hover : Theme.pillBg
-                        border.width: Theme.borderWidth
-                        border.color: Theme.border
-
-                        Text {
-                            id: moreLabel
-                            anchors.centerIn: parent
-                            text: "Show more (" + root.appPack.hidden + " left)"
-                            color: Theme.text
-                            font.family: Theme.uiFont
-                            font.pixelSize: Theme.smallPx
-                        }
-
-                        MouseArea {
-                            id: moreMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.listLimit += Theme.launcherListMax
-                        }
-                    }
                 }
-            }
-
-            SectionHeader {
-                width: parent.width
-                title: "Custom"
-                hint: "A name and a command. The command is split on spaces and is not run through a shell. The icon is a theme name or an absolute path."
             }
 
             Item {
                 width: parent.width
-                implicitHeight: customCol.implicitHeight
-                height: customCol.implicitHeight
+                height: Theme.space
+            }
 
-                Column {
-                    id: customCol
-                    x: Theme.sectionInset
-                    width: parent.width - Theme.sectionInset * 2
-                    spacing: Theme.tabGap
+            SideSection {
+                width: parent.width
+                title: "Custom"
+                hint: "A name and a command. The command is split on spaces and is not run through a shell. The icon is a theme name or an absolute path."
+                height: implicitHeight
 
-                    LineField {
-                        id: nameField
+                Item {
+                    width: parent.width
+                    implicitHeight: customCol.implicitHeight
+                    height: customCol.implicitHeight
+
+                    Column {
+                        id: customCol
                         width: parent.width
-                        placeholderText: "Name"
-                        tip: "Name shown on the launcher"
-                    }
+                        spacing: Theme.tabGap
 
-                    LineField {
-                        id: commandField
-                        width: parent.width
-                        placeholderText: "Command, for example /usr/bin/firefox"
-                        tip: "Program and arguments, separated by spaces. No shell characters."
-                    }
-
-                    LineField {
-                        id: iconField
-                        width: parent.width
-                        placeholderText: "Icon name or path, optional"
-                        tip: "Theme icon name, or an absolute path"
-                    }
-
-                    Rectangle {
-                        width: addLabel.implicitWidth + Theme.space * 2
-                        height: Theme.fieldHeight
-                        radius: Theme.radiusSm
-                        color: addMouse.containsMouse ? Theme.accentDim : Theme.pillBg
-                        border.width: Theme.borderWidth
-                        border.color: Theme.accent
-
-                        Text {
-                            id: addLabel
-                            anchors.centerIn: parent
-                            text: "Add"
-                            color: Theme.wsActiveText
-                            font.family: Theme.uiFont
-                            font.pixelSize: Theme.smallPx
-                            font.bold: true
+                        LineField {
+                            id: nameField
+                            width: parent.width
+                            placeholderText: "Name"
+                            tip: "Name shown on the launcher"
                         }
 
-                        MouseArea {
-                            id: addMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.addCustom()
+                        LineField {
+                            id: commandField
+                            width: parent.width
+                            placeholderText: "Command, for example /usr/bin/firefox"
+                            tip: "Program and arguments, separated by spaces. No shell characters."
+                        }
 
-                            HoverTip {
-                                message: "Pin this command on Launcher 1"
-                                show: addMouse.containsMouse
+                        LineField {
+                            id: iconField
+                            width: parent.width
+                            placeholderText: "Icon name or path, optional"
+                            tip: "Theme icon name, or an absolute path"
+                        }
+
+                        Rectangle {
+                            width: addLabel.implicitWidth + Theme.space * 2
+                            height: Theme.fieldHeight
+                            radius: Theme.radiusSm
+                            color: addMouse.containsMouse ? Theme.accentDim : Theme.pillBg
+                            border.width: Theme.borderWidth
+                            border.color: Theme.accent
+
+                            Text {
+                                id: addLabel
+                                anchors.centerIn: parent
+                                text: "Add"
+                                color: Theme.wsActiveText
+                                font.family: Theme.uiFont
+                                font.pixelSize: Theme.smallPx
+                                font.bold: true
+                            }
+
+                            MouseArea {
+                                id: addMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: root.addCustom()
+
+                                HoverTip {
+                                    message: "Pin this command on Launcher 1"
+                                    show: addMouse.containsMouse
+                                }
                             }
                         }
                     }

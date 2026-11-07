@@ -43,8 +43,11 @@ Nothing on those pages is saved until Apply.
 
 ## Applications
 
-- **App Launcher**: one to four launchers. Search installed apps and pin
-  them, or pin a custom command; drag `||` to reorder.
+- **App Launcher**: one to four launchers on the left; **Installed apps**
+  (search and pin) on the right, folding sideways to its title bar when
+  you click it (remembered). The launcher columns use whatever width is
+  left: two side by side when they fit, else one. **Custom** below pins a
+  command. Drag `||` to reorder or move pins between launchers.
 - **Application Menu**: the menu icon (a font symbol, or an SVG/PNG with an
   optional tint), its size and color, and the command a click runs.
 - **FreshRSS**: server and reader options. See [FreshRSS](freshrss.md).

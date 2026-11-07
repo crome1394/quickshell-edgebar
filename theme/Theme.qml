@@ -288,6 +288,11 @@ Singleton {
     // The open Arrangement column's width range.
     readonly property int displayArrangeMin: 300
     readonly property int displayArrangeMax: 460
+    // Applications → App Launcher: the open Installed apps column, and the
+    // narrowest a launcher column may get before they stack.
+    readonly property int launcherAppsMin: 300
+    readonly property int launcherAppsMax: 440
+    readonly property int launcherColumnMin: 260
     // Snap a dropped monitor's edges to a neighbor's within this many logical pixels.
     readonly property int displaySnapPx: 160
     readonly property int displaySettleMs: 1500
