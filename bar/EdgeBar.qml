@@ -17,6 +17,9 @@ PanelWindow {
 
     signal openSettings()
 
+    // This bar's monitor name, for menus that open on one monitor only.
+    property string screenName: ""
+
     readonly property bool horizontal: root.edge === "top" || root.edge === "bottom"
     readonly property bool enabledBar: {
         if (root.edge === "bottom")
@@ -215,6 +218,7 @@ PanelWindow {
                         edge: root.edge
                         horizontal: root.horizontal
                         theme: root.theme
+                        screenName: root.screenName
                         onOpenSettings: root.openSettings()
                         onHoldingChanged: root.holdCount = Math.max(0, root.holdCount + (holding ? 1 : -1))
                         Component.onDestruction: {
@@ -288,6 +292,7 @@ PanelWindow {
                         edge: root.edge
                         horizontal: root.horizontal
                         theme: root.theme
+                        screenName: root.screenName
                         onOpenSettings: root.openSettings()
                         onHoldingChanged: root.holdCount = Math.max(0, root.holdCount + (holding ? 1 : -1))
                         Component.onDestruction: {

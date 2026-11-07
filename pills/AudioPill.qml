@@ -15,7 +15,8 @@ Rectangle {
     property real widthFactor: 1
 
     property string tipText: "Audio"
-    readonly property bool menuOpen: AudioMenuService.open
+    property string screenName: ""
+    readonly property bool menuOpen: AudioMenuService.open && ScreenService.owns(AudioMenuService.screen, root.screenName)
     property bool dockHot: dock.mag > 1.01 || Math.abs(dock.jumpY) > 0.5
 
     readonly property real ui: WidgetService.uiScale
@@ -140,7 +141,7 @@ Rectangle {
                 onClicked: (mouse) => {
                     dock.play()
                     if (mouse.button === Qt.LeftButton)
-                        AudioMenuService.toggle()
+                        AudioMenuService.toggle(root.screenName)
                     else
                         levels.toggleMute("out")
                 }
@@ -224,7 +225,7 @@ Rectangle {
                 onClicked: (mouse) => {
                     dock.play()
                     if (mouse.button === Qt.LeftButton)
-                        AudioMenuService.toggle()
+                        AudioMenuService.toggle(root.screenName)
                     else
                         levels.toggleMute("in")
                 }

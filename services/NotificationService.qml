@@ -14,6 +14,8 @@ Singleton {
 
     readonly property bool resident: true
     property bool historyOpen: false
+    // The monitor whose bell opened the history; "" means the main monitor.
+    property string historyScreen: ""
     property bool dnd: false
     property var items: []
     property int cursor: 0
@@ -182,7 +184,8 @@ Singleton {
         toastProc.running = true
     }
 
-    function showHistory() {
+    function showHistory(name) {
+        root.historyScreen = String(name || "")
         if (root.keepExpanded())
             root.expandAll(true)
         root.cursor = 0
@@ -193,11 +196,12 @@ Singleton {
         root.historyOpen = false
     }
 
-    function toggleHistory() {
-        if (root.historyOpen)
+    function toggleHistory(name) {
+        const where = String(name || "")
+        if (root.historyOpen && root.historyScreen === where)
             root.hideHistory()
         else
-            root.showHistory()
+            root.showHistory(where)
     }
 
     function toggleDnd() {

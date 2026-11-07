@@ -40,6 +40,11 @@ Singleton {
     // Workspace colors: "theme", "custom", or "" (custom when a face has
     // a color, else theme). Custom colors: "" falls back to the theme.
     property alias wsColorMode: data.wsColorMode
+    // Monitors (ScreenService): bars on "main" | "all" | "pick", the picked
+    // monitor names (JSON list), and the main monitor's name ("" = first).
+    property alias barScreenMode: data.barScreenMode
+    property alias barScreenNames: data.barScreenNames
+    property alias mainScreen: data.mainScreen
     property alias wsActiveBg: data.wsActiveBg
     property alias wsActiveFg: data.wsActiveFg
     property alias wsIdleFg: data.wsIdleFg
@@ -445,6 +450,9 @@ Singleton {
             property bool wsSpecialItalic: false
             property string wsSpecialColor: ""
             property string wsColorMode: ""
+            property string barScreenMode: ""
+            property string barScreenNames: "[]"
+            property string mainScreen: ""
             property string wsActiveBg: ""
             property string wsActiveFg: ""
             property string wsIdleFg: ""
