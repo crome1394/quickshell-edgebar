@@ -414,7 +414,6 @@ FloatingWindow {
                 IndexTabStrip {
                     model: tabs.model
                     currentId: window.currentTab
-                    colorMode: Config.settingsTabColors === "accent" ? "accent" : "rainbow"
                     onSelected: (tabId) => { window.currentTab = tabId }
                 }
             }

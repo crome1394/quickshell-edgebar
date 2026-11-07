@@ -2,11 +2,16 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import qs.theme
 
+// Section tabs. With Settings' index-divider style on (and indexAllowed),
+// they draw as dividers standing on the page in shades of the active main
+// tab's color (IndexTabStrip, edge "top"); otherwise as flat chips.
 Item {
     id: root
 
     required property var model
     property string currentId: ""
+    property bool indexAllowed: true
+    readonly property bool indexed: root.indexAllowed && TabColors.indexed
 
     signal selected(string tabId)
 
@@ -36,7 +41,22 @@ Item {
         return out
     }
 
-    implicitHeight: root.rows * Theme.tabHeight + Math.max(0, root.rows - 1) * Theme.tabGap
+    implicitHeight: root.indexed
+        ? Theme.indexTabEdge + Theme.indexTabHeight
+        : root.rows * Theme.tabHeight + Math.max(0, root.rows - 1) * Theme.tabGap
+
+    Loader {
+        active: root.indexed
+        width: root.width
+        sourceComponent: Component {
+            IndexTabStrip {
+                edge: "top"
+                model: root.model
+                currentId: root.currentId
+                onSelected: (tabId) => root.choose(tabId)
+            }
+        }
+    }
 
     function rowTabs(row) {
         const tabs = root.model || []
@@ -55,7 +75,7 @@ Item {
     }
 
     Repeater {
-        model: root.rowsData
+        model: root.indexed ? [] : root.rowsData
         delegate: Item {
             id: row
             required property var modelData

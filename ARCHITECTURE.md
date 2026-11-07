@@ -185,7 +185,9 @@ calls are listed in a comment beside the handler.
 
 ## Tests
 
-`tests/run.sh` runs the logic tests: the theme builder and import, the
+`tests/run.sh` first starts the real `shell.qml` from a temporary copy
+(bars off) and fails if Quickshell cannot load it, which catches errors
+lint misses. Then it runs the logic tests: the theme builder and import, the
 FreshRSS env reader and HTML cleaning, the reader's grouping and cursor,
 the settings Draft, and the tooltip service. Each `tests/*Test.qml` is a
 small Quickshell config run against a temporary copy of the bar with a

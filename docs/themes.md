@@ -36,9 +36,11 @@ Workspaces → Colors.
 
 The tabs along the bottom of Settings are **Index dividers** by default:
 colored tabs hanging from the page like a binder's, the active one raised
-with its color along the page edge. **Tab colors** are Rainbow (a fixed
-color per section) or From accent (hues spread around the theme's accent).
-**Flat** gives plain chips in the theme's colors. These save at once.
+with its color along the page edge. The section tabs along the top of a
+page stand on it the same way, in shades of that page's divider color.
+**Tab colors** are Rainbow (a fixed color per section) or From accent
+(hues spread around the theme's accent). **Flat** gives plain chips in the
+theme's colors at both levels. These save at once.
 
 Changing the accent also restyles hovers, borders, and the active
 workspace, because those are derived from it.
