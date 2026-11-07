@@ -24,6 +24,7 @@ not loaded at all. Tooltips open outside the bar, away from the edge.
 | **FreshRSS** | Unread count | Opens the [reader](freshrss.md) |
 | **Caffeine** | A tea cup, filled while on | Left: keep the screen awake (no screensaver or idle lock). Right: 30 min → 1 h → 2 h → until off |
 | **Night Light** | A moon | Left: warm the screen against blue light (needs `hyprsunset`). Wheel: warmer or cooler |
+| **Firewall** | A shield, checked while on, crossed out in red while off | Left: menu with on/off, default policies, the rules, and Add a rule. Right: turn the firewall on or off. Changes ask for your password |
 | **Screen Recorder** | A record button; a red mark and the time while recording | Left: record (focused monitor or a region, per Settings) or stop. Right: record a region. Middle: open the folder |
 
 Caffeine holds a standard Wayland idle inhibitor, and the screensaver's
@@ -53,6 +54,13 @@ class, and title in a screen corner (Widgets → Active Window).
   save at once. See [Settings → Transparency](settings.md#system).
 - **Notifications**: the history list beside the bar, with copy, dismiss,
   and clear.
+- **Firewall** (UFW): on or off with a switch; the incoming, outgoing, and
+  routed defaults; the rules (IPv4 and IPv6 copies shown once) with ✕ to
+  delete; and Add a rule: Allow, Deny, or Limit (blocks an address that
+  connects 6 times in 30 seconds, for SSH), TCP, UDP, or both, a port or
+  range, and optionally where from. Reading needs no password (UFW's files
+  are readable, and watched); every change runs `pkexec ufw …`, so your
+  polkit agent asks.
 
 ## Bar behavior
 

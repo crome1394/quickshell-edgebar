@@ -130,6 +130,7 @@ Singleton {
             { id: "caffeine", label: "Caffeine" },
             { id: "nightLight", label: "Night Light" },
             { id: "recorder", label: "Screen Recorder" },
+            { id: "firewall", label: "Firewall" },
             { id: "workspaces", label: "Workspaces" },
             { id: "stats", label: "System Stats" },
             { id: "tray", label: "System Tray" },
@@ -168,6 +169,7 @@ Singleton {
             { id: "caffeine", zone: "bottom" },
             { id: "nightLight", zone: "bottom" },
             { id: "recorder", zone: "bottom" },
+            { id: "firewall", zone: "bottom" },
             { id: "opacity", zone: "bottom" },
             { id: "networkPanel", zone: "bottom" },
             { id: "bluetooth", zone: "bottom" },
@@ -222,7 +224,7 @@ Singleton {
             || key === "networkPanel" || key === "bluetooth" || key === "launcher"
             || key === "stats" || key === "notifications" || key === "volume"
             || key === "tailscale" || key === "hyprInsp" || key === "freshRss"
-            || key === "caffeine" || key === "nightLight" || key === "recorder"
+            || key === "caffeine" || key === "nightLight" || key === "recorder" || key === "firewall"
             || root.isLauncherId(key)
     }
 

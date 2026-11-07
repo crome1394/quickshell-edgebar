@@ -20,6 +20,7 @@ Singleton {
         caffeine: "showCaffeinePill",
         nightLight: "showNightLightPill",
         recorder: "showRecorderPill",
+        firewall: "showFirewallPill",
         workspaces: "showWorkspacesPill",
         stats: "showStatsWidget",
         tray: "showTrayPill",
