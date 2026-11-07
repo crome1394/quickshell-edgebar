@@ -112,6 +112,34 @@ Singleton {
     readonly property int opacityStep: 5
     readonly property int opacityOverrideMax: 32
     readonly property int opacityOverrideDefault: 85
+    // FreshRSS reader. Saved 0 (or -1 for days) means the default here.
+    readonly property int freshRssWidth: 980
+    readonly property int freshRssHeight: 640
+    readonly property int freshRssMinWidth: 640
+    readonly property int freshRssMinHeight: 420
+    readonly property int freshRssListDefault: 340
+    readonly property int freshRssListMin: 200
+    readonly property int freshRssDetailMin: 280
+    readonly property int freshRssRowHeight: 26
+    readonly property int freshRssPollDefault: 5
+    readonly property int freshRssPollMax: 60
+    readonly property int freshRssPerFeedDefault: 12
+    readonly property var freshRssPerFeedChoices: [5, 8, 10, 12, 15, 20, 25, 30]
+    readonly property int freshRssItemLimitDefault: 80
+    readonly property var freshRssItemLimitChoices: [20, 40, 50, 80, 100, 150, 200]
+    readonly property int freshRssMaxDaysDefault: 30
+    // 0 is "no limit".
+    readonly property var freshRssMaxDaysChoices: [7, 14, 30, 60, 90, 180, 0]
+    readonly property int freshRssRequestMs: 20000
+    // Parallel requests while loading every feed.
+    readonly property int freshRssParallel: 6
+    // Login is reused this long before asking again.
+    readonly property int freshRssAuthMs: 1500000
+    // Longest article HTML kept for the reader, and the search text per item.
+    readonly property int freshRssHtmlMax: 120000
+    readonly property int freshRssSearchTextMax: 400
+    readonly property string freshRssGlyph: "󰑫"
+
     // Settings → Theme.
     readonly property int themeCardMinWidth: 200
     readonly property int themeCardHeight: 78
@@ -262,6 +290,20 @@ Singleton {
     readonly property int bluetoothRefreshMs: 1000
 
     readonly property int chip: 24
+    // Small fixed controls shared by windows and settings pages.
+    readonly property int headerButtonWidth: 28
+    readonly property int headerButtonHeight: 24
+    readonly property int checkBoxWidth: 28
+    readonly property int checkBoxHeight: 22
+    readonly property int checkGlyphPx: 14
+    readonly property int sliderKnob: 14
+    readonly property int resizeGrip: 18
+    readonly property int buttonHeight: 32
+    readonly property int buttonPadX: 20
+    readonly property int historyButtonWidth: 96
+    readonly property int historyWideButtonWidth: 110
+    // Behind a notification image while it loads or has transparent parts.
+    readonly property color thumbBackdrop: Qt.rgba(0, 0, 0, 0.25)
     readonly property int toggleWidth: 28
     readonly property int widgetRowHeight: 72
     readonly property int dividerRowHeight: 40

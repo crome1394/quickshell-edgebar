@@ -28,3 +28,4 @@ AudioDeviceSection 1.0 AudioDeviceSection.qml
 AudioStreamRow 1.0 AudioStreamRow.qml
 OpacityAddRow 1.0 OpacityAddRow.qml
 InspectorPill 1.0 InspectorPill.qml
+FreshRssPill 1.0 FreshRssPill.qml

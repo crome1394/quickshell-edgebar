@@ -697,8 +697,8 @@ Item {
         Rectangle {
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            height: 32
-            width: addLabel.implicitWidth + 20
+            height: Theme.buttonHeight
+            width: addLabel.implicitWidth + Theme.buttonPadX
             radius: Theme.radiusSm
             opacity: root.draft.length >= 10 ? 0.4 : 1
             color: addMouse.containsMouse ? Theme.hover : Theme.pillBg
@@ -733,8 +733,8 @@ Item {
             id: applyButton
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            height: 32
-            width: applyLabel.implicitWidth + 20
+            height: Theme.buttonHeight
+            width: applyLabel.implicitWidth + Theme.buttonPadX
             radius: Theme.radiusSm
             opacity: root.canApply ? 1 : 0.4
             color: applyMouse.containsMouse && root.canApply ? Theme.accentDim : Theme.pillBg
@@ -770,8 +770,8 @@ Item {
             anchors.right: applyButton.left
             anchors.rightMargin: Theme.space
             anchors.verticalCenter: parent.verticalCenter
-            height: 32
-            width: undoLabel.implicitWidth + 20
+            height: Theme.buttonHeight
+            width: undoLabel.implicitWidth + Theme.buttonPadX
             radius: Theme.radiusSm
             opacity: root.canUndo ? 1 : 0.4
             color: undoMouse.containsMouse && root.canUndo ? Theme.hover : Theme.pillBg

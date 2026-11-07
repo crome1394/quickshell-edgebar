@@ -209,7 +209,7 @@ Item {
             }
 
             Rectangle {
-                width: 96
+                width: Theme.historyButtonWidth
                 height: Theme.fieldHeight
                 radius: Theme.radiusSm
                 color: NotificationService.dnd
@@ -244,7 +244,7 @@ Item {
             }
 
             Rectangle {
-                width: 110
+                width: Theme.historyWideButtonWidth
                 height: Theme.fieldHeight
                 radius: Theme.radiusSm
                 opacity: NotificationService.count > 0 ? 1 : Theme.widgetOffOpacity
@@ -475,7 +475,7 @@ Item {
                                 height: Theme.notificationThumbHeight
                                 radius: Theme.radiusSm
                                 clip: true
-                                color: Qt.rgba(0, 0, 0, 0.25)
+                                color: Theme.thumbBackdrop
                                 border.width: Theme.borderWidth
                                 border.color: Theme.border
 

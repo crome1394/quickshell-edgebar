@@ -29,6 +29,7 @@ Item {
             { tab: "wallpaper", section: "", title: "Wallpaper", keys: "wallpaper image hyprpaper folder" },
             { tab: "theme", section: "", title: "Theme", keys: "theme preset color colour accent alert tint glass light dark import export save palette look" },
             { tab: "applications", section: "launcher", title: "Applications · App Launcher", keys: "pin launcher application command" },
+            { tab: "applications", section: "freshrss", title: "Applications · FreshRSS", keys: "freshrss rss feed reader news articles server api password unread" },
             { tab: "applications", section: "menu", title: "Applications · Application Menu", keys: "menu symbol glyph command font" },
             { tab: "connectivity", section: "network", title: "Connectivity · Network", keys: "network ip address wifi octet device" },
             { tab: "connectivity", section: "bluetooth", title: "Connectivity · Bluetooth", keys: "bluetooth scan paired adapter" },
@@ -119,8 +120,8 @@ Item {
         id: searchButton
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        width: 28
-        height: 24
+        width: Theme.headerButtonWidth
+        height: Theme.headerButtonHeight
         radius: Theme.radiusSm
         color: searchMouse.containsMouse || root.open ? Theme.hover : "transparent"
         border.width: Theme.borderWidth

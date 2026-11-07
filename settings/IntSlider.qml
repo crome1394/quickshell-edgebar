@@ -13,7 +13,7 @@ Item {
     // Shown between the decrease and increase buttons. Empty hides it.
     property string readout: ""
     property bool showSwatch: false
-    property color swatch: "#000000"
+    property color swatch: "transparent"
     readonly property bool hovered: trackMouse.containsMouse || swatchMouse.containsMouse || downMouse.containsMouse || upMouse.containsMouse
     readonly property bool canDecrease: root.value > root.from
     readonly property bool canIncrease: root.value < root.to
@@ -79,8 +79,8 @@ Item {
             }
 
             Rectangle {
-                width: 14
-                height: 14
+                width: Theme.sliderKnob
+                height: Theme.sliderKnob
                 radius: 7
                 color: Theme.text
                 anchors.verticalCenter: parent.verticalCenter

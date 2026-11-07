@@ -1,0 +1,6 @@
+module freshrss
+ReaderModel 1.0 ReaderModel.qml
+ReaderRow 1.0 ReaderRow.qml
+ReaderList 1.0 ReaderList.qml
+ReaderControls 1.0 ReaderControls.qml
+ReaderDetail 1.0 ReaderDetail.qml

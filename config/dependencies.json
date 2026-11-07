@@ -238,6 +238,20 @@
             "area": "Power",
             "need": "optional",
             "use": "Lock from the power menu"
+        },
+        {
+            "name": "mpv",
+            "pkg": "mpv",
+            "area": "FreshRSS",
+            "need": "optional",
+            "use": "Play in mpv for video articles"
+        },
+        {
+            "name": "yt-dlp",
+            "pkg": "yt-dlp",
+            "area": "FreshRSS",
+            "need": "optional",
+            "use": "Lets mpv play YouTube and other video pages"
         }
     ],
     "fonts": [

@@ -59,8 +59,8 @@ Rectangle {
         Rectangle {
             id: box
             anchors.verticalCenter: parent.verticalCenter
-            width: 28
-            height: 22
+            width: Theme.checkBoxWidth
+            height: Theme.checkBoxHeight
             radius: 4
             color: "transparent"
             border.width: Theme.borderWidth
@@ -70,7 +70,7 @@ Rectangle {
                 anchors.centerIn: parent
                 text: root.checked ? "✓" : "✕"
                 color: root.checked ? Theme.ok : Theme.danger
-                font.pixelSize: 14
+                font.pixelSize: Theme.checkGlyphPx
                 font.bold: true
             }
 

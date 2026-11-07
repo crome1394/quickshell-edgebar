@@ -156,7 +156,7 @@ Singleton {
             waitForEnd: true
         }
         onExited: (code) => {
-            const said = (String(reloadOut.text) + String(reloadErr.text)).trim()
+            const said = [String(reloadOut.text), String(reloadErr.text)].join("").trim()
             if (code !== 0 || /^error/i.test(said))
                 root.error = ("Hyprland did not take the rules: " + (said || "exit " + code)).slice(0, 220)
             root.finish()
