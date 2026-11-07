@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Controls
 import qs.config
 import qs.services
+import qs.settings
 import qs.theme
 
 // The article pane: feed actions for the feed under the cursor, the

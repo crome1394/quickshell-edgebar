@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
+import qs.components
 import qs.theme
 
 // The "?" shortcut sheet: every reader key from ReaderKeys, grouped, on a

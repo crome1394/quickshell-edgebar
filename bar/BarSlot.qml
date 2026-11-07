@@ -27,7 +27,7 @@ Item {
         || cell.widgetId === "launcher" || cell.widgetId === "stats"
         || cell.widgetId === "notifications" || cell.widgetId === "volume"
         || cell.widgetId === "tailscale" || cell.widgetId === "hyprInsp"
-        || cell.widgetId === "freshRss"
+        || cell.widgetId === "freshRss" || cell.widgetId === "clipboard"
         || cell.widgetId === "caffeine" || cell.widgetId === "nightLight" || cell.widgetId === "recorder"
         || cell.widgetId === "firewall" || cell.widgetId === "battery" || cell.widgetId === "brightness"
         || WidgetService.isLauncherId(cell.widgetId)
@@ -109,6 +109,8 @@ Item {
             file = "InspectorPill.qml"
         else if (cell.widgetId === "freshRss")
             file = "FreshRssPill.qml"
+        else if (cell.widgetId === "clipboard")
+            file = "ClipboardPill.qml"
         else if (cell.widgetId === "caffeine")
             file = "CaffeinePill.qml"
         else if (cell.widgetId === "nightLight")
@@ -201,7 +203,7 @@ Item {
             }
         }
 
-        // Loaded by URL so tray, power, transparency, network, bluetooth, stats, notifications, audio, the Inspector, FreshRSS, Caffeine, Night Light, the recorder, Firewall, Battery, Brightness, and the app launchers stay unloaded until that widget is on the bar.
+        // Loaded by URL so tray, power, transparency, network, bluetooth, stats, notifications, audio, the Inspector, FreshRSS, Clipboard, Caffeine, Night Light, the recorder, Firewall, Battery, Brightness, and the app launchers stay unloaded until that widget is on the bar.
         Loader {
             id: tool
             active: !cell.divider && cell.toolWidget && cell.shown

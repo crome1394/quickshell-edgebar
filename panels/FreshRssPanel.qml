@@ -1,9 +1,11 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
+import qs.components
 import qs.config
 import qs.freshrss
 import qs.services
+import qs.settings
 import qs.theme
 
 // Real toplevel so Hyprland window rules can match it.

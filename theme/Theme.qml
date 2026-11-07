@@ -184,6 +184,21 @@ Singleton {
     readonly property int freshRssHtmlMax: 120000
     readonly property int freshRssSearchTextMax: 400
     readonly property string freshRssGlyph: "󰑫"
+    // Clipboard viewer: window size, list row height, preview pane share,
+    // history sizes to pick from (cliphist's own default is 750), the
+    // longest preview read per entry, and the pause before a preview loads.
+    readonly property string clipboardGlyph: "\u{f0a38}"
+    readonly property int clipboardWidth: 920
+    readonly property int clipboardHeight: 560
+    readonly property int clipboardRowHeight: 44
+    readonly property real clipboardListShare: 0.46
+    readonly property int clipboardMaxItemsDefault: 500
+    readonly property var clipboardMaxItemsChoices: [100, 250, 500, 750, 1000]
+    readonly property int clipboardPreviewWidth: 400
+    readonly property int clipboardPreviewMax: 20000
+    readonly property int clipboardPreviewDelayMs: 120
+    readonly property int clipboardTagWidth: 46
+    readonly property int clipboardRestartMs: 3000
     // Caffeine: tea cup outline when off, filled when on (nf-md-tea).
     readonly property string caffeineOffGlyph: "\u{f0d9f}"
     readonly property string caffeineOnGlyph: "\u{f0d9e}"

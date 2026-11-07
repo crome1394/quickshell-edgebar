@@ -1,6 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
-import qs.settings
+import qs.components
 import qs.theme
 
 // A reader button with its keyboard key shown beside the label, so the

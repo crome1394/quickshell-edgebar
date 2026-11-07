@@ -1,0 +1,5 @@
+module clipboard
+ClipModel 1.0 ClipModel.qml
+ClipRow 1.0 ClipRow.qml
+ClipPreview 1.0 ClipPreview.qml
+ClipKeys 1.0 ClipKeys.qml

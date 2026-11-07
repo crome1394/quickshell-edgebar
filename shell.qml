@@ -30,6 +30,9 @@ ShellRoot {
     property bool recorderWatch: RecorderService.recording
     // Registers the firewall IPC target; it only reads UFW's files.
     property bool firewallWatch: FirewallService.enabled
+    // Registers the clipboard IPC target and keeps the history watcher
+    // (one wl-paste) running while history is on.
+    property bool clipboardWatch: ClipboardService.recording
 
     // The one tooltip window every bar widget shares (TipService).
     BarTipHost {}
@@ -76,6 +79,14 @@ ShellRoot {
         active: FreshRssService.open
         sourceComponent: Component {
             FreshRssPanel {}
+        }
+    }
+
+    // The clipboard viewer exists only while open (qs ipc call clipboard toggle).
+    Loader {
+        active: ClipboardService.open
+        sourceComponent: Component {
+            ClipboardPanel {}
         }
     }
 

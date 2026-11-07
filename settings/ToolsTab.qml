@@ -2,7 +2,7 @@ import QtQuick
 import qs.theme
 
 // Settings → Tools: desktop helpers: Capture and Screensaver (started by
-// Hyprland keybinds or hypridle), Recording, and Night Light.
+// Hyprland keybinds or hypridle), Recording, Night Light, and Clipboard.
 Item {
     id: root
 
@@ -12,7 +12,7 @@ Item {
 
     function applyReveal() {
         const id = root.revealSection
-        if (id === "capture" || id === "screensaver" || id === "recording" || id === "nightlight")
+        if (id === "capture" || id === "screensaver" || id === "recording" || id === "nightlight" || id === "clipboard")
             root.section = id
     }
 
@@ -28,7 +28,8 @@ Item {
             { id: "capture", label: "Capture" },
             { id: "screensaver", label: "Screensaver" },
             { id: "recording", label: "Recording" },
-            { id: "nightlight", label: "Night Light" }
+            { id: "nightlight", label: "Night Light" },
+            { id: "clipboard", label: "Clipboard" }
         ]
         currentId: root.section
         onSelected: (tabId) => { root.section = tabId }
@@ -76,5 +77,16 @@ Item {
         anchors.topMargin: Theme.space
         active: root.section === "nightlight"
         source: nightPage.active ? Qt.resolvedUrl("NightLightTab.qml") : ""
+    }
+
+    Loader {
+        id: clipboardPage
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: sections.bottom
+        anchors.bottom: parent.bottom
+        anchors.topMargin: Theme.space
+        active: root.section === "clipboard"
+        source: clipboardPage.active ? Qt.resolvedUrl("ClipboardTab.qml") : ""
     }
 }

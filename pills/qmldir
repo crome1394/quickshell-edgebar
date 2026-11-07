@@ -37,3 +37,4 @@ FirewallMenu 1.0 FirewallMenu.qml
 FirewallRuleRow 1.0 FirewallRuleRow.qml
 BatteryPill 1.0 BatteryPill.qml
 BrightnessPill 1.0 BrightnessPill.qml
+ClipboardPill 1.0 ClipboardPill.qml

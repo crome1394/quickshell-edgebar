@@ -20,6 +20,7 @@ hl.bind("SUPER + R", hl.dsp.exec_cmd("qs ipc call freshRss toggle"))
 | `inspector openTab bindings\|system` | Inspector on a tab |
 | `freshRss toggle` · `open` · `close` | [FreshRSS](freshrss.md) reader |
 | `freshRss refresh` | Check the unread count now |
+| `clipboard toggle` · `open` · `close` | [Clipboard](clipboard.md) viewer |
 | `overview toggle` · `open` · `close` | Workspace overview |
 | `overview desktop` · `all` | Windows in place / every workspace |
 | `overview next` · `prev` | Step cards while it is open |
@@ -89,6 +90,7 @@ Pick keys that are free in your config.
 hl.bind("SUPER + TAB",         hl.dsp.exec_cmd("qs ipc call overview toggle"))
 hl.bind("SUPER + SLASH",       hl.dsp.exec_cmd("qs ipc call inspector toggle"))
 hl.bind("SUPER + R",           hl.dsp.exec_cmd("qs ipc call freshRss toggle"))
+hl.bind("SUPER + V",           hl.dsp.exec_cmd("qs ipc call clipboard toggle"))
 hl.bind("SUPER + COMMA",       hl.dsp.exec_cmd("qs ipc call settings toggle"))
 hl.bind("SUPER + N",           hl.dsp.exec_cmd("qs ipc call notificationBell toggleHistory"))
 hl.bind("SUPER + SHIFT + R",   hl.dsp.exec_cmd("qs ipc call recorder toggle"))

@@ -22,6 +22,7 @@ not loaded at all. Tooltips open outside the bar, away from the edge.
 | **Tailscale** | The Tailscale mark (dim when off) | Left: menu. Right: on/off |
 | **Inspector** | A search icon | Opens the [Inspector](inspector.md) |
 | **FreshRSS** | Unread count | Opens the [reader](freshrss.md) |
+| **Clipboard** | Clipboard icon (dim while no history is kept) | Opens the [clipboard viewer](clipboard.md) |
 | **Caffeine** | A tea cup, filled while on | Left: keep the screen awake (no screensaver or idle lock). Right: 30 min → 1 h → 2 h → until off |
 | **Night Light** | A moon | Left: warm the screen against blue light (needs `hyprsunset`). Wheel: warmer or cooler |
 | **Battery** (laptops) | Level glyph and percent; red when low, a bolt while charging | Left: next power profile. The tip shows time left and the profile |

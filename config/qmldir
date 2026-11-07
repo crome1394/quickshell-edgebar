@@ -24,3 +24,4 @@ singleton FreshRssSettings 1.0 FreshRssSettings.qml
 singleton PopupSettings 1.0 PopupSettings.qml
 singleton NightLightSettings 1.0 NightLightSettings.qml
 singleton RecorderSettings 1.0 RecorderSettings.qml
+singleton ClipboardSettings 1.0 ClipboardSettings.qml

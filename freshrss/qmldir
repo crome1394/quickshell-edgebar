@@ -7,6 +7,4 @@ ReaderDetail 1.0 ReaderDetail.qml
 ReaderKeys 1.0 ReaderKeys.qml
 ReaderKeysHelp 1.0 ReaderKeysHelp.qml
 ReaderSegment 1.0 ReaderSegment.qml
-KeyCap 1.0 KeyCap.qml
-ActionChip 1.0 ActionChip.qml
 PageReader 1.0 PageReader.qml

@@ -281,6 +281,13 @@
             "use": "Lets mpv play YouTube and other video pages"
         },
         {
+            "name": "cliphist",
+            "pkg": "cliphist",
+            "area": "Clipboard",
+            "need": "optional",
+            "use": "Clipboard history and the clipboard viewer"
+        },
+        {
             "name": "gpu-screen-recorder",
             "pkg": "gpu-screen-recorder",
             "area": "Recording",

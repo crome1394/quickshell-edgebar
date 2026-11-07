@@ -94,6 +94,10 @@ Singleton {
     property alias menuImagePath: data.menuImagePath
     property alias menuImageTint: data.menuImageTint
     property alias showFreshRssPill: data.showFreshRssPill
+    property alias showClipboardPill: data.showClipboardPill
+    property alias clipboardHistory: data.clipboardHistory
+    property alias clipboardMaxItems: data.clipboardMaxItems
+    property alias clipboardImages: data.clipboardImages
     property alias showCaffeinePill: data.showCaffeinePill
     property alias showNightLightPill: data.showNightLightPill
     property alias showRecorderPill: data.showRecorderPill
@@ -539,6 +543,12 @@ Singleton {
             property string menuImagePath: ""
             property bool menuImageTint: false
             property bool showFreshRssPill: false
+            property bool showClipboardPill: false
+            // Clipboard history (cliphist): keep it, how many entries (0 =
+            // default), and whether pictures are kept too.
+            property bool clipboardHistory: true
+            property int clipboardMaxItems: 0
+            property bool clipboardImages: true
             property bool showCaffeinePill: false
             property bool showNightLightPill: false
             property bool showRecorderPill: false

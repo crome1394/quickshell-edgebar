@@ -17,6 +17,7 @@ Singleton {
         quickLaunch3: "showQuickLaunch3Pill",
         quickLaunch4: "showQuickLaunch4Pill",
         freshRss: "showFreshRssPill",
+        clipboard: "showClipboardPill",
         caffeine: "showCaffeinePill",
         nightLight: "showNightLightPill",
         recorder: "showRecorderPill",
