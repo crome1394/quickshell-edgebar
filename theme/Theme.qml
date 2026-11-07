@@ -69,6 +69,8 @@ Singleton {
     readonly property int tabHeight: 32
     readonly property int tabGap: 6
     readonly property int tabMinWidth: 100
+    // Width of a section's title bar when the title runs down the left side.
+    readonly property int sideHeaderWidth: 30
     // Settings tabs as index dividers (IndexTabStrip).
     readonly property int indexTabHeight: 34
     readonly property int indexTabEdge: 3
@@ -266,6 +268,9 @@ Singleton {
     readonly property int displayConfirmWidth: 420
     // Settings → System → Display → Arrangement.
     readonly property int displayLayoutHeight: 240
+    // The open Arrangement column's width range.
+    readonly property int displayArrangeMin: 300
+    readonly property int displayArrangeMax: 460
     // Snap a dropped monitor's edges to a neighbor's within this many logical pixels.
     readonly property int displaySnapPx: 160
     readonly property int displaySettleMs: 1500

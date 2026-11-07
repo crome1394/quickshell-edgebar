@@ -111,10 +111,13 @@ devices.
   mode; a small window in the middle of that monitor asks **Keep** or **Go
   back** (Enter or Escape), and with no answer it goes back after 15
   seconds. Either way Settings reopens on Display with the mode in use
-  selected. **Arrangement** shows the monitors to scale: drag one next to
+  selected. The resolution tiles size themselves to fill their column.
+  **Arrangement** sits to the right, with its title down the left side:
+  click the title bar to fold it sideways or open it (folded by default
+  with one monitor). It shows the monitors to scale: drag one next to
   another and it snaps to the nearest side (left, right, above, below),
   edges lined up when close; Apply arrangement asks the same Keep or Go
-  back. Saving for good needs the marker described in
+  back. In a narrow window the open Arrangement drops below. Saving for good needs the marker described in
   [Hyprland setup](hyprland.md#display).
 - **Transparency**: one opacity for every app, plus per-app overrides with
   focused and unfocused levels. Add an app from the open windows or by its
