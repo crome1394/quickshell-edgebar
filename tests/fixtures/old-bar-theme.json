@@ -1,0 +1,30 @@
+{
+  "name": "Old bar sample",
+  "version": 1,
+  "colors": {
+    "accent": { "hex": "#7dd3fc", "alpha": 1 },
+    "muted": { "hex": "#d01f3e", "alpha": 1 },
+    "glassBg": { "hex": "#0a121f", "alpha": 0.4 },
+    "glassPopupBg": { "hex": "#0a121f", "alpha": 0.9 },
+    "glassPillBg": { "hex": "#0a121f", "alpha": 0 },
+    "text": { "hex": "#f0f4fc", "alpha": 1 },
+    "weekday": { "hex": "#ff5c9a", "alpha": 1 },
+    "audioSpeakerTier1": { "hex": "#10b981", "alpha": 1 },
+    "audioSpeakerTier2": { "hex": "#31ff00", "alpha": 1 },
+    "audioSpeakerTier3": { "hex": "#f97316", "alpha": 1 },
+    "audioSpeakerTier4": { "hex": "#ef4444", "alpha": 1 },
+    "statCpuTier1": { "hex": "#e8a0a4", "alpha": 1 },
+    "statCpuTier2": { "hex": "#ed1c24", "alpha": 1 },
+    "statCpuTier3": { "hex": "#c4161c", "alpha": 1 },
+    "statCpuTier4": { "hex": "#ff4500", "alpha": 1 },
+    "statGpuTier1": { "hex": "#76b900", "alpha": 1 },
+    "statGpuTier2": { "hex": "#c4d600", "alpha": 1 },
+    "statGpuTier3": { "hex": "#ffc800", "alpha": 1 },
+    "statGpuTier4": { "hex": "#ff5a00", "alpha": 1 }
+  },
+  "numbers": {
+    "audioUtilThreshold1": 20, "audioUtilThreshold2": 40, "audioUtilThreshold3": 80,
+    "statUtilThreshold1": 30, "statUtilThreshold2": 60, "statUtilThreshold3": 90,
+    "statTempWarmAt": 65, "statTempHotAt": 80
+  }
+}

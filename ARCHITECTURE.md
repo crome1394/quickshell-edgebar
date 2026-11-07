@@ -158,6 +158,15 @@ is a command of its own. Each handler
 calls the same function as its button and validates its arguments; the
 calls are listed in a comment beside the handler.
 
+## Tests
+
+`tests/run.sh` runs the logic tests: the theme builder and import, the
+FreshRSS env reader and HTML cleaning, the reader's grouping and cursor,
+the settings Draft, and the tooltip service. Each `tests/*Test.qml` is a
+small Quickshell config run against a temporary copy of the bar with a
+throwaway HOME, printing PASS/FAIL lines (`tests/Check.qml`). Add a test
+when you change logic that has no UI.
+
 ## Adding things
 
 - **A widget**: add it to `WidgetService`'s catalog and `isImplemented()`,

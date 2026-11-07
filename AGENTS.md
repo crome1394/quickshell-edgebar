@@ -40,6 +40,8 @@ The old bar is at <~/Projects/qs-old-bar>
   must call the same function its button calls, validate its arguments,
   and be listed in a comment beside its IPC handler.
 - A hot reload doesn't register new QML files; restart with `qs kill; qs -d -n`.
+- Run `tests/run.sh` after changing logic (themes, settings drafts, FreshRSS
+  parsing, the reader model); it must pass.
 
 ## Goals
 Goals, in priority order:
