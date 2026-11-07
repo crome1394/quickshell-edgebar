@@ -25,7 +25,7 @@ Item {
         || cell.widgetId === "opacity" || cell.widgetId === "networkPanel" || cell.widgetId === "bluetooth"
         || cell.widgetId === "launcher" || cell.widgetId === "stats"
         || cell.widgetId === "notifications" || cell.widgetId === "volume"
-        || cell.widgetId === "tailscale"
+        || cell.widgetId === "tailscale" || cell.widgetId === "hyprInsp"
         || WidgetService.isLauncherId(cell.widgetId)
     // An empty launcher, or stats with every section off, stays unloaded.
     readonly property bool shown: {
@@ -93,6 +93,8 @@ Item {
             file = "AudioPill.qml"
         else if (cell.widgetId === "tailscale")
             file = "TailscalePill.qml"
+        else if (cell.widgetId === "hyprInsp")
+            file = "InspectorPill.qml"
         else if (WidgetService.isLauncherId(cell.widgetId)) {
             file = "LaunchPill.qml"
             props.launcher = cell.launcherIndex()
@@ -173,7 +175,7 @@ Item {
             }
         }
 
-        // Loaded by URL so tray, power, transparency, network, bluetooth, stats, notifications, audio, and the app launchers stay unloaded until that widget is on the bar.
+        // Loaded by URL so tray, power, transparency, network, bluetooth, stats, notifications, audio, the Inspector, and the app launchers stay unloaded until that widget is on the bar.
         Loader {
             id: tool
             active: !cell.divider && cell.toolWidget && cell.shown

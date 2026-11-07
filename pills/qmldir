@@ -27,3 +27,4 @@ AudioMenu 1.0 AudioMenu.qml
 AudioDeviceSection 1.0 AudioDeviceSection.qml
 AudioStreamRow 1.0 AudioStreamRow.qml
 OpacityAddRow 1.0 OpacityAddRow.qml
+InspectorPill 1.0 InspectorPill.qml
