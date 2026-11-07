@@ -76,8 +76,9 @@ setting on Auto.
 ## Window rules
 
 The bar's windows have the class `org.quickshell` and these titles:
-`Settings`, `Inspector`, `FreshRSS`. They float on their own; add rules to
-size or place them:
+`Settings`, `Inspector`, `FreshRSS`. They float on their own and open
+no larger than the focused screen (less a small margin), so they fit a
+laptop panel. Add rules to size or place them:
 
 ```lua
 hl.window_rule({
