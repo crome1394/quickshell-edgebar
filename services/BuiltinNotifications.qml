@@ -109,12 +109,13 @@ Singleton {
 
     // ── History file and clear-at-boot ──────────────────────────────────
     property string bootNow: ""
+    property bool kernelRead: false
     property bool bootRead: false
     property bool historyRead: false
     property var historyRaw: []
 
     function finishLoad() {
-        if (!root.bootRead || !root.historyRead)
+        if (!root.kernelRead || !root.bootRead || !root.historyRead)
             return
         const previous = String(bootFile.text() || "").trim()
         const fresh = root.bootNow.length && previous.length && previous !== root.bootNow
@@ -134,10 +135,11 @@ Singleton {
         printErrors: false
         onLoaded: {
             root.bootNow = String(kernelBoot.text() || "").trim()
-            bootFile.reload()
+            root.kernelRead = true
+            root.finishLoad()
         }
         onLoadFailed: {
-            root.bootRead = true
+            root.kernelRead = true
             root.finishLoad()
         }
     }
@@ -147,7 +149,6 @@ Singleton {
         path: root.enabled ? root.stateDir + "/notification-boot-id" : ""
         atomicWrites: true
         printErrors: false
-        preload: false
         onLoaded: {
             root.bootRead = true
             root.finishLoad()
