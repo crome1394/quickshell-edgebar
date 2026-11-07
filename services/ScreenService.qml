@@ -1,7 +1,9 @@
 pragma Singleton
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import qs.config
+import qs.theme
 
 // Which monitors get bars, and which one is the main monitor.
 //
@@ -40,6 +42,37 @@ Singleton {
     }
 
     readonly property string mainName: root.mainScreen ? String(root.mainScreen.name) : ""
+
+    // The screen with focus, where a new window opens.
+    function focusedScreen() {
+        const mon = Hyprland.focusedMonitor
+        const name = mon ? String(mon.name) : ""
+        for (let i = 0; i < root.screens.length; i++) {
+            if (String(root.screens[i].name) === name)
+                return root.screens[i]
+        }
+        return root.mainScreen
+    }
+
+    // A window size no larger than the focused screen less a margin, so
+    // Settings and the readers fit a laptop panel. Read when a window
+    // opens, not bound, so an open window never resizes on its own.
+    function fitSize(w, h) {
+        const s = root.focusedScreen()
+        if (!s || s.width <= 0 || s.height <= 0)
+            return Qt.size(w, h)
+        const m = Theme.windowScreenMargin * 2
+        return Qt.size(Math.max(1, Math.min(w, s.width - m)), Math.max(1, Math.min(h, s.height - m)))
+    }
+
+    // Opens `win` at its preferred size, shrunk to fit the screen; the
+    // minimum shrinks with it.
+    function fitWindow(win, w, h, minW, minH) {
+        const size = root.fitSize(w, h)
+        win.implicitWidth = size.width
+        win.implicitHeight = size.height
+        win.minimumSize = Qt.size(Math.min(minW, size.width), Math.min(minH, size.height))
+    }
 
     // The screens that get a set of edge bars.
     readonly property var barScreens: {

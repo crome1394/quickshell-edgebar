@@ -22,6 +22,9 @@ FloatingWindow {
 
     property string notice: ""
 
+    Component.onCompleted: ScreenService.fitWindow(window, Theme.inspectorWidth, Theme.inspectorHeight,
+        Theme.inspectorMinWidth, Theme.inspectorMinHeight)
+
     function copy(text) {
         Quickshell.clipboardText = String(text)
         const one = String(text).split("\n")[0]

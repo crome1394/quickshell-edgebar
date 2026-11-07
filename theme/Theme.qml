@@ -49,6 +49,8 @@ Singleton {
     readonly property int settingsHeight: 760
     readonly property int settingsMinWidth: 760
     readonly property int settingsMinHeight: 480
+    // Gap kept around a window sized to fit a small screen.
+    readonly property int windowScreenMargin: 40
     // Inspector window (Bindings, System Info).
     readonly property int inspectorWidth: 1000
     readonly property int inspectorHeight: 720

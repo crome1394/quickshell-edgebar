@@ -39,6 +39,7 @@ FloatingWindow {
         window.remapping = true
         window.minimized = false
         window.visible = false
+        ScreenService.fitWindow(window, Theme.settingsWidth, Theme.settingsHeight, Theme.settingsMinWidth, Theme.settingsMinHeight)
         Qt.callLater(() => {
             if (token !== window.showGeneration)
                 return

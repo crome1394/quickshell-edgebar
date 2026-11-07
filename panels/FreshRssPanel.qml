@@ -47,6 +47,7 @@ FloatingWindow {
     }
 
     Component.onCompleted: {
+        ScreenService.fitWindow(window, Theme.freshRssWidth, Theme.freshRssHeight, Theme.freshRssMinWidth, Theme.freshRssMinHeight)
         readerState.reload()
         list.forceActiveFocus()
     }
