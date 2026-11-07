@@ -29,14 +29,19 @@ Item {
         || cell.widgetId === "tailscale" || cell.widgetId === "hyprInsp"
         || cell.widgetId === "freshRss"
         || cell.widgetId === "caffeine" || cell.widgetId === "nightLight" || cell.widgetId === "recorder"
-        || cell.widgetId === "firewall"
+        || cell.widgetId === "firewall" || cell.widgetId === "battery" || cell.widgetId === "brightness"
         || WidgetService.isLauncherId(cell.widgetId)
-    // An empty launcher, or stats with every section off, stays unloaded.
+    // An empty launcher, stats with every section off, or a battery or
+    // brightness widget on a machine without one stays unloaded.
     readonly property bool shown: {
         if (WidgetService.isLauncherId(cell.widgetId))
             return WidgetService.launcherPinCount(cell.widgetId) > 0
         if (cell.widgetId === "stats")
             return WidgetService.statsDrawn()
+        if (cell.widgetId === "battery")
+            return BatteryService.present
+        if (cell.widgetId === "brightness")
+            return BrightnessService.available
         return true
     }
 
@@ -112,6 +117,10 @@ Item {
             file = "RecorderPill.qml"
         else if (cell.widgetId === "firewall")
             file = "FirewallPill.qml"
+        else if (cell.widgetId === "battery")
+            file = "BatteryPill.qml"
+        else if (cell.widgetId === "brightness")
+            file = "BrightnessPill.qml"
         else if (WidgetService.isLauncherId(cell.widgetId)) {
             file = "LaunchPill.qml"
             props.launcher = cell.launcherIndex()
@@ -192,7 +201,7 @@ Item {
             }
         }
 
-        // Loaded by URL so tray, power, transparency, network, bluetooth, stats, notifications, audio, the Inspector, FreshRSS, Caffeine, Night Light, the recorder, and the app launchers stay unloaded until that widget is on the bar.
+        // Loaded by URL so tray, power, transparency, network, bluetooth, stats, notifications, audio, the Inspector, FreshRSS, Caffeine, Night Light, the recorder, Firewall, Battery, Brightness, and the app launchers stay unloaded until that widget is on the bar.
         Loader {
             id: tool
             active: !cell.divider && cell.toolWidget && cell.shown

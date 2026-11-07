@@ -175,6 +175,18 @@ Singleton {
     readonly property string recordGlyph: "\u{f044a}"
     readonly property string recordingGlyph: "\u{f044b}"
     readonly property var recFpsChoices: [30, 60, 120, 144]
+    // Battery (UPower): outline at 0, then 10 % steps to full (nf-md-battery-*).
+    readonly property var batteryGlyphs: ["\u{f008e}", "\u{f007a}", "\u{f007b}", "\u{f007c}", "\u{f007d}", "\u{f007e}",
+        "\u{f007f}", "\u{f0080}", "\u{f0081}", "\u{f0082}", "\u{f0079}"]
+    readonly property string batteryChargingGlyph: "\u{f0084}"
+    // At or below this percent the battery turns the alert color.
+    readonly property int batteryLowPercent: 15
+    readonly property int batteryTextPx: 10
+    // Screen brightness (/sys/class/backlight, set through logind).
+    readonly property string brightnessGlyph: "\u{f00e0}"
+    readonly property int brightnessStep: 5
+    readonly property int brightnessMinPercent: 1
+    readonly property var brightnessSteps: [25, 50, 75, 100]
 
     // Settings → Theme.
     readonly property int themeCardMinWidth: 200

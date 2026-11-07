@@ -24,6 +24,8 @@ not loaded at all. Tooltips open outside the bar, away from the edge.
 | **FreshRSS** | Unread count | Opens the [reader](freshrss.md) |
 | **Caffeine** | A tea cup, filled while on | Left: keep the screen awake (no screensaver or idle lock). Right: 30 min → 1 h → 2 h → until off |
 | **Night Light** | A moon | Left: warm the screen against blue light (needs `hyprsunset`). Wheel: warmer or cooler |
+| **Battery** (laptops) | Level glyph and percent; red when low, a bolt while charging | Left: next power profile. The tip shows time left and the profile |
+| **Brightness** (laptops) | A sun | Wheel: brighter or dimmer. Left: 25, 50, 75, 100 % |
 | **Firewall** | A shield, checked while on, crossed out in red while off | Left: menu with on/off, default policies, the rules, and Add a rule. Right: turn the firewall on or off. Changes ask for your password |
 | **Screen Recorder** | A record button; a red mark and the time while recording | Left: record (focused monitor or a region, per Settings) or stop. Right: record a region. Middle: open the folder |
 

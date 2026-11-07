@@ -177,20 +177,26 @@ command -v python3 >/dev/null 2>&1 || die "python3 is needed to read the depende
 # value is checked against a strict pattern, so nothing odd from the file
 # reaches a command line. SwayNC-only tools are never installed: the bar
 # uses SwayNC when it is already there, and its own server otherwise.
-# NVIDIA-only tools are offered only when an NVIDIA card is present.
+# NVIDIA-only tools are offered only when an NVIDIA card is present, and
+# laptop tools only when there is a battery.
 has_nvidia=0
 for v in /sys/class/drm/card*/device/vendor; do
     [[ -r "$v" && "$(cat "$v")" == "0x10de" ]] && has_nvidia=1 && break
 done
+has_battery=0
+for t in /sys/class/power_supply/*/type; do
+    [[ -r "$t" && "$(cat "$t")" == "Battery" ]] && has_battery=1 && break
+done
 rows() {
-    python3 -I - "$list" "$1" "$has_nvidia" <<'PY'
+    python3 -I - "$list" "$1" "$has_nvidia" "$has_battery" <<'PY'
 import json, re, sys
-path, kind, nvidia = sys.argv[1], sys.argv[2], sys.argv[3] == "1"
+path, kind, nvidia, laptop = sys.argv[1], sys.argv[2], sys.argv[3] == "1", sys.argv[4] == "1"
 safe = re.compile(r"^[A-Za-z0-9@._+ -]{1,64}$")
 with open(path, encoding="utf-8") as f:
     data = json.load(f)
 for row in data.get(kind, []):
-    if row.get("when") == "swaync" or (row.get("when") == "nvidia" and not nvidia):
+    when = row.get("when")
+    if when == "swaync" or (when == "nvidia" and not nvidia) or (when == "laptop" and not laptop):
         continue
     need = row.get("need", "optional")
     name, pkg = str(row.get("name", "")), str(row.get("pkg", ""))

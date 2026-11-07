@@ -281,6 +281,23 @@
             "use": "Night Light widget: warms the screen against blue light"
         },
         {
+            "name": "upower",
+            "pkg": "upower",
+            "area": "Laptop",
+            "need": "optional",
+            "when": "laptop",
+            "use": "Battery widget (level, time left, charging)"
+        },
+        {
+            "name": "powerprofilesctl",
+            "pkg": "power-profiles-daemon",
+            "area": "Laptop",
+            "need": "optional",
+            "when": "laptop",
+            "ask": "no",
+            "use": "Power profile on the Battery widget (tuned-ppd works too; install one, not both)"
+        },
+        {
             "name": "ufw",
             "pkg": "ufw",
             "area": "Firewall",

@@ -32,3 +32,5 @@ singleton NightLightService 1.0 NightLightService.qml
 singleton RecorderService 1.0 RecorderService.qml
 singleton FirewallService 1.0 FirewallService.qml
 singleton GpuService 1.0 GpuService.qml
+singleton BatteryService 1.0 BatteryService.qml
+singleton BrightnessService 1.0 BrightnessService.qml
