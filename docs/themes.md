@@ -1,6 +1,6 @@
 # Themes
 
-**Settings → Theme** restyles the bar, its menus, and Settings at once.
+**Settings → Appearance → Theme** restyles the bar, its menus, and Settings at once.
 
 ## Presets
 
@@ -15,7 +15,7 @@
 - **New**: Midnight, Velvet, Dune, Evergreen, Copper
 
 Click a card to preview it on the page, then **Apply**. Presets change
-colors only; your stat and audio thresholds stay.
+colors only; your fonts and stat and audio thresholds stay.
 
 ## Simple edits
 
@@ -24,16 +24,21 @@ colors only; your stat and audio thresholds stay.
   hot temperatures, weekdays), and tint (the glass color)
 - **Bar glass** and **Menu glass**: how solid they are
 - **CPU warm at / hot at**: the temperature steps in System Stats
+- **UI font** and **Bar font** (Default uses Inter and MesloLGS Nerd Font)
+- **Text size**: 80 to 130%, for text and icons everywhere
 - **Use derived colors**: drop a preset's own text colors and derive
   everything from the three colors above
+
+Workspace pills follow the theme unless you choose My colors under Bar →
+Workspaces → Colors.
 
 Changing the accent also restyles hovers, borders, and the active
 workspace, because those are derived from it.
 
 ## My themes, import, export
 
-- **Save** stores the look under a name, together with your stat and audio
-  thresholds and colors. ✕ on a card deletes it.
+- **Save** stores the look under a name, together with its fonts and your
+  stat and audio thresholds and colors. ✕ on a card deletes it.
 - **Export…** writes the look to a `.json` theme file.
 - **Import…** reads a theme file from this bar or from the old bar (its
   `themes/*.json` or `state/theme-colors.json`) and adds it to My themes.
@@ -61,6 +66,7 @@ qs ipc call theme current                # the applied one
   "menu": 92,
   "colors": { "colWeekday": "#b48ead" },
   "temp": { "warmAt": 70, "hotAt": 85 },
+  "fonts": { "ui": "Inter", "bar": "", "size": 100 },
   "stats": { "cpu": { "t": [25, 50, 75], "c": ["#…", "#…", "#…", "#…"] } },
   "audio": { "t": [25, 50, 75], "c": ["#…", "#…", "#…", "#…"] }
 }

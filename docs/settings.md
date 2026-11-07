@@ -11,7 +11,10 @@ Nothing on those pages is saved until Apply.
 ## Bar
 
 - **Workspaces**: symbol, label, font, and size for each workspace number.
-  Drag a row by `||` to move a face to another number.
+  Drag a row by `||` to move a face to another number. **Colors**: Theme
+  (pills follow the theme, so they read on light and dark themes) or My
+  colors (each workspace's label color, plus optional active pill, active
+  text, idle text, and hover text colors; an empty swatch uses the theme).
 - **Dock**: hover effect (Off, Magnify, Jump, Both), what it applies to,
   magnify amount, spread, jump height, running-app dot color.
 - **Overview**: layout, strip, previews, motion, which workspaces appear,
@@ -20,21 +23,21 @@ Nothing on those pages is saved until Apply.
 ## Widgets
 
 - **Bars**: turn each edge on, align it, place widgets, auto-hide (H) and
-  its delays.
+  its delays. **Monitors**: bars on the main monitor (the default), every
+  monitor, or monitors you pick, and which monitor is the main one (the
+  Active Window popup and menus opened from a keybind go there). A menu
+  opens on the monitor whose bar you clicked.
 - **Active Window**: show it, corner, width, and classes to exclude.
 - **System Stats**: font, bold, italic, size, bar graph width, the CPU,
   memory, GPU, and VRAM threshold steps and colors, and the click commands
   (run directly or in your terminal, never through a shell).
 
-## Wallpaper
+## Appearance
 
-A folder of images; click one to set it with hyprpaper. Rename (pencil) or
-delete (✕) files, and change the preview size.
-
-## Theme
-
-Presets, simple edits, saved themes, import and export. See
-[Themes](themes.md).
+- **Theme**: presets, colors, fonts and text size, saved themes, import
+  and export. See [Themes](themes.md).
+- **Wallpaper**: a folder of images; click one to set it with hyprpaper.
+  Rename (pencil) or delete (✕) files, and change the preview size.
 
 ## Applications
 
@@ -59,8 +62,16 @@ devices.
 
 ## Notifications
 
-Toast corner and timeout, and history options (keep expanded, stagger row
-colors, clear at boot, show the counter). Apply updates SwayNC too.
+- **Server**: SwayNC (the default) or Built-in. Built-in makes the bar the
+  notification server: its own popups (images, action buttons, pause on
+  hover, critical ones stay up), Do Not Disturb, and history, with no
+  extra processes. Only one server can run: the page shows whether SwayNC
+  is running and has a Stop SwayNC button. To keep Built-in after a
+  restart, remove SwayNC from your autostart (see
+  [Hyprland setup](hyprland.md#notifications)).
+- **Toasts**: popup corner and timeout (0 keeps a popup until dismissed).
+- **History**: keep expanded, stagger row colors, clear at boot, show the
+  counter. History carries over when you switch servers.
 
 ## Region & Clock
 
@@ -98,7 +109,10 @@ colors, clear at boot, show the counter). Apply updates SwayNC too.
 ## Where settings are saved
 
 - `state/bar-layout.json`: everything set in Settings.
-- `state/theme.json`: the active theme and the stat and audio thresholds.
+- `state/theme.json`: the active theme, its fonts, and the stat and audio
+  thresholds.
+- `~/.local/state/quickshell/notification-history.json`: notification
+  history (both servers).
 - `~/.config/freshrss-quickshell/freshrss.env`: the FreshRSS server.
 
 `state/` is ignored by git.

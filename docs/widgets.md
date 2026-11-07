@@ -6,7 +6,7 @@ not loaded at all. Tooltips open outside the bar, away from the edge.
 
 | Widget | Shows | Click |
 |---|---|---|
-| **Workspaces** | Each workspace with its symbol, label, and font | Switch to it |
+| **Workspaces** | Each workspace with its symbol, label, and font; theme colors or your own | Switch to it |
 | **Clock** | Time in your format and font | Opens the calendar (the click is configurable) |
 | **Config Menu Icon** | A spanner | Opens Settings |
 | **System Tray** | App tray icons | As each app defines |
@@ -47,6 +47,9 @@ class, and title in a screen corner (Widgets → Active Window).
   and clear.
 
 ## Bar behavior
+
+- **Several monitors**: bars on the main monitor, every monitor, or the
+  ones you pick (Widgets → Bars → Monitors). Each bar has the same widgets.
 
 - **Auto-hide** (the H chip on a bar in Widgets → Bars): the bar slides off
   its edge and gives the space back to windows. Touch the edge to bring it
