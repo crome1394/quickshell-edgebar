@@ -132,7 +132,8 @@ ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `them
 - Services start work only when something reads them. Pollers run at slow
   rates (`Theme.*Ms` intervals) and faster only while their menu is open.
 - Long-running processes are kept to a few watchers: `nvidia-smi` in loop
-  mode for the GPU, and, only when another notification daemon is in use,
+  mode for an NVIDIA GPU (AMD and Intel are read from `/sys`, no process;
+  `GpuService` lists the cards once and picks one), and, only when another notification daemon is in use,
   the history watcher (plus `swaync-client --subscribe` for SwayNC).
   Everything else is read from `/proc`, `/sys`, D-Bus, or Hyprland's
   socket through Quickshell's native modules.

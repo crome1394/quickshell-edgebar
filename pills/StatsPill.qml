@@ -188,11 +188,11 @@ Rectangle {
             edge: root.edge
             label: "GPU"
             percentText: root.gpuKnown ? root.pct(root.gpuUtil) : "N/A"
-            valueText: root.gpuKnown ? (root.gpuTemp + "°") : "N/A"
+            valueText: root.gpuKnown && stats.gpuTempKnown ? (root.gpuTemp + "°") : (root.gpuKnown ? "—" : "N/A")
             percentSample: "100%"
             valueSample: "100°"
             percentColor: root.gpuKnown ? root.utilColor(root.gpuUtil, "gpu") : root.theme.colFgMuted
-            valueColor: root.gpuKnown ? ThemeStore.statTempColor(root.gpuTemp) : root.theme.colFgMuted
+            valueColor: root.gpuKnown && stats.gpuTempKnown ? ThemeStore.statTempColor(root.gpuTemp) : root.theme.colFgMuted
             gaugeColor: root.utilColor(root.gpuUtil, "gpu")
             faceFont: root.faceFont
             faceBold: root.faceBold

@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- System Stats reads AMD (busy percent, VRAM, temperature) and Intel (load estimated from the clock) GPUs from `/sys`, no process; NVIDIA still uses `nvidia-smi`. Widgets → System Stats → Graphics card picks the card; Auto takes the only one, or on a hybrid laptop the one that drives the screen, so the discrete GPU can sleep (the page warns when your choice keeps it awake). New: `services/GpuService.qml`. The installer and the dependency list offer `nvidia-utils` only on machines with an NVIDIA card.
 - Screen Recorder: a new Auto codec (the default) reads `gpu-screen-recorder --info` once and records AV1 when the GPU encodes it, else HEVC, else H.264, so older NVIDIA, AMD, and Intel GPUs work out of the box. Recording marks codecs this GPU cannot encode.
 - Caffeine and idle rules: only the screensaver's hypridle listener ignores inhibitors now (`ignore_inhibit` in that listener), so lock and suspend rules still respect video players and Caffeine.
 - Applications → App Launcher: Launchers and Installed apps sit side by side with titles down the left; Installed apps folds sideways to its title bar (remembered), and the launcher columns re-flow to the space left (two when they fit, else one). Custom sits below. In a narrow window an open apps panel drops underneath.
