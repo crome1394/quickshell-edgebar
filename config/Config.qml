@@ -129,6 +129,10 @@ Singleton {
     property alias notificationClearOnBoot: data.notificationClearOnBoot
     property alias notificationShowCount: data.notificationShowCount
     property alias notificationCorner: data.notificationCorner
+    // "builtin" makes the bar the notification server; "" keeps SwayNC.
+    property alias notificationServer: data.notificationServer
+    // Do Not Disturb for the built-in server.
+    property alias notificationDnd: data.notificationDnd
     property alias notificationTimeout: data.notificationTimeout
     property alias showPowerPill: data.showPowerPill
     property alias showOpacityPill: data.showOpacityPill
@@ -538,6 +542,8 @@ Singleton {
             property bool notificationClearOnBoot: false
             property bool notificationShowCount: true
             property string notificationCorner: "bottomRight"
+            property string notificationServer: ""
+            property bool notificationDnd: false
             property int notificationTimeout: 8
             property bool showPowerPill: false
             property bool showOpacityPill: false

@@ -7,8 +7,14 @@ import qs.theme
 
 // Notification history and Do Not Disturb.
 // The bell and the history window load on demand. This singleton stays up
-// so `qs ipc call notificationBell` works. The history watcher and the
-// DND poll run only while the bell is on the bar or the history window is open.
+// so `qs ipc call notificationBell` works.
+//
+// Two servers (Settings → Notifications → Server):
+//   SwayNC   SwayNC shows popups; a watcher script records history and
+//            swaync-client reports DND, only while the bell is on a bar or
+//            the history is open.
+//   Built-in BuiltinNotifications is the server; no extra processes. History
+//            and DND are kept by the bar.
 Singleton {
     id: root
 
@@ -16,13 +22,16 @@ Singleton {
     property bool historyOpen: false
     // The monitor whose bell opened the history; "" means the main monitor.
     property string historyScreen: ""
-    property bool dnd: false
+    readonly property bool builtin: BuiltinNotifications.enabled
+    // DND as SwayNC reports it; in built-in mode DND is a saved setting.
+    property bool swayncDnd: false
+    readonly property bool dnd: root.builtin ? Config.notificationDnd : root.swayncDnd
     property var items: []
     property int cursor: 0
     property bool allExpanded: false
 
     readonly property int count: root.items ? root.items.length : 0
-    readonly property bool watching: Config.showNotificationPill || root.historyOpen
+    readonly property bool watching: !root.builtin && (Config.showNotificationPill || root.historyOpen)
 
     function historyScript() {
         return Quickshell.shellDir + "/scripts/notification-history.py"
@@ -158,9 +167,9 @@ Singleton {
         if (!state || state.dnd === undefined || state.dnd === null)
             return
         if (typeof state.dnd === "boolean")
-            root.dnd = state.dnd
+            root.swayncDnd = state.dnd
         else
-            root.dnd = String(state.dnd).toLowerCase() === "true"
+            root.swayncDnd = String(state.dnd).toLowerCase() === "true"
     }
 
     function syncWatchers() {
@@ -173,7 +182,7 @@ Singleton {
     }
 
     function applyToast() {
-        if (!Config.ready || toastProc.running)
+        if (!Config.ready || toastProc.running || root.builtin)
             return
         toastProc.command = [
             "python3",
@@ -205,6 +214,10 @@ Singleton {
     }
 
     function toggleDnd() {
+        if (root.builtin) {
+            BuiltinNotifications.setDnd(!Config.notificationDnd)
+            return
+        }
         // The subscriber reports the new state.
         Quickshell.execDetached(["swaync-client", "-d", "-sw"])
     }
@@ -230,13 +243,25 @@ Singleton {
         const want = String(id || "")
         if (!/^[A-Za-z0-9._-]{1,80}$/.test(want))
             return
+        if (root.builtin) {
+            root.removeLocal(want)
+            BuiltinNotifications.save(root.items)
+            return
+        }
         Quickshell.execDetached(["python3", root.historyScript(), "dismiss", want])
         root.removeLocal(want)
     }
 
     function clearHistory() {
-        Quickshell.execDetached(["python3", root.historyScript(), "clear"])
-        Quickshell.execDetached(["swaync-client", "-C", "-sw"])
+        if (root.builtin) {
+            const live = BuiltinNotifications.live.slice()
+            for (let i = 0; i < live.length; i++)
+                live[i].dismiss()
+            BuiltinNotifications.save([])
+        } else {
+            Quickshell.execDetached(["python3", root.historyScript(), "clear"])
+            Quickshell.execDetached(["swaync-client", "-C", "-sw"])
+        }
         root.items = []
         root.cursor = 0
         root.allExpanded = false
@@ -344,6 +369,17 @@ Singleton {
         function onReadyChanged() {
             if (Config.ready)
                 root.applyToast()
+        }
+    }
+
+    Connections {
+        target: BuiltinNotifications
+        function onHistoryLoaded(items) {
+            root.applyList(items)
+        }
+        function onReceived(item) {
+            root.addItem(item)
+            BuiltinNotifications.save(root.items)
         }
     }
 

@@ -9,3 +9,5 @@ NotificationHistory 1.0 NotificationHistory.qml
 NotificationHost 1.0 NotificationHost.qml
 InspectorPanel 1.0 InspectorPanel.qml
 FreshRssPanel 1.0 FreshRssPanel.qml
+NotificationToast 1.0 NotificationToast.qml
+NotificationToasts 1.0 NotificationToasts.qml

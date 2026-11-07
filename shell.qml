@@ -39,6 +39,14 @@ ShellRoot {
         id: settings
     }
 
+    // Popups for the built-in notification server (Settings → Notifications).
+    Loader {
+        active: BuiltinNotifications.enabled
+        sourceComponent: Component {
+            NotificationToasts {}
+        }
+    }
+
     // The FreshRSS reader exists only while open (pill or qs ipc call freshRss toggle).
     Loader {
         active: FreshRssService.open
