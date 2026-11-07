@@ -29,8 +29,7 @@ ShellRoot {
             D.owner = "dunst"
             t.eq("built-in chosen wins over a running daemon", D.mode, "builtin")
             Config.notificationServer = "swaync"
-            D.owner = ""
-            t.eq("SwayNC chosen", D.mode, "swaync")
+            t.eq("an older SwayNC choice means auto", D.setting, "auto")
             Config.notificationServer = "nonsense"
             t.eq("unknown values mean auto", D.setting, "auto")
             t.done()

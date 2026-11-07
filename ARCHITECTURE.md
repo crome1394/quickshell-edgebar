@@ -144,8 +144,10 @@ ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `them
 ## Outside the bar
 
 - **Notifications**: `NotificationDaemon` decides the mode. Auto asks
-  D-Bus who owns `org.freedesktop.Notifications` once at start (and again
-  only while the Notifications page is open). Built-in mode:
+  D-Bus who owns `org.freedesktop.Notifications` at start, and if nobody
+  does, once more after `Theme.notificationClaimDelayMs` so a daemon
+  launched at login wins; after that only while the Notifications page is
+  open. Built-in mode:
   `BuiltinNotifications` owns the name (Quickshell's `NotificationServer`),
   `NotificationToasts` draws the popups (look from `PopupSettings`), and
   nothing else runs. SwayNC or another daemon: `NotificationService` runs

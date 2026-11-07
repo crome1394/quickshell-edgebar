@@ -129,7 +129,7 @@ Singleton {
     property alias notificationClearOnBoot: data.notificationClearOnBoot
     property alias notificationShowCount: data.notificationShowCount
     property alias notificationCorner: data.notificationCorner
-    // Notification server: "" (Auto), "builtin", or "swaync" (NotificationDaemon).
+    // Notification server: "" (Auto) or "builtin" (NotificationDaemon).
     property alias notificationServer: data.notificationServer
     // Do Not Disturb for the built-in server.
     property alias notificationDnd: data.notificationDnd

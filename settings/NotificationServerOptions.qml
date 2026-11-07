@@ -6,10 +6,9 @@ import qs.services
 import qs.theme
 
 // Settings → Notifications → Server.
-//   Auto      use the notification daemon already running (SwayNC, dunst,
+//   Auto      use the notification daemon that is running (SwayNC, dunst,
 //             mako, …), or the built-in server when there is none
-//   Built-in  the bar is the server: its own popups, history, and DND
-//   SwayNC    SwayNC shows popups; the bar keeps history and DND
+//   Built-in  the bar is always the server: its own popups, history, DND
 // Only one server can own the name, so Built-in needs others stopped.
 // Saves at once.
 Column {
@@ -50,7 +49,7 @@ Column {
         ChipButton {
             label: "Auto"
             active: root.setting === "auto"
-            tip: "Use the notification daemon that is already running, or the built-in server when there is none"
+            tip: "Use the notification daemon that is running (SwayNC, dunst, mako, …), or the built-in server when there is none"
             onClicked: root.setServer("auto")
         }
 
@@ -59,13 +58,6 @@ Column {
             active: root.setting === "builtin"
             tip: "The bar is the notification server: its own popups, history, and Do Not Disturb"
             onClicked: root.setServer("builtin")
-        }
-
-        ChipButton {
-            label: "SwayNC"
-            active: root.setting === "swaync"
-            tip: "SwayNC shows the popups; the bar keeps the history and Do Not Disturb"
-            onClicked: root.setServer("swaync")
         }
     }
 
@@ -77,8 +69,6 @@ Column {
                 return "Checking which notification daemon is running…"
             if (root.blocked)
                 return root.owner + " is running and holds notifications, so the built-in server cannot start."
-            if (root.setting === "swaync" && root.owner !== "swaync")
-                return "SwayNC is not running, so no popups show. Start it, or choose Auto or Built-in."
             const using = "Using " + NotificationDaemon.modeLabel + "."
             if (NotificationDaemon.mode === "external")
                 return using + " It shows the popups; the bar keeps history" + (root.owner === "dunst" || root.owner === "mako" ? " and Do Not Disturb." : ". Use " + root.owner + "'s own Do Not Disturb.")
@@ -86,7 +76,7 @@ Column {
                 return using + " No other daemon is running."
             return using
         }
-        color: root.blocked || (root.setting === "swaync" && root.owner !== "swaync") ? Theme.danger : Theme.subtext
+        color: root.blocked ? Theme.danger : Theme.subtext
         font.family: Theme.uiFont
         font.pixelSize: Theme.smallPx
     }
