@@ -6,10 +6,9 @@ import Quickshell.Io
 import Quickshell.Services.Notifications
 import qs.config
 
-// The bar's own notification server, used when Settings → Notifications →
-// Server is Built-in (Config.notificationServer). It owns the
-// org.freedesktop.Notifications name, so SwayNC (or any other server) must
-// not be running. NotificationToasts draws the live notifications;
+// The bar's own notification server, used in built-in mode (Settings →
+// Notifications → Server: Built-in, or Auto when no other daemon runs; see
+// NotificationDaemon). It owns the org.freedesktop.Notifications name. NotificationToasts draws the live notifications;
 // NotificationService keeps the history list and the bell.
 //
 // History is saved to ~/.local/state/quickshell/notification-history.json,
@@ -18,7 +17,8 @@ import qs.config
 Singleton {
     id: root
 
-    readonly property bool enabled: Config.notificationServer === "builtin"
+    // Built-in mode: chosen, or Auto with no other daemon running.
+    readonly property bool enabled: NotificationDaemon.mode === "builtin"
     // False for a moment to drop and claim the bus name again (after SwayNC stops).
     property bool claiming: true
 
