@@ -69,6 +69,19 @@ Singleton {
     readonly property int tabHeight: 32
     readonly property int tabGap: 6
     readonly property int tabMinWidth: 100
+    // Settings tabs as index dividers (IndexTabStrip).
+    readonly property int indexTabHeight: 34
+    readonly property int indexTabEdge: 3
+    readonly property int indexTabOverlap: 8
+    readonly property int indexTabSlant: 10
+    readonly property int indexTabRadius: 5
+    readonly property int indexTabInset: 5
+    readonly property real indexTabIdleOpacity: 0.8
+    readonly property int indexTabMinPx: 8
+    readonly property color indexTabDarkInk: "#1c1917"
+    readonly property color indexTabLightInk: "#ffffff"
+    // Rainbow divider colors, one per Settings tab in order.
+    readonly property var indexTabColors: ["#e53935", "#fdd835", "#1e88e5", "#43a047", "#fb8c00", "#f48fb1", "#8e24aa", "#00acc1", "#a1887f", "#78909c"]
     readonly property int fieldHeight: 30
     readonly property int slotMinHeight: 112
     readonly property int sliderHeight: 22

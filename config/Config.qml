@@ -158,6 +158,9 @@ Singleton {
     property alias opacityOverridesJson: data.opacityOverridesJson
     // Settings → Theme: saved themes (ThemeSettings).
     property alias themeLibraryJson: data.themeLibraryJson
+    // Settings window tabs: "" (index dividers) or "flat"; colors "" (rainbow) or "accent".
+    property alias settingsTabStyle: data.settingsTabStyle
+    property alias settingsTabColors: data.settingsTabColors
     // FreshRSS reader (FreshRssSettings). The server and password live in
     // ~/.config/freshrss-quickshell/freshrss.env, not here.
     property alias freshRssPollMin: data.freshRssPollMin
@@ -570,6 +573,8 @@ Singleton {
             property int opacitySatty: 0
             property string opacityOverridesJson: ""
             property string themeLibraryJson: ""
+            property string settingsTabStyle: ""
+            property string settingsTabColors: ""
             property int freshRssPollMin: 0
             property int freshRssPerFeed: 0
             property int freshRssItemLimit: 0

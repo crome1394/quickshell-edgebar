@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Settings tabs look like index dividers: colored tabs hanging from the page, the active one raised with its color along the page edge, labels shrinking to fit, and dark or light text chosen per color. Appearance → Theme → Settings window switches between Index dividers and Flat (the old chips) and between Rainbow and From accent colors. New: `settings/IndexTabStrip.qml`.
 - Notification server Auto (the new default): the bar uses the daemon already running (SwayNC, dunst, mako, …) and keeps history, or becomes the server itself when there is none, so a notification daemon is optional. At start Auto waits a few seconds for a daemon launched at login before taking over. The manual SwayNC choice is gone (Auto covers it; an older saved SwayNC choice reads as Auto), leaving Auto and Built-in. Do Not Disturb also works with dunst and mako. New: `services/NotificationDaemon.qml`.
 - Built-in popups are customizable under Settings → Notifications → Popups: style (compact, standard, large), motion (slide, fade, none), width, how many show, icon size, body lines, edge gap, glass, a progress bar that pauses on hover, grouping by app, big image previews, an app color stripe, and your own color per app, plus Send a test. New: `config/PopupSettings.qml`, `settings/PopupStyleOptions.qml`.
 - Dependencies: SwayNC tools (`swaync-client`, `dbus-monitor`) show only while SwayNC is in use, and `install-deps.sh` never installs them: a notification daemon is optional. `notify-send` is listed for Send a test.

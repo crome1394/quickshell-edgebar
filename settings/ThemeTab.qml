@@ -361,6 +361,70 @@ Item {
 
             SectionHeader {
                 width: parent.width
+                title: "Settings window"
+                hint: "How the tabs along the bottom of Settings look. Saves at once."
+            }
+
+            Column {
+                x: Theme.sectionInset
+                width: parent.width - Theme.sectionInset * 2
+                spacing: Theme.space
+
+                FormRow {
+                    width: parent.width
+                    label: "Tab style"
+
+                    Row {
+                        spacing: Theme.tabGap
+
+                        ChipButton {
+                            label: "Index dividers"
+                            active: Config.settingsTabStyle !== "flat"
+                            tip: "Colored tabs hanging from the page, like a binder's dividers"
+                            onClicked: Config.saveFields(() => { Config.settingsTabStyle = "" })
+                        }
+
+                        ChipButton {
+                            label: "Flat"
+                            active: Config.settingsTabStyle === "flat"
+                            tip: "Plain chips in the theme's colors"
+                            onClicked: Config.saveFields(() => { Config.settingsTabStyle = "flat" })
+                        }
+                    }
+                }
+
+                FormRow {
+                    visible: Config.settingsTabStyle !== "flat"
+                    width: parent.width
+                    label: "Tab colors"
+
+                    Row {
+                        spacing: Theme.tabGap
+
+                        ChipButton {
+                            label: "Rainbow"
+                            active: Config.settingsTabColors !== "accent"
+                            tip: "A fixed color per section, so you can find tabs by color"
+                            onClicked: Config.saveFields(() => { Config.settingsTabColors = "" })
+                        }
+
+                        ChipButton {
+                            label: "From accent"
+                            active: Config.settingsTabColors === "accent"
+                            tip: "Hues spread around the theme's accent, so they change with the theme"
+                            onClicked: Config.saveFields(() => { Config.settingsTabColors = "accent" })
+                        }
+                    }
+                }
+            }
+
+            Item {
+                width: parent.width
+                height: Theme.space
+            }
+
+            SectionHeader {
+                width: parent.width
                 title: "My themes"
                 hint: "Save the look above under a name. A saved theme keeps your stat and audio thresholds and colors too. Export writes a theme file; Import reads one from this bar or the old bar."
             }
