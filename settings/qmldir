@@ -68,3 +68,5 @@ IndexTabStrip 1.0 IndexTabStrip.qml
 singleton TabColors 1.0 TabColors.qml
 MonitorLayout 1.0 MonitorLayout.qml
 SideSection 1.0 SideSection.qml
+RecordingTab 1.0 RecordingTab.qml
+NightLightTab 1.0 NightLightTab.qml

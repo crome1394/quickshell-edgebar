@@ -29,3 +29,6 @@ AudioStreamRow 1.0 AudioStreamRow.qml
 OpacityAddRow 1.0 OpacityAddRow.qml
 InspectorPill 1.0 InspectorPill.qml
 FreshRssPill 1.0 FreshRssPill.qml
+CaffeinePill 1.0 CaffeinePill.qml
+NightLightPill 1.0 NightLightPill.qml
+RecorderPill 1.0 RecorderPill.qml

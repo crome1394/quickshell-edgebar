@@ -156,6 +156,23 @@ Singleton {
     readonly property int freshRssHtmlMax: 120000
     readonly property int freshRssSearchTextMax: 400
     readonly property string freshRssGlyph: "󰑫"
+    // Caffeine: tea cup outline when off, filled when on (nf-md-tea).
+    readonly property string caffeineOffGlyph: "\u{f0d9f}"
+    readonly property string caffeineOnGlyph: "\u{f0d9e}"
+    // Caffeine durations a right-click steps through, in minutes (0 = until off).
+    readonly property var caffeineSteps: [30, 60, 120, 0]
+    // Night light (hyprsunset): Kelvin range and the step for the wheel.
+    readonly property string nightGlyph: "\u{f0594}"
+    readonly property int nightTempMin: 2500
+    readonly property int nightTempMax: 6500
+    readonly property int nightTempDefault: 4000
+    readonly property int nightTempStep: 100
+    // Wait this long after a temperature change before restarting hyprsunset.
+    readonly property int nightRestartMs: 300
+    // Screen recorder (gpu-screen-recorder).
+    readonly property string recordGlyph: "\u{f044a}"
+    readonly property string recordingGlyph: "\u{f044b}"
+    readonly property var recFpsChoices: [30, 60, 120, 144]
 
     // Settings → Theme.
     readonly property int themeCardMinWidth: 200

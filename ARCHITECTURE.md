@@ -156,6 +156,14 @@ ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `them
   `~/.local/state/quickshell/notification-history.json`.
 - **Fonts**: `FontService` reads `fc-list` once per session for every font
   picker.
+- **Caffeine**: `CaffeineService` turns on `panels/CaffeineInhibitor`, a 1×1
+  layer surface holding a Wayland `IdleInhibitor`, only while on.
+- **Night Light**: `NightLightService` runs `hyprsunset -t <K>` only while
+  on (restarted on a new temperature); with a schedule it checks once a
+  minute via `SystemClock`.
+- **Recording**: `RecorderService` runs `gpu-screen-recorder` with an argv
+  built by `RecorderSettings.argv()` (fixed values only), optionally after
+  `slurp` for a region, and stops it with SIGINT so the file is finished.
 
 - **Hyprland**: `services/OpacityService` writes `~/.config/hypr/opacity.lua`
   and swaps the live rules with `hyprctl repl`; `DisplayService` changes
@@ -178,7 +186,7 @@ ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `them
 
 `qs ipc show` lists them while the bar runs: `settings` (open, close,
 toggle, openTab), `theme` (apply, list, current), `freshRss` (toggle, open,
-close, refresh), `inspector`, `overview`, `notificationBell`, `audioMenu`,
+close, refresh), `caffeine`, `nightLight`, `recorder`, `inspector`, `overview`, `notificationBell`, `audioMenu`,
 `opacityMenu`, and `shell`. Avoid naming a function `show`: `qs ipc show`
 is a command of its own. Each handler
 calls the same function as its button and validates its arguments; the

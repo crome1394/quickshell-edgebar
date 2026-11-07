@@ -22,6 +22,12 @@ ShellRoot {
     // Registers the FreshRSS IPC target and reads its env file. Nothing
     // polls until the pill is on a bar or the reader is open.
     property bool freshRssWatch: FreshRssService.envLoaded
+    // Register the caffeine, nightLight, and recorder IPC targets. Night
+    // light also needs to load at start to follow its schedule; the others
+    // run nothing until used.
+    property bool caffeineWatch: CaffeineService.on
+    property bool nightWatch: NightLightService.on
+    property bool recorderWatch: RecorderService.recording
 
     // The one tooltip window every bar widget shares (TipService).
     BarTipHost {}
@@ -37,6 +43,14 @@ ShellRoot {
 
     SettingsPanel {
         id: settings
+    }
+
+    // Caffeine's idle inhibitor, only while Caffeine is on.
+    Loader {
+        active: CaffeineService.on
+        sourceComponent: Component {
+            CaffeineInhibitor {}
+        }
     }
 
     // "Keep this display mode?" while a display change is tried.
