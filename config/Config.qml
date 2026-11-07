@@ -140,6 +140,15 @@ Singleton {
     property alias opacityOverridesJson: data.opacityOverridesJson
     // Settings → Theme: saved themes (ThemeSettings).
     property alias themeLibraryJson: data.themeLibraryJson
+    // FreshRSS reader (FreshRssSettings). The server and password live in
+    // ~/.config/freshrss-quickshell/freshrss.env, not here.
+    property alias freshRssPollMin: data.freshRssPollMin
+    property alias freshRssPerFeed: data.freshRssPerFeed
+    property alias freshRssItemLimit: data.freshRssItemLimit
+    property alias freshRssMaxDays: data.freshRssMaxDays
+    property alias freshRssFiltersOpen: data.freshRssFiltersOpen
+    property alias freshRssScope: data.freshRssScope
+    property alias freshRssListWidth: data.freshRssListWidth
     property alias wallpaperDir: data.wallpaperDir
     property alias wallpaperCurrent: data.wallpaperCurrent
     property alias wallpaperTileSize: data.wallpaperTileSize
@@ -532,6 +541,13 @@ Singleton {
             property int opacitySatty: 0
             property string opacityOverridesJson: ""
             property string themeLibraryJson: ""
+            property int freshRssPollMin: 0
+            property int freshRssPerFeed: 0
+            property int freshRssItemLimit: 0
+            property int freshRssMaxDays: -1
+            property bool freshRssFiltersOpen: true
+            property string freshRssScope: ""
+            property int freshRssListWidth: 0
             property string wallpaperDir: ""
             property string wallpaperCurrent: ""
             property int wallpaperTileSize: 148

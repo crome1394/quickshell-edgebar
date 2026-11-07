@@ -18,6 +18,9 @@ ShellRoot {
     property bool notificationWatch: NotificationService.resident
     // Registers the theme IPC target (switch themes from a keybind).
     property string themeWatch: ThemeSettings.format
+    // Registers the FreshRSS IPC target and reads its env file. Nothing
+    // polls until the pill is on a bar or the reader is open.
+    property bool freshRssWatch: FreshRssService.envLoaded
 
     // A bar that is turned off is not created, so its widgets do not load.
     Loader {
@@ -66,6 +69,14 @@ ShellRoot {
 
     SettingsPanel {
         id: settings
+    }
+
+    // The FreshRSS reader exists only while open (pill or qs ipc call freshRss toggle).
+    Loader {
+        active: FreshRssService.open
+        sourceComponent: Component {
+            FreshRssPanel {}
+        }
     }
 
     // Exists only while open (qs ipc call inspector toggle), so a closed

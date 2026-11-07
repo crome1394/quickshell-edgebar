@@ -56,3 +56,6 @@ FooterButton 1.0 FooterButton.qml
 ThemeTab 1.0 ThemeTab.qml
 ThemeCard 1.0 ThemeCard.qml
 ColorChip 1.0 ColorChip.qml
+FreshRssTab 1.0 FreshRssTab.qml
+ChoiceChips 1.0 ChoiceChips.qml
+TextBox 1.0 TextBox.qml

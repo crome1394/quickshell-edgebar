@@ -336,7 +336,7 @@ Singleton {
         }
         onExited: (code) => {
             root.busy = false
-            const said = (String(applyOut.text) + String(applyErr.text)).trim()
+            const said = [String(applyOut.text), String(applyErr.text)].join("").trim()
             const ok = code === 0 && !/^error/i.test(said)
             // hyprctl without Lua config: retry once with the older keyword form.
             if (!ok && !root.useKeyword && /unknown request|invalid command|not supported/i.test(said)) {

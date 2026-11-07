@@ -23,6 +23,7 @@ it follows (lint-clean, one component per file, no shell injection) are in
 | `panels/` | Floating windows and overlays: Settings, Inspector, overview, notification history, the active-window popup. | `Panel` |
 | `settings/` | Settings pages and the controls they share (`IntSlider`, `ChipButton`, `DraftFooter`, …). | `Tab` |
 | `inspector/` | The Inspector's two views. | `View` |
+| `freshrss/` | The FreshRSS reader's model (filters, rows, cursor) and its views. | `Reader…` |
 | `components/` | Small drawing pieces shared by pills (`BarTip`, `DockFace`, `LevelMeter`, …). | |
 | `services/` | Runtime singletons: talk to Hyprland, PipeWire, BlueZ, NetworkManager, D-Bus, files, and the few processes the bar runs. | `Service` |
 | `config/` | Saved settings: `Config` (the store) and one `<Feature>Settings` singleton per feature. | `Settings` |
@@ -125,7 +126,7 @@ ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `them
   watcher). Everything else is read from `/proc`, `/sys`, D-Bus, or
   Hyprland's socket through Quickshell's native modules.
 - `shell.qml` reads a property from a few services (`OpacityService`,
-  `OverviewService`, `NotificationService`, `ThemeSettings`) so they load at
+  `OverviewService`, `NotificationService`, `ThemeSettings`, `FreshRssService`) so they load at
   start and register their IPC targets. Add to that list only when a
   feature has to work before any pill touches it.
 
@@ -135,6 +136,14 @@ ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `them
   and swaps the live rules with `hyprctl repl`; `DisplayService` changes
   monitor modes; `CaptureService` and `ScreensaverService` write their
   `.conf` files for the helper scripts in `~/.local/bin`.
+- **FreshRSS**: `services/FreshRssService` talks to the server's Google
+  Reader API with QML's `XMLHttpRequest` (no curl, no scripts). The login
+  token stays in memory; parallel requests share one login; requests past
+  `Theme.freshRssRequestMs` are aborted. Article HTML is cleaned before it
+  is shown: no scripts, frames, forms, or styles, and images become links.
+  The credentials file is read as shell-style text without running it and
+  written by a fixed script (path as an argument, text on stdin) with mode
+  600. The reader window (`panels/FreshRssPanel`) exists only while open.
 - **Files are written atomically** (FileView `atomicWrites`, or write-then-
   rename in scripts). Programs are run with argument lists, never through a
   shell with user text in it.
@@ -142,8 +151,10 @@ ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `them
 ## IPC targets
 
 `qs ipc show` lists them while the bar runs: `settings` (open, close,
-toggle, openTab), `theme` (apply, list, current), `inspector`, `overview`,
-`notificationBell`, `audioMenu`, `opacityMenu`, and `shell`. Each handler
+toggle, openTab), `theme` (apply, list, current), `freshRss` (toggle, open,
+close, refresh), `inspector`, `overview`, `notificationBell`, `audioMenu`,
+`opacityMenu`, and `shell`. Avoid naming a function `show`: `qs ipc show`
+is a command of its own. Each handler
 calls the same function as its button and validates its arguments; the
 calls are listed in a comment beside the handler.
 

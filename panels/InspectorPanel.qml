@@ -123,8 +123,8 @@ FloatingWindow {
                 anchors.right: parent.right
                 anchors.rightMargin: Theme.space
                 anchors.verticalCenter: parent.verticalCenter
-                width: 28
-                height: 24
+                width: Theme.headerButtonWidth
+                height: Theme.headerButtonHeight
                 radius: Theme.radiusSm
                 color: closeMouse.containsMouse ? Theme.hover : "transparent"
                 border.width: Theme.borderWidth

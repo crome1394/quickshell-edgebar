@@ -10,7 +10,7 @@ Item {
 
     function applyReveal() {
         const id = root.revealSection
-        if (id === "launcher" || id === "menu")
+        if (id === "launcher" || id === "menu" || id === "freshrss")
             root.section = id
     }
 
@@ -24,7 +24,8 @@ Item {
         anchors.top: parent.top
         model: [
             { id: "launcher", label: "App Launcher" },
-            { id: "menu", label: "Application Menu" }
+            { id: "menu", label: "Application Menu" },
+            { id: "freshrss", label: "FreshRSS" }
         ]
         currentId: root.section
         onSelected: (tabId) => { root.section = tabId }
@@ -50,5 +51,16 @@ Item {
         anchors.topMargin: Theme.space
         active: root.section === "menu"
         source: menuPage.active ? Qt.resolvedUrl("AppMenuTab.qml") : ""
+    }
+
+    Loader {
+        id: freshRssPage
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: sections.bottom
+        anchors.bottom: parent.bottom
+        anchors.topMargin: Theme.space
+        active: root.section === "freshrss"
+        source: freshRssPage.active ? Qt.resolvedUrl("FreshRssTab.qml") : ""
     }
 }

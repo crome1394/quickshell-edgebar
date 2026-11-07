@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import qs.components
@@ -26,7 +27,7 @@ Rectangle {
     readonly property int symbolPx: Math.max(1, Math.round(MenuSettings.pxValue() * root.ui * root.widthFactor))
     readonly property string fontName: Config.menuFont.length ? Config.menuFont : root.theme.iconFont
     readonly property string imageUrl: MenuSettings.modeValue() === "image" ? MenuSettings.imageUrl(MenuSettings.imageValue()) : ""
-    readonly property bool showImage: imageLoader.item !== null && imageLoader.item.ready
+    readonly property bool showImage: (imageLoader.item as MenuIconImage)?.ready ?? false
     readonly property color ink: Config.menuColor.length
         ? Config.menuColor
         : (menuMouse.containsMouse ? root.theme.colAccent : root.theme.colFg)
