@@ -148,7 +148,8 @@
             "pkg": "nvidia-utils",
             "area": "System Stats",
             "need": "optional",
-            "use": "GPU and VRAM readings"
+            "use": "GPU and VRAM readings on NVIDIA cards (AMD and Intel are read from /sys)",
+            "when": "nvidia"
         },
         {
             "name": "tailscale",

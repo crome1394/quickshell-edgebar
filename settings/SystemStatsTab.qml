@@ -133,6 +133,65 @@ Item {
                         onToggled: StatsSettings.editor.set("vram", !StatsSettings.editor.value.vram)
                     }
 
+                    // Which card the GPU and VRAM sections read.
+                    Column {
+                        id: gpuChoice
+                        visible: StatsSettings.editor.value.gpu || StatsSettings.editor.value.vram
+                        width: parent.width
+                        spacing: Theme.tabGap
+
+                        readonly property var auto: GpuService.pick("auto", GpuService.cards)
+                        readonly property var picked: GpuService.pick(StatsSettings.editor.value.gpuCard, GpuService.cards)
+
+                        Text {
+                            width: parent.width
+                            text: "Graphics card"
+                            color: Theme.text
+                            font.family: Theme.uiFont
+                            font.pixelSize: Theme.fontPx
+                        }
+
+                        Flow {
+                            width: parent.width
+                            spacing: Theme.tabGap
+
+                            ChipButton {
+                                label: "Auto"
+                                tip: "The only card, or the one driving the screen at boot (on a laptop, the integrated GPU, so the other can sleep). Now: "
+                                    + GpuService.label(gpuChoice.auto)
+                                active: StatsSettings.editor.value.gpuCard === "auto"
+                                onClicked: StatsSettings.editor.set("gpuCard", "auto")
+                            }
+
+                            Repeater {
+                                model: GpuService.cards
+                                delegate: ChipButton {
+                                    required property var modelData
+                                    label: GpuService.label(modelData) + (modelData.source.length ? "" : " ✕")
+                                    tip: modelData.source.length
+                                        ? "Read " + modelData.vendor + " (" + modelData.driver + ")" + (modelData.source === "intel" ? "; load is estimated from the clock, no VRAM" : "")
+                                        : "The " + (modelData.driver.length ? modelData.driver : "unknown") + " driver gives no load figures"
+                                    active: StatsSettings.editor.value.gpuCard === modelData.card
+                                    onClicked: StatsSettings.editor.set("gpuCard", modelData.card)
+                                }
+                            }
+                        }
+
+                        Text {
+                            visible: text.length > 0
+                            width: parent.width
+                            wrapMode: Text.WordWrap
+                            text: !GpuService.checked ? ""
+                                : (!GpuService.cards.length ? "No graphics card found; GPU and VRAM show N/A."
+                                    : (GpuService.wakes(gpuChoice.picked)
+                                        ? "Reading this card keeps it awake while the pill shows GPU or VRAM, which costs battery on a laptop."
+                                        : ""))
+                            color: Theme.danger
+                            font.family: Theme.uiFont
+                            font.pixelSize: Theme.smallPx
+                        }
+                    }
+
                     CheckRow {
                         width: parent.width
                         title: "Show Bar Graphs"

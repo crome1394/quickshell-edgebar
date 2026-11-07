@@ -18,9 +18,11 @@ Singleton {
     // systemctl --user.
     // Every program in the file, and those that apply to your setup:
     // entries with when "swaync" show only while SwayNC is the server in
-    // use (chosen, or found by Auto).
+    // use (chosen, or found by Auto); entries with when "nvidia" only when
+    // an NVIDIA card is present.
     property var allPrograms: []
-    readonly property var programs: root.allPrograms.filter((p) => p.when !== "swaync" || NotificationDaemon.mode === "swaync")
+    readonly property var programs: root.allPrograms.filter((p) => (p.when !== "swaync" || NotificationDaemon.mode === "swaync")
+        && (p.when !== "nvidia" || GpuService.cards.some((c) => c.vendor === "NVIDIA")))
     property var fonts: []
     property var services: []
 

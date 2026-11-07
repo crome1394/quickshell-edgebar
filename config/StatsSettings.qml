@@ -290,8 +290,15 @@ Singleton {
             root.editor.set("terminal", text)
     }
 
+    // "auto", "none", or a DRM card name.
+    function gpuCardNorm(value) {
+        const text = String(value || "")
+        return text === "none" || /^card[0-9]{1,3}$/.test(text) ? text : "auto"
+    }
+
     function normalize(src) {
         return {
+            gpuCard: root.gpuCardNorm(src.gpuCard),
             cpu: !!src.cpu,
             mem: !!src.mem,
             gpu: !!src.gpu,
@@ -310,6 +317,7 @@ Singleton {
 
     function snapshot() {
         return root.normalize({
+            gpuCard: Config.statGpu,
             cpu: Config.showStatCpu,
             mem: Config.showStatMem,
             gpu: Config.showStatGpu,
@@ -328,6 +336,7 @@ Singleton {
 
     function defaults() {
         return {
+            gpuCard: "auto",
             cpu: true,
             mem: true,
             gpu: true,
@@ -347,6 +356,7 @@ Singleton {
     function commit(snap) {
         const clean = root.normalize(snap)
         Config.saveFields(() => {
+            Config.statGpu = clean.gpuCard
             Config.showStatCpu = clean.cpu
             Config.showStatMem = clean.mem
             Config.showStatGpu = clean.gpu

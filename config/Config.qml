@@ -124,6 +124,7 @@ Singleton {
     property alias showStatGauges: data.showStatGauges
     property alias statGaugeWidth: data.statGaugeWidth
     property alias statTerminal: data.statTerminal
+    property alias statGpu: data.statGpu
     property alias statClick: data.statClick
     property alias statActionsJson: data.statActionsJson
     property alias statFont: data.statFont
@@ -562,6 +563,8 @@ Singleton {
             property bool showStatGauges: true
             property int statGaugeWidth: 56
             property string statTerminal: "kitty"
+            // "auto", "none", or a card name such as "card1" (GpuService).
+            property string statGpu: "auto"
             property string statClick: "left"
             property string statActionsJson: ""
             property string statFont: ""

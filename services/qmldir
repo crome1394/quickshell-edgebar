@@ -31,3 +31,4 @@ singleton CaffeineService 1.0 CaffeineService.qml
 singleton NightLightService 1.0 NightLightService.qml
 singleton RecorderService 1.0 RecorderService.qml
 singleton FirewallService 1.0 FirewallService.qml
+singleton GpuService 1.0 GpuService.qml
