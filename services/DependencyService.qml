@@ -16,7 +16,11 @@ Singleton {
     // scripts/install-deps.sh. need: "required" breaks the bar or a core
     // widget, "optional" one feature. A service's scope "user" runs under
     // systemctl --user.
-    property var programs: []
+    // Every program in the file, and those that apply to your settings:
+    // entries with when "swaync" drop out while the built-in notification
+    // server is chosen.
+    property var allPrograms: []
+    readonly property var programs: root.allPrograms.filter((p) => p.when !== "swaync" || Config.notificationServer !== "builtin")
     property var fonts: []
     property var services: []
 
@@ -27,7 +31,7 @@ Singleton {
         } catch (e) {
             data = {}
         }
-        root.programs = Array.isArray(data.programs) ? data.programs : []
+        root.allPrograms = Array.isArray(data.programs) ? data.programs : []
         root.fonts = Array.isArray(data.fonts) ? data.fonts : []
         root.services = Array.isArray(data.services) ? data.services : []
     }
@@ -82,7 +86,7 @@ Singleton {
         if (root.checking)
             return
         // The page can ask before the file's loaded signal arrives.
-        if (!root.programs.length)
+        if (!root.allPrograms.length)
             root.readList(listFile.text())
         root.checking = true
         root.settingRows = root.settingPrograms()

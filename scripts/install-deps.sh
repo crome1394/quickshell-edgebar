@@ -20,6 +20,7 @@ set -euo pipefail
 
 here="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 list="$here/../config/dependencies.json"
+layout="$here/../state/bar-layout.json"
 
 only_required=0
 assume_yes=0
@@ -62,15 +63,24 @@ command -v python3 >/dev/null 2>&1 || die "python3 is needed to read the depende
 # Rows as tab-separated fields. Every value is checked against a strict
 # pattern, so nothing odd from the file reaches a command line.
 rows() {
-    python3 -I - "$list" "$1" "$only_required" <<'PY'
+    python3 -I - "$list" "$1" "$only_required" "$layout" <<'PY'
 import json, re, sys
-path, kind, only_required = sys.argv[1], sys.argv[2], sys.argv[3] == "1"
+path, kind, only_required, layout = sys.argv[1], sys.argv[2], sys.argv[3] == "1", sys.argv[4]
 safe = re.compile(r"^[A-Za-z0-9@._+ -]{1,64}$")
 with open(path, encoding="utf-8") as f:
     data = json.load(f)
+# Skip SwayNC-only tools when the saved settings use the built-in server.
+builtin = False
+try:
+    with open(layout, encoding="utf-8") as f:
+        builtin = json.load(f).get("notificationServer") == "builtin"
+except (OSError, ValueError, AttributeError):
+    pass
 for row in data.get(kind, []):
     need = row.get("need", "optional")
     if only_required and need != "required":
+        continue
+    if builtin and row.get("when") == "swaync":
         continue
     name, pkg = str(row.get("name", "")), str(row.get("pkg", ""))
     scope = str(row.get("scope", ""))
