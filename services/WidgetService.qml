@@ -136,7 +136,7 @@ Singleton {
             { id: "clock", label: "Clock" },
             { id: "notifications", label: "Notifications" },
             { id: "volume", label: "Audio" },
-            { id: "hyprInsp", label: "Hypr Inspector" },
+            { id: "hyprInsp", label: "Inspector" },
             { id: "controlBar", label: "Config Menu Icon" },
             { id: "tailscale", label: "Tailscale" },
             { id: "opacity", label: "Transparency" },
@@ -216,7 +216,7 @@ Singleton {
             || key === "tray" || key === "power" || key === "opacity"
             || key === "networkPanel" || key === "bluetooth" || key === "launcher"
             || key === "stats" || key === "notifications" || key === "volume"
-            || key === "tailscale"
+            || key === "tailscale" || key === "hyprInsp"
             || root.isLauncherId(key)
     }
 
