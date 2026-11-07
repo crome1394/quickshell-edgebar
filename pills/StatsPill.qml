@@ -35,7 +35,7 @@ Rectangle {
 
     function utilColor(util, metric) {
         const bands = StatsSettings.bandsFor(metric)
-        return Theme.statUtilColor(util, metric, bands[0], bands[1], bands[2])
+        return ThemeStore.statUtilColor(util, metric, bands[0], bands[1], bands[2])
     }
 
     readonly property real cpuUtil: stats.cpuUtil
@@ -110,7 +110,7 @@ Rectangle {
             percentSample: "100%"
             valueSample: "100°"
             percentColor: root.utilColor(root.cpuUtil, "cpu")
-            valueColor: Theme.statTempColor(root.cpuTemp)
+            valueColor: ThemeStore.statTempColor(root.cpuTemp)
             gaugeColor: root.utilColor(root.cpuUtil, "cpu")
             faceFont: root.faceFont
             faceBold: root.faceBold
@@ -192,7 +192,7 @@ Rectangle {
             percentSample: "100%"
             valueSample: "100°"
             percentColor: root.gpuKnown ? root.utilColor(root.gpuUtil, "gpu") : root.theme.colFgMuted
-            valueColor: root.gpuKnown ? Theme.statTempColor(root.gpuTemp) : root.theme.colFgMuted
+            valueColor: root.gpuKnown ? ThemeStore.statTempColor(root.gpuTemp) : root.theme.colFgMuted
             gaugeColor: root.utilColor(root.gpuUtil, "gpu")
             faceFont: root.faceFont
             faceBold: root.faceBold

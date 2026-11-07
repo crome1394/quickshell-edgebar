@@ -4,3 +4,4 @@ singleton Theme 1.0 Theme.qml
 singleton ThemeBuilder 1.0 ThemeBuilder.qml
 singleton ThemePresets 1.0 ThemePresets.qml
 ThemePalette 1.0 ThemePalette.qml
+singleton ThemeStore 1.0 ThemeStore.qml

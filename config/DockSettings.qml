@@ -27,14 +27,14 @@ Singleton {
         if (effect !== "off" && effect !== "magnify" && effect !== "jump" && effect !== "both")
             effect = "both"
         const scope = String(src.scope || "icons") === "quicklaunch" ? "quicklaunch" : "icons"
-        const dot = Theme.colorHex(src.dot)
+        const dot = ThemeStore.colorHex(src.dot)
         return {
             effect: effect,
             scope: scope,
             percent: root.clamp(src.percent, Theme.dockScaleMin, Theme.dockScaleMax, Theme.dockScaleDefault),
             radius: root.clamp(src.radius, Theme.dockRadiusMin, Theme.dockRadiusMax, Theme.dockRadiusDefault),
             jump: root.clamp(src.jump, Theme.dockJumpMin, Theme.dockJumpMax, Theme.dockJumpDefault),
-            dot: dot.length === 7 ? dot : Theme.colorHex(Theme.dockDotDefault)
+            dot: dot.length === 7 ? dot : ThemeStore.colorHex(Theme.dockDotDefault)
         }
     }
 

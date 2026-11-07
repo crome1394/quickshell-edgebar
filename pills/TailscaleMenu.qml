@@ -4,7 +4,6 @@ import QtQuick.Controls
 import Quickshell
 import qs.components
 import qs.services
-import qs.settings
 import qs.theme
 
 // Left-click menu for the Tailscale pill: on/off, this device, login,

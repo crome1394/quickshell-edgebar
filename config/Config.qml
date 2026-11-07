@@ -317,7 +317,7 @@ Singleton {
 
     // A copy with one color changed, or null when the color is not valid.
     function withColor(visual, slot, color) {
-        const hex = Theme.colorHex(color)
+        const hex = ThemeStore.colorHex(color)
         if (!hex.length)
             return null
         const colors = visual.c.slice()

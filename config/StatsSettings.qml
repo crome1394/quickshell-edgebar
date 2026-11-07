@@ -186,7 +186,7 @@ Singleton {
     }
 
     function entry(raw, metric) {
-        const defaults = Theme.defaultStatVisual()[String(metric || "cpu")]
+        const defaults = ThemeStore.defaultStatVisual()[String(metric || "cpu")]
         let steps = null
         let colors = null
         if (raw && raw.length >= 3) {
@@ -195,7 +195,7 @@ Singleton {
             steps = raw.t
             colors = raw.c
         }
-        return { t: root.normTriple(steps), c: Theme.normColors(colors, defaults.c) }
+        return { t: root.normTriple(steps), c: ThemeStore.normColors(colors, defaults.c) }
     }
 
     function bandsFrom(src) {
@@ -226,8 +226,8 @@ Singleton {
     // Saved steps for one metric, for the pill.
     function bandsFor(metric) {
         const key = String(metric || "")
-        if (Theme.hasStatEntry(key))
-            return Theme.statThresholds(key)
+        if (ThemeStore.hasStatEntry(key))
+            return ThemeStore.statThresholds(key)
         const legacy = root.legacyBands()
         if (legacy && legacy[key])
             return legacy[key].t
@@ -239,10 +239,10 @@ Singleton {
         const out = {}
         for (let i = 0; i < root.metrics.length; i++) {
             const key = root.metrics[i]
-            let steps = Theme.statThresholds(key)
-            if (!Theme.hasStatEntry(key) && legacy && legacy[key])
+            let steps = ThemeStore.statThresholds(key)
+            if (!ThemeStore.hasStatEntry(key) && legacy && legacy[key])
                 steps = legacy[key].t
-            out[key] = { t: steps, c: Theme.statColors(key) }
+            out[key] = { t: steps, c: ThemeStore.statColors(key) }
         }
         return out
     }
@@ -340,7 +340,7 @@ Singleton {
             fontPercent: Theme.clockFontDefault,
             bold: true,
             italic: false,
-            bands: Theme.defaultStatVisual()
+            bands: ThemeStore.defaultStatVisual()
         }
     }
 
@@ -361,6 +361,6 @@ Singleton {
             Config.statItalic = clean.italic
             Config.statThresholdsJson = ""
         })
-        Theme.saveStats(clean.bands)
+        ThemeStore.saveStats(clean.bands)
     }
 }
