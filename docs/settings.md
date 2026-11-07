@@ -147,7 +147,10 @@ devices.
   schedule (from – to, crossing midnight is fine; a click on the widget
   holds until the next switch). Uses `hyprsunset`.
 - **Screensaver**: the program run after idle, idle time, whether it
-  starts over fullscreen video, the look, and brightness. Needs
+  starts over fullscreen video, the look, and brightness (dimming uses
+  DDC/CI, for external monitors). The video defaults to
+  `~/Videos/screensaver/screensaver.mp4`; until you add one, the text
+  screensaver (in kitty) runs instead. Needs
   `~/.local/bin/screensaver-config.sh`.
 
 ## Where settings are saved

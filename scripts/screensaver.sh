@@ -2,15 +2,15 @@
 # Idle screensaver: fullscreen mpv, no DPMS, no lock.
 # mpv must not idle-inhibit (--stop-screensaver=no) or hypridle will
 # never see mouse/keyboard and on-resume will not fire.
-# Optional DDC brightness (G9 has no sysfs backlight): dim on start,
-# set or restore on stop. Prefs in ~/.config/hypr/screensaver.conf.
+# Optional DDC brightness for external monitors (no sysfs backlight):
+# dim on start, set or restore on stop. Prefs in ~/.config/hypr/screensaver.conf.
 
 set -uo pipefail
 
 # Follow a ~/.local/bin symlink back to the bar's scripts/ folder.
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 CONF="${HOME}/.config/hypr/screensaver.conf"
-VIDEO="${SCREENSAVER_VIDEO:-$HOME/Videos/screensaver/g9-screen-saver.mp4}"
+VIDEO="${SCREENSAVER_VIDEO:-$HOME/Videos/screensaver/screensaver.mp4}"
 PID_FILE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/screensaver-mpv.pid"
 SOCK="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/screensaver-mpv.sock"
 PREV_BRIGHT="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/screensaver-ddc-prev"
@@ -388,6 +388,12 @@ start() {
         return 0
     fi
     if [[ ! -f "$VIDEO" ]]; then
+        # No video yet (a fresh install): show the text screensaver instead.
+        if command -v kitty >/dev/null 2>&1; then
+            echo "screensaver: missing $VIDEO; using text mode" >&2
+            start_text
+            return 0
+        fi
         echo "screensaver: missing $VIDEO" >&2
         exit 1
     fi
@@ -424,7 +430,10 @@ start() {
 stop() {
     local text_mode=0
     if [[ -S "$SOCK" ]]; then
-        printf '%s\n' '{ "command": ["quit"] }' | socat - "$SOCK" >/dev/null 2>&1 || true
+        # Ask mpv to quit cleanly; without socat the TERM below does it.
+        if command -v socat >/dev/null 2>&1; then
+            printf '%s\n' '{ "command": ["quit"] }' | socat - "$SOCK" >/dev/null 2>&1 || true
+        fi
         sleep 0.15
     else
         text_mode=1

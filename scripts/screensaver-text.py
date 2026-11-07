@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Text screensaver for the Odyssey G9. Stdlib only. No video file.
+"""Text screensaver, full screen in kitty. Stdlib only. No video file.
 
 Styles: night (starfield), rain (columns), orbital (rings).
 A big 24-hour clock sits in the middle. Quit on a key, a click, or a

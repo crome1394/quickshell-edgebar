@@ -21,7 +21,7 @@ Singleton {
     // In the bar's scripts/ (install-deps.sh links them into ~/.local/bin).
     readonly property string helperPath: Quickshell.shellDir + "/scripts/screensaver-config.sh"
     readonly property string builtInProgram: Quickshell.shellDir + "/scripts/screensaver.sh"
-    readonly property string defaultVideo: root.home + "/Videos/screensaver/g9-screen-saver.mp4"
+    readonly property string defaultVideo: root.home + "/Videos/screensaver/screensaver.mp4"
 
     // The Look choices: Video, or one of the built-in text styles.
     readonly property var styles: [
