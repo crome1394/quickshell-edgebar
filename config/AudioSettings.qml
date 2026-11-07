@@ -43,13 +43,13 @@ Singleton {
     }
 
     function visualNorm(raw) {
-        const base = Theme.defaultAudioVisual()
+        const base = ThemeStore.defaultAudioVisual()
         if (!raw)
             return { t: base.t.slice(), c: base.c.slice() }
         const steps = raw.t ? raw.t : raw
         return {
-            t: Theme.normSteps(steps, base.t),
-            c: Theme.normColors(raw.c, base.c)
+            t: ThemeStore.normSteps(steps, base.t),
+            c: ThemeStore.normColors(raw.c, base.c)
         }
     }
 
@@ -100,12 +100,12 @@ Singleton {
             limit100: Config.audioLimit100,
             meterStreams: Config.audioMeterStreams,
             meterDevices: Config.audioMeterDevices,
-            tiers: Theme.audioVisual()
+            tiers: ThemeStore.audioVisual()
         })
     }
 
     function defaults() {
-        return { step: Theme.volumeStep, percent: true, limit100: false, meterStreams: true, meterDevices: true, tiers: Theme.defaultAudioVisual() }
+        return { step: Theme.volumeStep, percent: true, limit100: false, meterStreams: true, meterDevices: true, tiers: ThemeStore.defaultAudioVisual() }
     }
 
     function commit(snap) {
@@ -117,7 +117,7 @@ Singleton {
             Config.audioMeterStreams = clean.meterStreams
             Config.audioMeterDevices = clean.meterDevices
         })
-        Theme.saveAudio(clean.tiers)
+        ThemeStore.saveAudio(clean.tiers)
     }
 
     // Playback and Recording in the audio menu remember whether they are open.

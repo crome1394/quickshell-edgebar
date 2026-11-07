@@ -37,7 +37,7 @@ Rectangle {
     function levelInk(ok, muted, level) {
         if (!ok || muted)
             return root.theme.colFgMuted
-        return Theme.audioSpeakerColor(level)
+        return ThemeStore.audioSpeakerColor(level)
     }
 
     // The whole pill grows as one; either side's click makes it jump.

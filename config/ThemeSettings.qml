@@ -29,15 +29,15 @@ Singleton {
     function statsNorm(visual) {
         if (!visual || typeof visual !== "object")
             return null
-        const clean = JSON.parse(Theme.statsText(visual))
-        return Theme.statsText(clean) === Theme.statsText(Theme.statVisual()) ? null : clean
+        const clean = JSON.parse(ThemeStore.statsText(visual))
+        return ThemeStore.statsText(clean) === ThemeStore.statsText(ThemeStore.statVisual()) ? null : clean
     }
 
     function audioNorm(visual) {
         if (!visual || typeof visual !== "object")
             return null
-        const clean = JSON.parse(Theme.audioText(visual))
-        return Theme.audioText(clean) === Theme.audioText(Theme.audioVisual()) ? null : clean
+        const clean = JSON.parse(ThemeStore.audioText(visual))
+        return ThemeStore.audioText(clean) === ThemeStore.audioText(ThemeStore.audioVisual()) ? null : clean
     }
 
     // ── Draft ───────────────────────────────────────────────────────────
@@ -51,7 +51,7 @@ Singleton {
     }
 
     function snapshot() {
-        return { theme: Theme.activeTheme, stats: null, audio: null }
+        return { theme: ThemeStore.activeTheme, stats: null, audio: null }
     }
 
     // Reset drafts Liquid amber and keeps the thresholds.
@@ -61,7 +61,7 @@ Singleton {
 
     function commit(snap) {
         const clean = root.normalize(snap)
-        Theme.saveLook(clean.theme, clean.stats, clean.audio)
+        ThemeStore.saveLook(clean.theme, clean.stats, clean.audio)
     }
 
     // Draft a preset or a saved theme. Saved ones bring their thresholds.
@@ -122,8 +122,8 @@ Singleton {
         if (!src || typeof src !== "object")
             return null
         const out = ThemeBuilder.normalize(src)
-        out.stats = src.stats && typeof src.stats === "object" ? JSON.parse(Theme.statsText(src.stats)) : null
-        out.audio = src.audio && typeof src.audio === "object" ? JSON.parse(Theme.audioText(src.audio)) : null
+        out.stats = src.stats && typeof src.stats === "object" ? JSON.parse(ThemeStore.statsText(src.stats)) : null
+        out.audio = src.audio && typeof src.audio === "object" ? JSON.parse(ThemeStore.audioText(src.audio)) : null
         return out
     }
 
@@ -165,8 +165,8 @@ Singleton {
         const v = root.editor.value
         const out = Object.assign({}, v.theme)
         out.name = ThemeBuilder.labelNorm(name === undefined ? v.theme.name : name)
-        out.stats = v.stats || Theme.statVisual()
-        out.audio = v.audio || Theme.audioVisual()
+        out.stats = v.stats || ThemeStore.statVisual()
+        out.audio = v.audio || ThemeStore.audioVisual()
         return out
     }
 
@@ -255,7 +255,7 @@ Singleton {
         }
 
         function current(): string {
-            return Theme.activeTheme.name
+            return ThemeStore.activeTheme.name
         }
     }
 
@@ -312,7 +312,7 @@ Singleton {
         for (const key in metrics) {
             if (!metrics[key])
                 continue
-            stats = stats || Theme.statVisual()
+            stats = stats || ThemeStore.statVisual()
             stats[key] = { t: statSteps.slice(), c: metrics[key] }
         }
         const speaker = tiers("audioSpeakerTier")

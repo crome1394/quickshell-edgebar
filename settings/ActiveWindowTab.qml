@@ -3,7 +3,6 @@ import QtQuick
 import QtQuick.Controls
 import Quickshell.Hyprland
 import qs.config
-import qs.services
 import qs.theme
 
 Item {
