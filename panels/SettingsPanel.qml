@@ -3,6 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import qs.config
+import qs.services
 import qs.settings
 import qs.theme
 
@@ -19,6 +20,8 @@ FloatingWindow {
     visible: false
 
     property string currentTab: "bar"
+    // Hidden while a display change is tried; reopen on Display after.
+    property bool awayForDisplay: false
     property bool remapping: false
     property int showGeneration: 0
     property int revealSerial: 0
@@ -120,6 +123,23 @@ FloatingWindow {
             window.jump(id, /^[A-Za-z0-9_-]{0,40}$/.test(part) ? part : "")
             window.show()
             return "ok"
+        }
+    }
+
+    Connections {
+        target: DisplayService
+        function onTryStarted() {
+            if (window.visible) {
+                window.awayForDisplay = true
+                window.hide()
+            }
+        }
+        function onTryEnded() {
+            if (!window.awayForDisplay)
+                return
+            window.awayForDisplay = false
+            window.jump("system", "display")
+            window.show()
         }
     }
 

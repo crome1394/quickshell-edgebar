@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- System → Display: Apply closes Settings and shows a small Keep / Go back window centered on the monitor being changed (Enter / Escape), so it stays reachable at any resolution. After Keep, Go back, or the timeout, Settings reopens on Display. The mode in use is selected again after going back; before, the tried mode stayed highlighted. New: `panels/DisplayConfirmPanel.qml`.
+- System → Display → Arrangement: the monitors drawn to scale; drag one next to another and it snaps to the nearest side (left, right, above, below) with edges lined up when close, then Apply arrangement with the same Keep / Go back. New: `settings/MonitorLayout.qml`.
 - Section tabs along the top of each Settings page are dividers too, standing on the page in shades of the parent tab's color, and no wider than 200 px. Flat turns both levels back into chips; the Inspector keeps flat tabs. New: `settings/TabColors.qml`.
 - `tests/run.sh` checks that the whole shell loads before running the logic tests, catching load errors that lint does not.
 - Settings tabs look like index dividers: colored tabs hanging from the page, the active one raised with its color along the page edge, labels shrinking to fit, and dark or light text chosen per color. Appearance → Theme → Settings window switches between Index dividers and Flat (the old chips) and between Rainbow and From accent colors. New: `settings/IndexTabStrip.qml`.

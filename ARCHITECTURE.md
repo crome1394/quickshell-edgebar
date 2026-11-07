@@ -159,7 +159,8 @@ ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `them
 
 - **Hyprland**: `services/OpacityService` writes `~/.config/hypr/opacity.lua`
   and swaps the live rules with `hyprctl repl`; `DisplayService` changes
-  monitor modes; `CaptureService` and `ScreensaverService` write their
+  monitor modes and positions in one `hyprctl eval`, then waits for Keep in
+  `DisplayConfirmPanel` (Settings steps aside via `tryStarted`/`tryEnded`); `CaptureService` and `ScreensaverService` write their
   `.conf` files for the helper scripts in `~/.local/bin`.
 - **FreshRSS**: `services/FreshRssService` talks to the server's Google
   Reader API with QML's `XMLHttpRequest` (no curl, no scripts). The login

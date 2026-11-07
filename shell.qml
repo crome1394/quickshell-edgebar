@@ -39,6 +39,14 @@ ShellRoot {
         id: settings
     }
 
+    // "Keep this display mode?" while a display change is tried.
+    Loader {
+        active: DisplayService.pending !== null
+        sourceComponent: Component {
+            DisplayConfirmPanel {}
+        }
+    }
+
     // Popups for the built-in notification server (Settings → Notifications).
     Loader {
         active: BuiltinNotifications.enabled

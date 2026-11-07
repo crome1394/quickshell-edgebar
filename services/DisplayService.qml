@@ -9,8 +9,11 @@ import qs.theme
 // monitors, modes, and 10-bit support come from Hyprland at runtime.
 // Nothing runs unless the Display page is open (retain/release).
 //
-// Apply sets the mode live, checks that Hyprland kept it, then waits for
-// Keep. With no Keep before the countdown ends, the old mode comes back.
+// Apply (a mode) or applyLayout (monitor positions) sets the change live,
+// checks that Hyprland kept it, then waits for Keep in DisplayConfirmPanel,
+// a small window centered on the monitor. Settings steps aside meanwhile
+// (tryStarted / tryEnded) and comes back on the Display page. With no Keep
+// before the countdown ends, the old setup comes back.
 // Keep saves to a monitors file only when one already carries the
 // "Managed by Quickshell" marker; otherwise the change lasts until
 // Hyprland restarts. Every command is a fixed argv, never a shell.
@@ -24,10 +27,20 @@ Singleton {
     property string error: ""
     property string notice: ""
 
-    // While a change waits for Keep.
+    // While a change waits for Keep: { kind: "mode" | "layout", specs, label }.
     property var pending: null
+    // The specs to send back on Go back.
     property var previous: null
     property int countdown: 0
+
+    signal tryStarted()
+    signal tryEnded()
+
+    // Counts finished applies, and which count each monitor read started
+    // after, so the page can tell fresh monitor data from stale.
+    property int applySerial: 0
+    property int monitorSerial: 0
+    readonly property bool settled: !root.busy && root.monitorSerial === root.applySerial
 
     // The monitors file Keep writes, or "" when there is none to manage.
     property string managedFile: ""
@@ -59,6 +72,7 @@ Singleton {
         if (monitorProc.running)
             return
         root.loading = true
+        monitorProc.startedAt = root.applySerial
         monitorProc.running = true
     }
 
@@ -162,19 +176,40 @@ Singleton {
         return parts.join(",")
     }
 
-    function send(spec) {
-        const lua = DisplaySettings.luaMonitor(spec)
-        if (!lua.length) {
-            root.error = "That mode could not be checked, so it was not sent."
+    // Send monitor specs in one Hyprland call.
+    function send(specs) {
+        const list = Array.isArray(specs) ? specs : [specs]
+        const lines = list.map((sp) => DisplaySettings.luaMonitor(sp))
+        if (!list.length || lines.some((l) => !l.length)) {
+            root.error = "That change could not be checked, so it was not sent."
             return false
         }
-        applyProc.spec = spec
+        applyProc.specs = list
         applyProc.command = root.useKeyword
-            ? ["hyprctl", "keyword", "monitor", root.keywordValue(spec)]
-            : ["hyprctl", "eval", lua]
+            ? ["hyprctl", "--batch", list.map((sp) => "keyword monitor " + root.keywordValue(sp)).join(" ; ")]
+            : ["hyprctl", "eval", lines.join("\n")]
         root.busy = true
         applyProc.running = true
         return true
+    }
+
+    function begin(kind, label, previous, next) {
+        root.error = ""
+        root.notice = ""
+        root.previous = previous
+        root.pending = { kind: kind, specs: next, label: label }
+        if (!root.send(next)) {
+            root.pending = null
+            root.previous = null
+            return
+        }
+        root.tryStarted()
+    }
+
+    function end() {
+        root.pending = null
+        root.previous = null
+        root.tryEnded()
     }
 
     // Try a mode. The current one is kept to go back to.
@@ -190,22 +225,43 @@ Singleton {
             root.error = "This monitor does not report 10-bit color."
             return
         }
-        root.error = ""
-        root.notice = ""
-        root.previous = root.specFor(monitor, root.liveMode(monitor), monitor.depth)
-        root.pending = root.specFor(monitor, mode, Number(depth))
-        if (!root.send(root.pending)) {
-            root.pending = null
-            root.previous = null
+        const p = DisplaySettings.parseMode(mode)
+        root.begin("mode", p.w + " × " + p.h + " at " + Math.round(p.hz) + " Hz, " + depth + "-bit",
+            [root.specFor(monitor, root.liveMode(monitor), monitor.depth)],
+            [root.specFor(monitor, mode, Number(depth))])
+    }
+
+    // Try new monitor positions: { name: { x, y } }. Monitors left out stay put.
+    function applyLayout(positions) {
+        if (root.busy || root.pending)
+            return
+        const before = []
+        const after = []
+        for (let i = 0; i < root.monitors.length; i++) {
+            const m = root.monitors[i]
+            const want = positions[m.name]
+            if (m.disabled || !want)
+                continue
+            const x = Math.round(Number(want.x))
+            const y = Math.round(Number(want.y))
+            if (!isFinite(x) || !isFinite(y) || (x === m.x && y === m.y))
+                continue
+            const spec = root.specFor(m, root.liveMode(m), m.depth)
+            before.push(spec)
+            after.push(Object.assign({}, spec, { x: x, y: y }))
         }
+        if (!after.length) {
+            root.notice = "The arrangement is already in place."
+            return
+        }
+        root.begin("layout", "the new arrangement", before, after)
     }
 
     function revert(reason) {
         confirmTimer.stop()
         root.countdown = 0
         const back = root.previous
-        root.pending = null
-        root.previous = null
+        root.end()
         if (reason)
             root.notice = reason
         if (back)
@@ -217,22 +273,36 @@ Singleton {
             return
         confirmTimer.stop()
         root.countdown = 0
-        const kept = root.pending
-        root.pending = null
-        root.previous = null
+        const kept = root.pending.specs
+        root.end()
         root.save(kept)
     }
 
     // After an apply: does Hyprland show what we asked for?
     function verify() {
-        const spec = root.pending
-        const monitor = spec ? root.monitorNamed(spec.output) : null
-        if (!spec || !monitor)
+        const job = root.pending
+        if (!job)
             return
-        const want = DisplaySettings.parseMode(spec.mode)
-        const modeHeld = monitor.width === want.w && monitor.height === want.h && Math.abs(monitor.hz - want.hz) <= 0.6
-        const depthHeld = monitor.depth === spec.depth
-        if (modeHeld && depthHeld) {
+        let failed = null
+        let depthFailed = false
+        for (let i = 0; i < job.specs.length; i++) {
+            const spec = job.specs[i]
+            const monitor = root.monitorNamed(spec.output)
+            if (!monitor) {
+                failed = spec
+                break
+            }
+            const want = DisplaySettings.parseMode(spec.mode)
+            const modeHeld = monitor.width === want.w && monitor.height === want.h && Math.abs(monitor.hz - want.hz) <= 0.6
+            const depthHeld = monitor.depth === spec.depth
+            const placeHeld = Math.abs(monitor.x - spec.x) <= 1 && Math.abs(monitor.y - spec.y) <= 1
+            if (!modeHeld || !depthHeld || !placeHeld) {
+                failed = spec
+                depthFailed = modeHeld && !depthHeld
+                break
+            }
+        }
+        if (!failed) {
             root.countdown = Theme.displayConfirmSeconds
             confirmTimer.restart()
             return
@@ -242,13 +312,17 @@ Singleton {
             settleTimer.restart()
             return
         }
-        DisplaySettings.markRejected(spec.output, spec.mode, spec.depth)
-        root.revert(depthHeld
-            ? "Hyprland did not switch to " + spec.mode + ". It is now marked as not supported."
-            : "This monitor would not keep " + spec.depth + "-bit at " + spec.mode + ". That pair is now marked as not supported.")
+        if (job.kind === "layout") {
+            root.revert("Hyprland did not take the new arrangement, so the old one is back.")
+            return
+        }
+        DisplaySettings.markRejected(failed.output, failed.mode, failed.depth)
+        root.revert(depthFailed
+            ? "This monitor would not keep " + failed.depth + "-bit at " + failed.mode + ". That pair is now marked as not supported."
+            : "Hyprland did not switch to " + failed.mode + ". It is now marked as not supported.")
     }
 
-    function save(spec) {
+    function save(kept) {
         if (!root.managedFile.length) {
             root.notice = "Applied. It lasts until Hyprland restarts: no monitors file with the \"" + DisplaySettings.fileMarker + "\" marker was found."
             return
@@ -258,7 +332,8 @@ Singleton {
             const m = root.monitors[i]
             if (m.disabled)
                 continue
-            specs.push(m.name === spec.output ? spec : root.specFor(m, root.liveMode(m), m.depth))
+            const mine = kept.find((k) => k.output === m.name)
+            specs.push(mine ? mine : root.specFor(m, root.liveMode(m), m.depth))
         }
         const stamp = new Date().toISOString()
         const text = DisplaySettings.monitorsFile(specs, stamp)
@@ -306,6 +381,7 @@ Singleton {
 
     Process {
         id: monitorProc
+        property int startedAt: 0
         command: ["hyprctl", "monitors", "all", "-j"]
         stdout: StdioCollector {
             id: monitorOut
@@ -317,6 +393,7 @@ Singleton {
                 root.error = "hyprctl is not available, so monitors cannot be read."
                 return
             }
+            root.monitorSerial = monitorProc.startedAt
             root.readMonitors(monitorOut.text)
             if (root.pending && !confirmTimer.running)
                 root.verify()
@@ -325,7 +402,7 @@ Singleton {
 
     Process {
         id: applyProc
-        property var spec: null
+        property var specs: []
         stdout: StdioCollector {
             id: applyOut
             waitForEnd: true
@@ -336,25 +413,24 @@ Singleton {
         }
         onExited: (code) => {
             root.busy = false
+            root.applySerial += 1
             const said = [String(applyOut.text), String(applyErr.text)].join("").trim()
             const ok = code === 0 && !/^error/i.test(said)
             // hyprctl without Lua config: retry once with the older keyword form.
             if (!ok && !root.useKeyword && /unknown request|invalid command|not supported/i.test(said)) {
                 root.useKeyword = true
-                root.send(applyProc.spec)
+                root.send(applyProc.specs)
                 return
             }
             if (!ok) {
-                root.error = "Hyprland refused the mode: " + (said.length ? said : "exit " + code)
-                if (root.pending && applyProc.spec === root.pending) {
-                    root.pending = null
-                    root.previous = null
-                }
+                root.error = "Hyprland refused the change: " + (said.length ? said : "exit " + code)
+                if (root.pending && applyProc.specs === root.pending.specs)
+                    root.end()
                 root.refresh()
                 return
             }
             root.verifyTries = 0
-            if (root.pending && applyProc.spec === root.pending)
+            if (root.pending && applyProc.specs === root.pending.specs)
                 settleTimer.restart()
             else
                 root.refresh()
