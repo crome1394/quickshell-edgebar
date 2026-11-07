@@ -63,16 +63,15 @@ devices.
 ## Notifications
 
 - **Server**:
-  - **Auto** (the default) uses the notification daemon that is already
-    running (SwayNC, dunst, mako, …) and keeps the history; with none
-    running, the bar becomes the server itself.
+  - **Auto** (the default) uses the notification daemon that is running
+    (SwayNC, dunst, mako, …) and keeps the history; with none, the bar
+    becomes the server itself. At start it waits a few seconds for a daemon
+    launched at login before taking over.
   - **Built-in** always makes the bar the server: its own popups, Do Not
     Disturb, and history, with no extra processes. If another daemon holds
     notifications, the page names it and offers to stop it. To keep
     Built-in after a restart, don't start another daemon at login (see
     [Hyprland setup](hyprland.md#notifications)).
-  - **SwayNC** uses SwayNC for popups; the bar keeps history and Do Not
-    Disturb.
 
   The status line shows what is in use right now. History carries over
   when you switch.

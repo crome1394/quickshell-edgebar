@@ -180,6 +180,9 @@ Singleton {
     readonly property int notificationPanelWidth: 440
     readonly property int notificationPanelHeight: 488
     readonly property int notificationSyncMs: 2500
+    // Auto: how long to wait for a notification daemon at start before the
+    // built-in server takes over.
+    readonly property int notificationClaimDelayMs: 4000
     readonly property int notificationThumbWidth: 112
     readonly property int notificationThumbHeight: 72
     // Built-in server popups.

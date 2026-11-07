@@ -1,5 +1,5 @@
 {
-    "_comment": "Programs, fonts, and services the bar uses. Read by services/DependencyService.qml (Settings -> System -> Dependencies) and scripts/install-deps.sh. need: required or optional. scope: user (systemctl --user) or system. when: \"swaync\" means only needed while SwayNC is the notification server (chosen, or found by Auto).",
+    "_comment": "Programs, fonts, and services the bar uses. Read by services/DependencyService.qml (Settings -> System -> Dependencies) and scripts/install-deps.sh. need: required or optional. scope: user (systemctl --user) or system. when: \"swaync\" means only used when SwayNC is running (found by Auto); never installed by install-deps.sh.",
     "programs": [
         {
             "name": "qs",
