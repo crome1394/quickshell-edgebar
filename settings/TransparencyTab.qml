@@ -108,7 +108,7 @@ Item {
                 Text {
                     width: parent.width
                     wrapMode: Text.WordWrap
-                    text: "Always solid: the Settings and Inspector windows, and fullscreen windows."
+                    text: "Always solid: the Settings and Inspector windows, Tack pins, and fullscreen windows."
                     color: Theme.subtext
                     font.family: Theme.uiFont
                     font.pixelSize: Theme.smallPx

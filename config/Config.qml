@@ -18,6 +18,8 @@ Singleton {
     property bool ready: false
     property bool applying: false
     property bool writing: false
+    // A change came in while a save was running; save again when it ends.
+    property bool savePending: false
     property int revision: 0
 
     property alias showSpecial: data.wsShowSpecialPill
@@ -246,9 +248,21 @@ Singleton {
     }
 
     function queueSave() {
-        if (!root.ready || root.applying || root.writing)
+        if (!root.ready || root.applying)
             return
+        if (root.writing) {
+            root.savePending = true
+            return
+        }
         saveTimer.restart()
+    }
+
+    function saveDone() {
+        root.writing = false
+        if (root.savePending) {
+            root.savePending = false
+            saveTimer.restart()
+        }
     }
 
     // A text size percent, on the clock's step and range.
@@ -385,10 +399,12 @@ Singleton {
             root.touch()
         }
         onAdapterUpdated: root.queueSave()
-        onSaved: root.writing = false
-        onSaveFailed: root.writing = false
+        onSaved: root.saveDone()
+        onSaveFailed: root.saveDone()
+        // Reload edits made outside the bar. Skip while a save of ours is
+        // running or waiting, so the newer values in memory are not lost.
         onFileChanged: {
-            if (!root.writing)
+            if (!root.writing && !root.savePending && !saveTimer.running)
                 store.reload()
         }
         // qmllint disable unresolved-type

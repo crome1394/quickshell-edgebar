@@ -5,7 +5,7 @@ import qs.theme
 
 // System → Transparency, and the Transparency pill: one level for every
 // application plus per-application overrides (focused and unfocused).
-// Levels are percents; 100 is solid. The Settings and Inspector windows and fullscreen
+// Levels are percents; 100 is solid. The Settings and Inspector windows, Tack pins, and fullscreen
 // windows always stay solid.
 //
 // The overrides are saved as JSON in opacityOverridesJson. An empty field
@@ -179,6 +179,38 @@ Singleton {
         })
     }
 
+    // Add an override from the pill and save it at once. Starts at the
+    // same level as one added in Settings. False when the class is not
+    // allowed, already has an override, or the list is full.
+    function addOverrideLive(cls, label) {
+        const clean = String(cls || "").trim()
+        const list = root.savedOverrides()
+        if (!root.classOk(clean) || root.indexOf(list, clean) >= 0 || list.length >= Theme.opacityOverrideMax)
+            return false
+        const level = root.clamp(Theme.opacityOverrideDefault)
+        list.push({ cls: clean, label: root.labelNorm(label, clean), active: level, inactive: level, on: true })
+        Config.saveFields(() => {
+            Config.opacityOverridesJson = JSON.stringify(list)
+        })
+        return true
+    }
+
+    // Remove an override from the pill and save at once.
+    function removeOverrideLive(cls) {
+        const list = root.savedOverrides()
+        const at = root.indexOf(list, String(cls || ""))
+        if (at < 0)
+            return
+        list.splice(at, 1)
+        Config.saveFields(() => {
+            Config.opacityOverridesJson = JSON.stringify(list)
+        })
+    }
+
+    function hasOverride(cls) {
+        return root.indexOf(root.savedOverrides(), String(cls || "")) >= 0
+    }
+
     function useTheme() {
         Config.saveFields(() => {
             Config.opacityQuickshell = 0
@@ -220,6 +252,8 @@ Singleton {
         }
         if (level < 100 || rows.length) {
             lines.push("add({ name = 'qs-opacity-settings', match = { class = [[^org\\.quickshell$]], title = [[^(Settings|Inspector)$]] }, opacity = '1 override 1 override 1 override' })")
+            // Tack pins show a screenshot as it is.
+            lines.push("add({ name = 'qs-opacity-tack-pins', match = { class = [[^io\\.github\\.crome1394\\.Tack\\.Pins$]] }, opacity = '1 override 1 override 1 override' })")
             lines.push("add({ name = 'qs-opacity-fullscreen', match = { fullscreen = true }, opacity = '1 override 1 override 1 override' })")
         }
         lines.push("")
