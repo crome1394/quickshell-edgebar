@@ -239,13 +239,15 @@ write_hypridle_if_missing() {
     tmp="$(mktemp "${dest}.XXXXXX")"
     {
         printf 'general {\n'
-        printf '    ignore_dbus_inhibit = true\n'
-        printf '    ignore_systemd_inhibit = true\n'
-        printf '    ignore_wayland_inhibit = true\n'
+        printf '    # Other listeners (lock, suspend) respect idle inhibitors.\n'
+        printf '    ignore_dbus_inhibit = false\n'
+        printf '    ignore_systemd_inhibit = false\n'
+        printf '    ignore_wayland_inhibit = false\n'
         printf '}\n\n'
         printf '%s\n' "$BEGIN"
         printf 'listener {\n'
         printf '    timeout = %s\n' "$TIMEOUT_SEC"
+        printf '    ignore_inhibit = true\n'
         printf '    on-timeout = %s start\n' "$SELF"
         printf '    on-resume = %s stop\n' "$SELF"
         printf '    condition_cmd = %s idle-ok\n' "$SELF"
@@ -274,6 +276,8 @@ block = (
     f"{begin}\n"
     "listener {\n"
     f"    timeout = {t}\n"
+    # Only the screensaver ignores inhibitors (tab video); idle-ok decides.
+    "    ignore_inhibit = true\n"
     f"    on-timeout = {self} start\n"
     f"    on-resume = {self} stop\n"
     f"    condition_cmd = {self} idle-ok\n"
@@ -292,10 +296,12 @@ else:
         text += "\n"
     new = text + "\n" + block
 import re
-# Tab video (YouTube/X/etc.) uses Wayland/D-Bus idle inhibit. Ignore those so
-# hypridle still reaches timeout; idle-ok decides fullscreen vs always-start.
+# Tab video (YouTube/X/etc.) sets idle inhibitors. Only the screensaver
+# listener ignores them (ignore_inhibit above; idle-ok handles fullscreen and
+# Caffeine). Older versions of this script set the general ignore_* keys to
+# true, which made lock and suspend rules ignore inhibitors too; put them back.
 for key in ("ignore_dbus_inhibit", "ignore_systemd_inhibit", "ignore_wayland_inhibit"):
-    new2, nsub = re.subn(rf"(?m)^(\s*{key}\s*=\s*)\S+", r"\1true", new)
+    new2, nsub = re.subn(rf"(?m)^(\s*{key}\s*=\s*)true\b", r"\1false", new)
     if nsub:
         new = new2
 if new != text:
