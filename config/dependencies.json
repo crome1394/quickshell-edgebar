@@ -100,6 +100,13 @@
             "use": "Volume pop-up"
         },
         {
+            "name": "notify-send",
+            "pkg": "libnotify",
+            "area": "Notifications",
+            "need": "optional",
+            "use": "Send a test button under Notifications → Popups"
+        },
+        {
             "name": "swaync-client",
             "pkg": "swaync",
             "area": "Notifications",

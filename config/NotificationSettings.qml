@@ -46,7 +46,8 @@ Singleton {
             clearBoot: !!src.clearBoot,
             showCount: src.showCount !== false,
             corner: root.cornerNorm(src.corner),
-            timeout: root.timeoutNorm(src.timeout === undefined ? Theme.notificationTimeoutDefault : src.timeout)
+            timeout: root.timeoutNorm(src.timeout === undefined ? Theme.notificationTimeoutDefault : src.timeout),
+            popup: PopupSettings.normalize(src.popup)
         }
     }
 
@@ -57,7 +58,8 @@ Singleton {
             clearBoot: Config.notificationClearOnBoot,
             showCount: Config.notificationShowCount,
             corner: Config.notificationCorner,
-            timeout: Config.notificationTimeout
+            timeout: Config.notificationTimeout,
+            popup: PopupSettings.saved()
         })
     }
 
@@ -68,7 +70,8 @@ Singleton {
             clearBoot: false,
             showCount: true,
             corner: "bottomRight",
-            timeout: Theme.notificationTimeoutDefault
+            timeout: Theme.notificationTimeoutDefault,
+            popup: PopupSettings.defaults()
         }
     }
 
@@ -81,6 +84,7 @@ Singleton {
             Config.notificationShowCount = clean.showCount
             Config.notificationCorner = clean.corner
             Config.notificationTimeout = clean.timeout
+            PopupSettings.write(clean.popup)
         })
         root.applySerial++
     }

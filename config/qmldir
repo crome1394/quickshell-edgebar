@@ -21,3 +21,4 @@ singleton ScreensaverSettings 1.0 ScreensaverSettings.qml
 singleton CaptureSettings 1.0 CaptureSettings.qml
 singleton ThemeSettings 1.0 ThemeSettings.qml
 singleton FreshRssSettings 1.0 FreshRssSettings.qml
+singleton PopupSettings 1.0 PopupSettings.qml
