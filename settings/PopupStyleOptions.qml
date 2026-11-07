@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Dialogs
 import Quickshell
 import qs.config
+import qs.services
 import qs.theme
 
 // Settings → Notifications → Popups: how the built-in server's popups look.
@@ -12,7 +13,7 @@ Column {
     id: root
 
     readonly property var popup: NotificationSettings.editor.value.popup
-    readonly property bool builtin: Config.notificationServer === "builtin"
+    readonly property bool builtin: NotificationDaemon.mode === "builtin"
     property int paintIndex: -1
 
     function set(key, value) {
@@ -43,7 +44,7 @@ Column {
         visible: !root.builtin
         width: parent.width
         wrapMode: Text.WordWrap
-        text: "These apply to the built-in server's popups. SwayNC draws its own."
+        text: "These apply to the built-in server's popups. " + NotificationDaemon.modeLabel + " draws its own."
         color: Theme.subtext
         font.family: Theme.uiFont
         font.pixelSize: Theme.smallPx

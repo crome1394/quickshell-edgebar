@@ -45,7 +45,7 @@ Item {
             SectionHeader {
                 width: parent.width
                 title: "Server"
-                hint: "Who shows notifications: SwayNC, or the bar itself. Saves at once."
+                hint: "Who shows notifications: Auto uses the daemon already running, or the bar itself when there is none. Saves at once."
             }
 
             NotificationServerOptions {

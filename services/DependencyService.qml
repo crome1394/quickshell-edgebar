@@ -16,11 +16,11 @@ Singleton {
     // scripts/install-deps.sh. need: "required" breaks the bar or a core
     // widget, "optional" one feature. A service's scope "user" runs under
     // systemctl --user.
-    // Every program in the file, and those that apply to your settings:
-    // entries with when "swaync" drop out while the built-in notification
-    // server is chosen.
+    // Every program in the file, and those that apply to your setup:
+    // entries with when "swaync" show only while SwayNC is the server in
+    // use (chosen, or found by Auto).
     property var allPrograms: []
-    readonly property var programs: root.allPrograms.filter((p) => p.when !== "swaync" || Config.notificationServer !== "builtin")
+    readonly property var programs: root.allPrograms.filter((p) => p.when !== "swaync" || NotificationDaemon.mode === "swaync")
     property var fonts: []
     property var services: []
 

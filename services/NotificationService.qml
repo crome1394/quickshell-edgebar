@@ -9,12 +9,15 @@ import qs.theme
 // The bell and the history window load on demand. This singleton stays up
 // so `qs ipc call notificationBell` works.
 //
-// Two servers (Settings → Notifications → Server):
-//   SwayNC   SwayNC shows popups; a watcher script records history and
+// The server in use comes from NotificationDaemon (Settings → Notifications
+// → Server: Auto, Built-in, or SwayNC):
+//   builtin  BuiltinNotifications is the server; no extra processes. History
+//            and DND are kept by the bar.
+//   swaync   SwayNC shows popups; a watcher script records history and
 //            swaync-client reports DND, only while the bell is on a bar or
 //            the history is open.
-//   Built-in BuiltinNotifications is the server; no extra processes. History
-//            and DND are kept by the bar.
+//   external another daemon (dunst, mako, …) shows popups; the watcher
+//            records history. DND uses dunstctl or makoctl when present.
 Singleton {
     id: root
 
@@ -23,15 +26,19 @@ Singleton {
     // The monitor whose bell opened the history; "" means the main monitor.
     property string historyScreen: ""
     readonly property bool builtin: BuiltinNotifications.enabled
-    // DND as SwayNC reports it; in built-in mode DND is a saved setting.
+    readonly property string mode: NotificationDaemon.mode
+    readonly property bool swaync: root.mode === "swaync"
+    // DND as SwayNC reports it; in built-in mode DND is a saved setting;
+    // with another daemon, the last state the bar set.
     property bool swayncDnd: false
-    readonly property bool dnd: root.builtin ? Config.notificationDnd : root.swayncDnd
+    property bool externalDnd: false
+    readonly property bool dnd: root.builtin ? Config.notificationDnd : (root.swaync ? root.swayncDnd : root.externalDnd)
     property var items: []
     property int cursor: 0
     property bool allExpanded: false
 
     readonly property int count: root.items ? root.items.length : 0
-    readonly property bool watching: !root.builtin && (Config.showNotificationPill || root.historyOpen)
+    readonly property bool watching: (root.mode === "swaync" || root.mode === "external") && (Config.showNotificationPill || root.historyOpen)
 
     function historyScript() {
         return Quickshell.shellDir + "/scripts/notification-history.py"
@@ -182,7 +189,7 @@ Singleton {
     }
 
     function applyToast() {
-        if (!Config.ready || toastProc.running || root.builtin)
+        if (!Config.ready || toastProc.running || !root.swaync)
             return
         toastProc.command = [
             "python3",
@@ -218,8 +225,19 @@ Singleton {
             BuiltinNotifications.setDnd(!Config.notificationDnd)
             return
         }
-        // The subscriber reports the new state.
-        Quickshell.execDetached(["swaync-client", "-d", "-sw"])
+        if (root.swaync) {
+            // The subscriber reports the new state.
+            Quickshell.execDetached(["swaync-client", "-d", "-sw"])
+            return
+        }
+        const next = !root.externalDnd
+        if (NotificationDaemon.owner === "dunst")
+            Quickshell.execDetached(["dunstctl", "set-paused", next ? "true" : "false"])
+        else if (NotificationDaemon.owner === "mako")
+            Quickshell.execDetached(["makoctl", "mode", next ? "-a" : "-r", "do-not-disturb"])
+        else
+            return
+        root.externalDnd = next
     }
 
     function setExpanded(index, on) {
@@ -260,7 +278,8 @@ Singleton {
             BuiltinNotifications.save([])
         } else {
             Quickshell.execDetached(["python3", root.historyScript(), "clear"])
-            Quickshell.execDetached(["swaync-client", "-C", "-sw"])
+            if (root.swaync)
+                Quickshell.execDetached(["swaync-client", "-C", "-sw"])
         }
         root.items = []
         root.cursor = 0
@@ -417,13 +436,13 @@ Singleton {
     // polls. If swaync restarts, the subscriber exits and is started again.
     Process {
         id: stateProc
-        running: root.watching
+        running: root.watching && root.swaync
         command: ["swaync-client", "--subscribe"]
         stdout: SplitParser {
             onRead: (line) => root.applySync(line)
         }
         onExited: {
-            if (root.watching)
+            if (root.watching && root.swaync)
                 stateRestart.restart()
         }
     }
@@ -433,8 +452,8 @@ Singleton {
         interval: Theme.notificationSyncMs
         onTriggered: {
             // Re-binding (not assigning true) restarts it and keeps it tied to watching.
-            if (root.watching && !stateProc.running)
-                stateProc.running = Qt.binding(() => root.watching)
+            if (root.watching && root.swaync && !stateProc.running)
+                stateProc.running = Qt.binding(() => root.watching && root.swaync)
         }
     }
 

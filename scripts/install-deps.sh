@@ -69,11 +69,12 @@ path, kind, only_required, layout = sys.argv[1], sys.argv[2], sys.argv[3] == "1"
 safe = re.compile(r"^[A-Za-z0-9@._+ -]{1,64}$")
 with open(path, encoding="utf-8") as f:
     data = json.load(f)
-# Skip SwayNC-only tools when the saved settings use the built-in server.
-builtin = False
+# SwayNC-only tools are installed only when SwayNC is chosen as the
+# server; Auto (the default) falls back to the built-in server.
+builtin = True
 try:
     with open(layout, encoding="utf-8") as f:
-        builtin = json.load(f).get("notificationServer") == "builtin"
+        builtin = json.load(f).get("notificationServer") != "swaync"
 except (OSError, ValueError, AttributeError):
     pass
 for row in data.get(kind, []):

@@ -26,3 +26,4 @@ singleton TipService 1.0 TipService.qml
 singleton FontService 1.0 FontService.qml
 singleton ScreenService 1.0 ScreenService.qml
 singleton BuiltinNotifications 1.0 BuiltinNotifications.qml
+singleton NotificationDaemon 1.0 NotificationDaemon.qml
