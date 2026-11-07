@@ -1,0 +1,104 @@
+# Settings
+
+Open Settings from the spanner on the bar, or `qs ipc call settings open`.
+Most pages have **Apply**, **Undo** (drop the draft, or put back the last
+applied values), and **Reset** (draft the defaults) along the bottom.
+Nothing on those pages is saved until Apply.
+
+**Search**: the magnifier or `Ctrl+F`. Tab or ↓ moves into the results,
+↑/↓ pick one, Enter opens it, Esc closes. Escape again closes Settings.
+
+## Bar
+
+- **Workspaces**: symbol, label, font, and size for each workspace number.
+  Drag a row by `||` to move a face to another number.
+- **Dock**: hover effect (Off, Magnify, Jump, Both), what it applies to,
+  magnify amount, spread, jump height, running-app dot color.
+- **Overview**: layout, strip, previews, motion, which workspaces appear,
+  and input for the overview overlay.
+
+## Widgets
+
+- **Bars**: turn each edge on, align it, place widgets, auto-hide (H) and
+  its delays.
+- **Active Window**: show it, corner, width, and classes to exclude.
+- **System Stats**: font, bold, italic, size, bar graph width, the CPU,
+  memory, GPU, and VRAM threshold steps and colors, and the click commands
+  (run directly or in your terminal, never through a shell).
+
+## Wallpaper
+
+A folder of images; click one to set it with hyprpaper. Rename (pencil) or
+delete (✕) files, and change the preview size.
+
+## Theme
+
+Presets, simple edits, saved themes, import and export. See
+[Themes](themes.md).
+
+## Applications
+
+- **App Launcher**: one to four launchers. Search installed apps and pin
+  them, or pin a custom command; drag `||` to reorder.
+- **Application Menu**: the menu icon (a font symbol, or an SVG/PNG with an
+  optional tint), its size and color, and the command a click runs.
+- **FreshRSS**: server and reader options. See [FreshRSS](freshrss.md).
+
+## Connectivity
+
+- **Network**: what the pill shows (full IPv4, last octet, or adapter
+  name) and the active connections.
+- **Bluetooth**: scan length, adapter power, new devices, and paired
+  devices.
+
+## Audio
+
+Scroll step, show percent, volume limit, meters on/off, the speaker and
+microphone threshold steps and colors, and the live output and input
+devices.
+
+## Notifications
+
+Toast corner and timeout, and history options (keep expanded, stagger row
+colors, clear at boot, show the counter). Apply updates SwayNC too.
+
+## Region & Clock
+
+- **Clock**: font, color, bold, italic, size, format, first day of the
+  week, and which click opens the calendar.
+- **Region**: pick a city on the map or search; Apply sets the system time
+  zone. The map pictures come from GNOME and are GPL-2.0-or-later
+  ([details](../assets/gnome-tz/README.md)).
+
+## System
+
+- **Dependencies**: checks every program, font, and service the bar uses
+  and gives one `pacman -S` line for what is missing. The same list drives
+  `scripts/install-deps.sh`.
+- **Display**: resolution, refresh rate, and 8/10-bit color per monitor,
+  from the modes the monitor reports. Apply tries the mode and asks you to
+  keep it; it goes back on its own after 15 seconds. Saving it for good
+  needs the marker described in [Hyprland setup](hyprland.md#display).
+- **Transparency**: one opacity for every app, plus per-app overrides with
+  focused and unfocused levels. Add an app from the open windows or by its
+  class. The Settings and Inspector windows, Tack pins, and fullscreen
+  windows always stay solid. Needs one line in your Hyprland config; see
+  [Hyprland setup](hyprland.md#transparency).
+
+## Tools
+
+- **Capture**: setup for `~/.local/bin/capture-screenshot` and
+  `~/.local/bin/ocr-region` (folder, editor, freeze, OCR languages, a
+  program for OCR text). Apply writes `~/.config/hypr/capture.conf`. Your
+  capture keybinds are listed read-only.
+- **Screensaver**: the program run after idle, idle time, whether it
+  starts over fullscreen video, the look, and brightness. Needs
+  `~/.local/bin/screensaver-config.sh`.
+
+## Where settings are saved
+
+- `state/bar-layout.json`: everything set in Settings.
+- `state/theme.json`: the active theme and the stat and audio thresholds.
+- `~/.config/freshrss-quickshell/freshrss.env`: the FreshRSS server.
+
+`state/` is ignored by git.
