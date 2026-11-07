@@ -40,7 +40,7 @@ Opened from a keybind, a menu appears on the main monitor (see
 | `notificationBell toggleHistory` · `showHistory` · `hideHistory` | Notification history |
 | `notificationBell toggleDoNotDisturb` | Do not disturb (built-in, SwayNC, dunst, or mako) |
 
-## Caffeine, Night Light, recorder, firewall
+## Caffeine, Night Light, recorder, firewall, battery, brightness
 
 | Call | Does |
 |---|---|
@@ -55,6 +55,9 @@ Opened from a keybind, a menu appears on the main monitor (see
 | `recorder status` | Recording time and file, or the last file saved |
 | `firewall status` | On or off, default policies, rule count |
 | `firewall enable` · `disable` · `toggle` | Change the firewall (asks for your password) |
+| `battery status` | Level, charging, time left, power profile |
+| `battery setProfile <name>` · `cycleProfile` | Power profile: `power-saver`, `balanced`, `performance` |
+| `brightness status` · `set <percent>` · `up` · `down` | Built-in screen brightness (good for the brightness keys) |
 
 These work whether or not the widgets are on a bar.
 
@@ -90,4 +93,11 @@ hl.bind("SUPER + COMMA",       hl.dsp.exec_cmd("qs ipc call settings toggle"))
 hl.bind("SUPER + N",           hl.dsp.exec_cmd("qs ipc call notificationBell toggleHistory"))
 hl.bind("SUPER + SHIFT + R",   hl.dsp.exec_cmd("qs ipc call recorder toggle"))
 hl.bind("SUPER + SHIFT + C",   hl.dsp.exec_cmd("qs ipc call caffeine toggle"))
+```
+
+On a laptop, the brightness keys:
+
+```lua
+hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("qs ipc call brightness up"))
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("qs ipc call brightness down"))
 ```

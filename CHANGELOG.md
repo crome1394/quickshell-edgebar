@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Laptop widgets, on by default and hidden on machines without the hardware: **Battery** (UPower: level, charging, time left; click steps the power profile) and **Brightness** (built-in panel; wheel and click; set through logind, no root). `qs ipc call battery status|setProfile <name>|cycleProfile` and `qs ipc call brightness status|set <pct>|up|down`. New: `services/BatteryService.qml`, `services/BrightnessService.qml`, `pills/BatteryPill.qml`, `pills/BrightnessPill.qml`; `upower` and (optional, default No) `power-profiles-daemon` in the dependency list.
 - Settings, Inspector, and FreshRSS open no larger than the focused screen (less `Theme.windowScreenMargin`), so they fit a 1366×768 laptop; their minimum sizes shrink with them. `ScreenService.fitWindow()`.
 - System Stats reads AMD (busy percent, VRAM, temperature) and Intel (load estimated from the clock) GPUs from `/sys`, no process; NVIDIA still uses `nvidia-smi`. Widgets → System Stats → Graphics card picks the card; Auto takes the only one, or on a hybrid laptop the one that drives the screen, so the discrete GPU can sleep (the page warns when your choice keeps it awake). New: `services/GpuService.qml`. The installer and the dependency list offer `nvidia-utils` only on machines with an NVIDIA card.
 - Screen Recorder: a new Auto codec (the default) reads `gpu-screen-recorder --info` once and records AV1 when the GPU encodes it, else HEVC, else H.264, so older NVIDIA, AMD, and Intel GPUs work out of the box. Recording marks codecs this GPU cannot encode.

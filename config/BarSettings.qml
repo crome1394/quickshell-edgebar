@@ -21,6 +21,8 @@ Singleton {
         nightLight: "showNightLightPill",
         recorder: "showRecorderPill",
         firewall: "showFirewallPill",
+        battery: "showBatteryPill",
+        brightness: "showBrightnessPill",
         workspaces: "showWorkspacesPill",
         stats: "showStatsWidget",
         tray: "showTrayPill",

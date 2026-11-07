@@ -98,6 +98,8 @@ Singleton {
     property alias showNightLightPill: data.showNightLightPill
     property alias showRecorderPill: data.showRecorderPill
     property alias showFirewallPill: data.showFirewallPill
+    property alias showBatteryPill: data.showBatteryPill
+    property alias showBrightnessPill: data.showBrightnessPill
     // Caffeine: 0 off, -1 on until turned off, else when it ends (ms since epoch).
     property alias caffeineUntil: data.caffeineUntil
     // Night light (NightLightSettings): Kelvin, schedule on/off, and HH:MM times.
@@ -540,6 +542,9 @@ Singleton {
             property bool showNightLightPill: false
             property bool showRecorderPill: false
             property bool showFirewallPill: false
+            // On by default: each hides itself without a battery or backlight.
+            property bool showBatteryPill: true
+            property bool showBrightnessPill: true
             property real caffeineUntil: 0
             property int nightTemp: 0
             property bool nightSchedule: false
