@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import qs.bar
+import qs.components
 import qs.config
 import qs.panels
 import qs.services
@@ -21,6 +22,9 @@ ShellRoot {
     // Registers the FreshRSS IPC target and reads its env file. Nothing
     // polls until the pill is on a bar or the reader is open.
     property bool freshRssWatch: FreshRssService.envLoaded
+
+    // The one tooltip window every bar widget shares (TipService).
+    BarTipHost {}
 
     // A bar that is turned off is not created, so its widgets do not load.
     Loader {
