@@ -37,6 +37,13 @@ Singleton {
     property alias specialBold: data.wsSpecialBold
     property alias specialItalic: data.wsSpecialItalic
     property alias specialColor: data.wsSpecialColor
+    // Workspace colors: "theme", "custom", or "" (custom when a face has
+    // a color, else theme). Custom colors: "" falls back to the theme.
+    property alias wsColorMode: data.wsColorMode
+    property alias wsActiveBg: data.wsActiveBg
+    property alias wsActiveFg: data.wsActiveFg
+    property alias wsIdleFg: data.wsIdleFg
+    property alias wsHoverFg: data.wsHoverFg
     property alias slotsJson: data.wsSlotsJson
 
     property alias barLayoutMode: data.barLayoutMode
@@ -437,6 +444,11 @@ Singleton {
             property bool wsSpecialBold: true
             property bool wsSpecialItalic: false
             property string wsSpecialColor: ""
+            property string wsColorMode: ""
+            property string wsActiveBg: ""
+            property string wsActiveFg: ""
+            property string wsIdleFg: ""
+            property string wsHoverFg: ""
             property var wsSlotsJson: []
 
             property string barLayoutMode: "dual"

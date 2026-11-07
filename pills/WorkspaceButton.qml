@@ -16,6 +16,11 @@ Rectangle {
     required property bool bold
     required property bool italic
     required property string labelColor
+    // Custom workspace colors (Bar → Workspaces → Colors); "" uses the theme.
+    property string activeBg: ""
+    property string activeFg: ""
+    property string idleFg: ""
+    property string hoverFg: ""
     required property bool showNumber
     required property var theme
     property string edge: "top"
@@ -33,7 +38,7 @@ Rectangle {
     implicitWidth: Math.max(
         Math.round(Theme.wsButtonWidth * root.ui),
         Math.min(Math.round(Theme.wsButtonWidth * 4 * root.ui), face.implicitWidth + Math.round(Theme.wsInnerPad * root.ui)))
-    color: root.active ? root.theme.colWsActive : (root.hovered ? root.theme.colHover : "transparent")
+    color: root.active ? (root.activeBg.length ? root.activeBg : root.theme.colWsActive) : (root.hovered ? root.theme.colHover : "transparent")
     border.width: (root.active || root.hovered) ? Theme.borderWidth : 0
     border.color: root.active ? root.theme.colAccent : root.theme.colBorder
     z: Math.round((dock.mag - 1) * 24)
@@ -64,10 +69,10 @@ Rectangle {
 
     function stateColor() {
         if (root.active)
-            return root.theme.colWsActiveFg
+            return root.activeFg.length ? root.activeFg : root.theme.colWsActiveFg
         if (root.hovered)
-            return root.theme.colAccent
-        return root.theme.colWsIdleFg
+            return root.hoverFg.length ? root.hoverFg : root.theme.colAccent
+        return root.idleFg.length ? root.idleFg : root.theme.colWsIdleFg
     }
 
     Row {

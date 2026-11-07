@@ -523,6 +523,17 @@ Item {
 
                 SectionHeader {
                     width: parent.width
+                    title: "Colors"
+                    hint: "Follow the theme, or use your own colors. Saves at once."
+                }
+
+                WsColors {
+                    x: Theme.sectionInset
+                    width: parent.width - Theme.sectionInset * 2
+                }
+
+                SectionHeader {
+                    width: parent.width
                     title: "Workspaces"
                 }
 
