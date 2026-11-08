@@ -15,7 +15,9 @@ hl.bind("SUPER + R", hl.dsp.exec_cmd("qs ipc call freshRss toggle"))
 | Call | Does |
 |---|---|
 | `settings open` · `close` · `toggle` | Settings window |
-| `settings openTab <tab> <section>` | Jump to a page, e.g. `openTab applications freshrss`. Use `""` for no section |
+| `settings openTab <tab> <section>` | Jump to a page, e.g. `openTab applications freshrss`. Use `""` for no section; an unknown tab or section is refused with the valid names |
+| `settings listTabs` | Every tab and its sections, one tab per line |
+| `settings currentTab` | The open tab, or `closed` |
 | `inspector toggle` · `open` · `close` | [Inspector](inspector.md) |
 | `inspector openTab bindings\|system` | Inspector on a tab |
 | `freshRss toggle` · `open` · `close` | [FreshRSS](freshrss.md) reader |
@@ -29,8 +31,8 @@ hl.bind("SUPER + R", hl.dsp.exec_cmd("qs ipc call freshRss toggle"))
 Settings tab ids: `bar`, `widgets`, `appearance`, `applications`,
 `connectivity`, `audio`, `notifications`, `region`, `system`, `tools`.
 `theme` and `wallpaper` still work and open those sections of Appearance.
-Notifications has the sections `notifications` and `osd`
-(`openTab notifications osd`).
+`qs ipc call settings listTabs` prints every tab with its sections, e.g.
+`notifications: notifications osd` (so `openTab notifications osd`).
 
 ## Menus (while the widget is on a bar)
 

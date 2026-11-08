@@ -125,13 +125,26 @@ Singleton {
         return root.statMetricIds.indexOf(String(id || "")) >= 0
     }
 
-    // Entries the current System Stats mode does not draw. They keep their
-    // place in the layout, so switching modes back restores it.
+    // The separate Speaker and Microphone widgets.
+    readonly property var audioPartIds: ["audioOut", "audioIn"]
+
+    function isAudioPart(id) {
+        return root.audioPartIds.indexOf(String(id || "")) >= 0
+    }
+
+    // Entries the current System Stats or Audio mode does not draw. They
+    // keep their place in the layout, so switching modes back restores it.
     function parked(id) {
         const key = String(id || "")
-        if (Config.statsCombined)
-            return root.isStatMetric(key)
-        return key === "stats"
+        if (root.isStatMetric(key))
+            return Config.statsCombined
+        if (key === "stats")
+            return !Config.statsCombined
+        if (root.isAudioPart(key))
+            return Config.audioCombined
+        if (key === "volume")
+            return !Config.audioCombined
+        return false
     }
 
     function buildCatalog() {
@@ -162,6 +175,8 @@ Singleton {
             { id: "clock", label: "Clock" },
             { id: "notifications", label: "Notifications" },
             { id: "volume", label: "Audio" },
+            { id: "audioOut", label: "Audio · Speaker" },
+            { id: "audioIn", label: "Audio · Microphone" },
             { id: "hyprInsp", label: "Inspector" },
             { id: "controlBar", label: "Config Menu Icon" },
             { id: "tailscale", label: "Tailscale" },
@@ -179,6 +194,8 @@ Singleton {
             { id: "tray", zone: "bottom" },
             { id: "notifications", zone: "bottom" },
             { id: "volume", zone: "bottom" },
+            { id: "audioOut", zone: "bottom" },
+            { id: "audioIn", zone: "bottom" },
             { id: "power", zone: "bottom" },
             { id: "hyprInsp", zone: "bottom" },
             { id: "stats", zone: "bottom" },
@@ -256,7 +273,7 @@ Singleton {
             || key === "tailscale" || key === "hyprInsp" || key === "freshRss" || key === "clipboard"
             || key === "caffeine" || key === "nightLight" || key === "recorder" || key === "firewall"
             || key === "battery" || key === "brightness"
-            || root.isStatMetric(key) || root.isLauncherId(key)
+            || root.isStatMetric(key) || root.isAudioPart(key) || root.isLauncherId(key)
     }
 
     function labelFor(id) {
@@ -317,8 +334,12 @@ Singleton {
             if (seen[id])
                 continue
             seen[id] = true
-            // A missing metric widget starts next to System Stats.
-            const after = root.isStatMetric(id) ? root.lastStatIndex(out) : -1
+            // A missing split widget starts next to its combined one.
+            let after = -1
+            if (root.isStatMetric(id))
+                after = root.lastGroupIndex(out, ["stats"].concat(root.statMetricIds))
+            else if (root.isAudioPart(id))
+                after = root.lastGroupIndex(out, ["volume"].concat(root.audioPartIds))
             if (after >= 0)
                 out.splice(after + 1, 0, { id: id, zone: out[after].zone })
             else
@@ -327,11 +348,11 @@ Singleton {
         return out
     }
 
-    // Index of the last System Stats entry (combined or per metric), or -1.
-    function lastStatIndex(list) {
+    // Index of the last entry whose id is in ids, or -1.
+    function lastGroupIndex(list, ids) {
         let at = -1
         for (let i = 0; i < list.length; i++) {
-            if (list[i].id === "stats" || root.isStatMetric(list[i].id))
+            if (ids.indexOf(list[i].id) >= 0)
                 at = i
         }
         return at

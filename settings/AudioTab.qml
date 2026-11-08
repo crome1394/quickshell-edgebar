@@ -67,7 +67,9 @@ Item {
             SectionHeader {
                 width: parent.width
                 title: "On the bar"
-                hint: "Right-click a side to mute it. The wheel changes that side. The pill stays off until you enable Audio under Widgets and press Apply."
+                hint: AudioSettings.editor.value.combined
+                    ? "Right-click a side to mute it. The wheel changes that side. The pill stays off until you enable Audio under Widgets and press Apply."
+                    : "Speaker and Microphone are separate widgets. Turn them on and place them under Widgets → Bars. Right-click mutes; the wheel changes the volume."
             }
 
             Item {
@@ -79,6 +81,15 @@ Item {
                     x: Theme.sectionInset
                     width: parent.width - Theme.sectionInset * 2
                     spacing: Theme.space
+
+                    CheckRow {
+                        width: parent.width
+                        title: "Combine into one widget"
+                        detail: "Off: Speaker and Microphone are separate widgets you can place on any bar"
+                        tip: "One Audio pill, or a Speaker widget and a Microphone widget on the Bars page"
+                        checked: AudioSettings.editor.value.combined
+                        onToggled: AudioSettings.editor.set("combined", !AudioSettings.editor.value.combined)
+                    }
 
                     Text {
                         width: parent.width
@@ -498,9 +509,9 @@ Item {
         anchors.bottom: parent.bottom
         applyEnabled: AudioSettings.editor.dirty
         undoEnabled: AudioSettings.editor.canUndo
-        applyTip: "Save the scroll step, the percent, the volume limit, the meters, and the level threshold steps and colors"
+        applyTip: "Save the layout choice, the scroll step, the percent, the volume limit, the meters, and the level threshold steps and colors"
         undoTip: "Drop an unsaved draft, or put back the last applied one"
-        resetTip: "Restore a step of " + Theme.volumeStep + ", the percent, no volume limit, both meters on, and the theme level colors. Apply saves it."
+        resetTip: "Restore one combined pill, a step of " + Theme.volumeStep + ", the percent, no volume limit, both meters on, and the theme level colors. Apply saves it."
         onApplyClicked: AudioSettings.editor.apply()
         onUndoClicked: AudioSettings.editor.undo()
         onResetClicked: AudioSettings.editor.reset()

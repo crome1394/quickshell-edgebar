@@ -17,7 +17,7 @@ not loaded at all. Tooltips open outside the bar, away from the edge.
 | **App Launcher** (up to 4) | Your pinned apps in one pill | Launch; a dot marks running apps |
 | **Application Menu** | A symbol or an SVG/PNG image | Runs your command |
 | **System Stats** | CPU, memory, GPU, VRAM: bar, percent, second value. One pill, or one widget per metric (Widgets → System Stats → Combine into one widget). NVIDIA, AMD, or Intel (load estimated from the clock, no VRAM) | Each group runs a command (btop, nvtop by default) |
-| **Audio** | Speaker and microphone levels | Left: menu. Right: mute that side. Wheel: volume |
+| **Audio** | Speaker and microphone levels. One pill, or separate Speaker and Microphone widgets (Audio → Combine into one widget) | Left: menu. Right: mute that side. Wheel: volume |
 | **Notifications** | Bell with a count | Left: history. Right: do not disturb |
 | **Tailscale** | The Tailscale mark (dim when off) | Left: menu. Right: on/off |
 | **Inspector** | A search icon | Opens the [Inspector](inspector.md) |

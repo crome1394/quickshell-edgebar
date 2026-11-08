@@ -6,6 +6,8 @@ import qs.services
 import qs.theme
 
 // Speaker | microphone. Loaded only while the Audio widget is on the bar.
+// With Audio → "Combine into one widget" off, the Speaker and Microphone
+// widgets each load this with part "out" or "in" and draw only that side.
 // Levels come from AudioLevels, which keeps its own node copies.
 Rectangle {
     id: root
@@ -16,7 +18,9 @@ Rectangle {
 
     property string tipText: "Audio"
     property string screenName: ""
-    readonly property bool menuOpen: AudioMenuService.open && ScreenService.owns(AudioMenuService.screen, root.screenName)
+    // "both", "out" (speaker only), or "in" (microphone only).
+    property string part: "both"
+    readonly property bool menuOpen: AudioMenuService.shownBy(root.screenName, root.part)
     property bool dockHot: dock.mag > 1.01 || Math.abs(dock.jumpY) > 0.5
 
     readonly property real ui: WidgetService.uiScale
@@ -78,6 +82,7 @@ Rectangle {
         spacing: root.gap
 
         Item {
+            visible: root.part !== "in"
             width: outFace.implicitWidth
             height: root.cell
 
@@ -141,7 +146,7 @@ Rectangle {
                 onClicked: (mouse) => {
                     dock.play()
                     if (mouse.button === Qt.LeftButton)
-                        AudioMenuService.toggle(root.screenName)
+                        AudioMenuService.toggle(root.screenName, root.part)
                     else
                         levels.toggleMute("out")
                 }
@@ -154,6 +159,7 @@ Rectangle {
         }
 
         Text {
+            visible: root.part === "both"
             anchors.verticalCenter: parent.verticalCenter
             text: "|"
             color: root.theme.colFgMuted
@@ -162,6 +168,7 @@ Rectangle {
         }
 
         Item {
+            visible: root.part !== "out"
             width: inFace.implicitWidth
             height: root.cell
 
@@ -225,7 +232,7 @@ Rectangle {
                 onClicked: (mouse) => {
                     dock.play()
                     if (mouse.button === Qt.LeftButton)
-                        AudioMenuService.toggle(root.screenName)
+                        AudioMenuService.toggle(root.screenName, root.part)
                     else
                         levels.toggleMute("in")
                 }

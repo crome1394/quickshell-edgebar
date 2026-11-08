@@ -30,7 +30,8 @@ Item {
         || cell.widgetId === "freshRss" || cell.widgetId === "clipboard"
         || cell.widgetId === "caffeine" || cell.widgetId === "nightLight" || cell.widgetId === "recorder"
         || cell.widgetId === "firewall" || cell.widgetId === "battery" || cell.widgetId === "brightness"
-        || WidgetService.isStatMetric(cell.widgetId) || WidgetService.isLauncherId(cell.widgetId)
+        || WidgetService.isStatMetric(cell.widgetId) || WidgetService.isAudioPart(cell.widgetId)
+        || WidgetService.isLauncherId(cell.widgetId)
     // An empty launcher, stats with every section off, or a battery or
     // brightness widget on a machine without one stays unloaded.
     readonly property bool shown: {
@@ -85,7 +86,8 @@ Item {
             edge: cell.edge
         }
         // Pills whose menu state is shared need to know their monitor.
-        if (cell.widgetId === "volume" || cell.widgetId === "opacity" || cell.widgetId === "notifications")
+        if (cell.widgetId === "volume" || cell.widgetId === "opacity" || cell.widgetId === "notifications"
+                || WidgetService.isAudioPart(cell.widgetId))
             props.screenName = cell.screenName
         if (cell.widgetId === "tray")
             file = "TrayPill.qml"
@@ -103,6 +105,10 @@ Item {
             file = "NotificationPill.qml"
         else if (cell.widgetId === "volume")
             file = "AudioPill.qml"
+        else if (WidgetService.isAudioPart(cell.widgetId)) {
+            file = "AudioPill.qml"
+            props.part = cell.widgetId === "audioIn" ? "in" : "out"
+        }
         else if (cell.widgetId === "tailscale")
             file = "TailscalePill.qml"
         else if (cell.widgetId === "hyprInsp")

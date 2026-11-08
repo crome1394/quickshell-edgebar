@@ -69,7 +69,10 @@ Nothing on those pages is saved until Apply.
 
 ## Audio
 
-Scroll step, show percent, volume limit, meters on/off, the speaker and
+**Combine into one widget** (on by default; off makes Speaker and
+Microphone separate widgets to turn on and place under Widgets → Bars,
+each opening the audio menu from where it sits), scroll step, show
+percent, volume limit, meters on/off, the speaker and
 microphone threshold steps and colors, and the live output and input
 devices.
 

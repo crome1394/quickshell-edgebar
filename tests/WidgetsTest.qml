@@ -7,7 +7,8 @@ import "tests"
 
 // Caffeine steps and IPC limits, the night light schedule window, the
 // recorder's argv (fixed values only, never a shell), the System Stats
-// widget layout and text style, and the shared stats sampler.
+// widget layout and text style, the shared stats sampler, and the split
+// Audio widgets and their menu.
 ShellRoot {
     Check { id: t }
 
@@ -64,6 +65,25 @@ ShellRoot {
         t.eq("a placed metric keeps its bar", kept[0], { id: "statGpu", zone: "left" })
         t.eq("one mode parks the other", W.parked("stats") !== W.parked("statCpu"), true)
         t.eq("combined is the default", StatsSettings.normalize({}).combined, true)
+
+        // Audio: Speaker and Microphone start beside the combined pill.
+        const al = W.normalizeLayout([{ id: "volume", zone: "right" }, { id: "clock", zone: "right" }], false)
+        t.eq("audio parts follow Audio", al.slice(0, 4).map(e => e.id), ["volume", "audioOut", "audioIn", "clock"])
+        t.eq("and share its bar", al[2].zone, "right")
+        t.eq("one audio mode parks the other", W.parked("volume") !== W.parked("audioOut"), true)
+        t.eq("audio combined by default", AudioSettings.normalize({}).combined, true)
+
+        // Only the pill that opened the audio menu shows it.
+        const M = AudioMenuService
+        M.toggle("A", "in")
+        t.eq("mic click: mic pill shows it", [M.shownBy("A", "in"), M.shownBy("A", "out")], [true, false])
+        M.toggle("A", "out")
+        t.eq("speaker click moves it", [M.shownBy("A", "in"), M.shownBy("A", "out"), M.open], [false, true, true])
+        M.toggle("A", "out")
+        t.eq("same pill again closes it", M.open, false)
+        M.show("A")
+        t.eq("IPC: combined or speaker pill", [M.shownBy("A", "both"), M.shownBy("A", "out"), M.shownBy("A", "in")], [true, true, false])
+        M.hide()
 
         // Text Style: All is complete; a metric holds only what it overrides.
         const Y = StatStyle

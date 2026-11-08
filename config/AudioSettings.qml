@@ -3,7 +3,8 @@ import QtQuick
 import Quickshell
 import qs.theme
 
-// Audio page: scroll step, the percent readout, the audio menu's level
+// Audio page: one pill or separate Speaker and Microphone widgets, scroll
+// step, the percent readout, the audio menu's level
 // meters, and the level thresholds.
 // The thresholds and colors are saved in state/theme.json by Theme.
 Singleton {
@@ -84,6 +85,7 @@ Singleton {
 
     function normalize(src) {
         return {
+            combined: src.combined !== false,
             step: root.scrollNorm(src.step),
             percent: src.percent !== false,
             limit100: src.limit100 === true,
@@ -95,6 +97,7 @@ Singleton {
 
     function snapshot() {
         return root.normalize({
+            combined: Config.audioCombined,
             step: Config.audioScrollStep,
             percent: Config.audioShowPercent,
             limit100: Config.audioLimit100,
@@ -105,12 +108,13 @@ Singleton {
     }
 
     function defaults() {
-        return { step: Theme.volumeStep, percent: true, limit100: false, meterStreams: true, meterDevices: true, tiers: ThemeStore.defaultAudioVisual() }
+        return { combined: true, step: Theme.volumeStep, percent: true, limit100: false, meterStreams: true, meterDevices: true, tiers: ThemeStore.defaultAudioVisual() }
     }
 
     function commit(snap) {
         const clean = root.normalize(snap)
         Config.saveFields(() => {
+            Config.audioCombined = clean.combined
             Config.audioScrollStep = clean.step
             Config.audioShowPercent = clean.percent
             Config.audioLimit100 = clean.limit100

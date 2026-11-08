@@ -124,6 +124,9 @@ Singleton {
     property alias showWorkspacesPill: data.showWorkspacesPill
     property alias showStatsWidget: data.showStatsWidget
     property alias statsCombined: data.statsCombined
+    property alias audioCombined: data.audioCombined
+    property alias showSpeakerPill: data.showSpeakerPill
+    property alias showMicPill: data.showMicPill
     property alias showStatCpuPill: data.showStatCpuPill
     property alias showStatMemPill: data.showStatMemPill
     property alias showStatGpuPill: data.showStatGpuPill
@@ -581,6 +584,10 @@ Singleton {
             property bool showStatsWidget: false
             // One System Stats pill, or a widget per metric (the *Pill flags).
             property bool statsCombined: true
+            // One Audio pill, or Speaker and Microphone widgets (the *Pill flags).
+            property bool audioCombined: true
+            property bool showSpeakerPill: true
+            property bool showMicPill: true
             property bool showStatCpuPill: true
             property bool showStatMemPill: true
             property bool showStatGpuPill: true

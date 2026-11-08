@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Audio → **Combine into one widget** (on by default). Off, Speaker and Microphone are separate widgets (Audio · Speaker, Audio · Microphone) to turn on and place on any bar; positions are kept in both modes, and only the pill you click opens the audio menu (`AudioMenuService.owner`).
+- Settings IPC: `qs ipc call settings listTabs` lists every tab and its sections, `currentTab` names the open one, and `openTab` refuses an unknown section with the valid names instead of ignoring it.
+
 - **On-Screen Display**, replacing swayosd: a themed popup for volume and mute, a new output device, the microphone, new tracks (title, artist, cover), play and pause, and laptop brightness. It reacts to any change (keys, the bar's sliders, other apps) by PipeWire and MPRIS signals, with no polling, and its window exists only while it shows. Settings → Notifications → **On-Screen Display** sets the events, place, size, timeout, glass, colors, border, cover art, every symbol, and the sound (theme sound, your own file through `pw-play`, or off). `qs ipc call osd preview volume|mic|track|brightness`. The bar no longer calls `swayosd-client`; volume keys can be plain `wpctl` binds. New: `panels/OsdHost.qml`, `panels/OsdPanel.qml`, `services/OsdService.qml`, `config/OsdSettings.qml`, `settings/OsdTab.qml`, `settings/OsdIconOptions.qml`, `settings/OsdSoundOptions.qml`. The old Notifications page is now its first section (`settings/NotificationPopupsTab.qml`).
 
 - System Stats → **Text Style**: pick All widgets or one metric (CPU, Memory, GPU, VRAM) and a part (Label, Percent, Value), then set font, bold, italic, size, and color (Value color replaces the temperature colors; Percent keeps its threshold color). Metrics follow All for anything they do not set. Your old stats font becomes All. Saved in `statStyleJson`; new `config/StatStyle.qml`, `settings/StatStyleEditor.qml`. The page's Misc section is now **Click Commands**.

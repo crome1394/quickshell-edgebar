@@ -70,6 +70,32 @@ FloatingWindow {
         search.closeSearch()
     }
 
+    // Each tab's sections, for openTab and listTabs. Keep in step with the
+    // sub-tabs each page shows (its applyReveal()).
+    readonly property var tabSections: ({
+        bar: ["workspaces", "overview", "dock"],
+        widgets: ["bars", "activewindow", "stats"],
+        appearance: ["theme", "wallpaper"],
+        applications: ["launcher", "menu", "freshrss"],
+        connectivity: ["network", "bluetooth"],
+        audio: [],
+        notifications: ["notifications", "osd"],
+        region: ["region", "clock"],
+        system: ["dependencies", "display", "transparency"],
+        tools: ["capture", "screensaver", "recording", "nightlight", "clipboard"]
+    })
+
+    // One line per tab: "widgets: bars activewindow stats".
+    function tabList() {
+        const list = tabs.model
+        const lines = []
+        for (let i = 0; i < list.length; i++) {
+            const parts = window.tabSections[list[i].id] || []
+            lines.push(list[i].id + (parts.length ? ": " + parts.join(" ") : ""))
+        }
+        return lines.join("\n")
+    }
+
     // True when `tab` is one of the tab ids along the bottom.
     function knownTab(tab) {
         const list = tabs.model
@@ -88,11 +114,11 @@ FloatingWindow {
         item.revealSerial = window.revealTab === tab ? window.revealSerial : 0
     }
 
-    // qs ipc call settings open
-    // qs ipc call settings openTab applications menu
-    // Tab ids: bar, widgets, appearance (theme, wallpaper), applications, connectivity, audio,
-    // notifications (notifications, osd), region, system, tools. The section is optional ("" for none)
-    // and each tab ignores sections it does not have.
+    // qs ipc call settings open | close | toggle
+    // qs ipc call settings openTab applications menu   a tab and section ("" for none)
+    // qs ipc call settings listTabs                    every tab and its sections
+    // qs ipc call settings currentTab                  "tab" or "closed"
+    // Sections are listed in tabSections; an unknown one is refused.
     IpcHandler {
         target: "settings"
 
@@ -120,10 +146,21 @@ FloatingWindow {
                 id = "appearance"
             }
             if (!window.knownTab(id))
-                return "unknown tab: " + id
-            window.jump(id, /^[A-Za-z0-9_-]{0,40}$/.test(part) ? part : "")
+                return "unknown tab: " + id + " (qs ipc call settings listTabs)"
+            const parts = window.tabSections[id] || []
+            if (part.length && parts.indexOf(part) < 0)
+                return "unknown section for " + id + ": " + part + (parts.length ? " (sections: " + parts.join(", ") + ")" : " (it has none)")
+            window.jump(id, part)
             window.show()
             return "ok"
+        }
+
+        function listTabs(): string {
+            return window.tabList()
+        }
+
+        function currentTab(): string {
+            return window.visible ? window.currentTab : "closed"
         }
     }
 

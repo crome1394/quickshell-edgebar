@@ -37,6 +37,8 @@ Singleton {
         clock: "showClockPill",
         notifications: "showNotificationPill",
         volume: "showVolumePill",
+        audioOut: "showSpeakerPill",
+        audioIn: "showMicPill",
         hyprInsp: "showHyprInspPill",
         controlBar: "showControlBarPill",
         tailscale: "showTailscalePill",
