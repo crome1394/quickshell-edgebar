@@ -2,11 +2,12 @@ import QtQuick
 import Quickshell
 import qs.config
 import qs.services
+import qs.theme
 import "tests"
 
 // Caffeine steps and IPC limits, the night light schedule window, the
 // recorder's argv (fixed values only, never a shell), the System Stats
-// widget layout, and the shared stats sampler.
+// widget layout and text style, and the shared stats sampler.
 ShellRoot {
     Check { id: t }
 
@@ -63,6 +64,21 @@ ShellRoot {
         t.eq("a placed metric keeps its bar", kept[0], { id: "statGpu", zone: "left" })
         t.eq("one mode parks the other", W.parked("stats") !== W.parked("statCpu"), true)
         t.eq("combined is the default", StatsSettings.normalize({}).combined, true)
+
+        // Text Style: All is complete; a metric holds only what it overrides.
+        const Y = StatStyle
+        const base = { font: "Inter", bold: false, italic: true, size: 120, color: "auto" }
+        const st = Y.norm({ cpu: { value: { color: "#ff0000", junk: 1 } } }, base)
+        t.eq("All takes the older font setting", st.all.label, base)
+        t.eq("a metric keeps only its overrides", st.cpu.value, { color: "#ff0000" })
+        t.eq("effective: All, then the override", Y.effective(st, "cpu", "value"), { font: "Inter", bold: false, italic: true, size: 120, color: "#ff0000" })
+        t.eq("other metrics follow All", Y.effective(st, "gpu", "value").color, "auto")
+        t.eq("percent color stays auto", Y.norm({ all: { percent: { color: "#00ff00" } } }, base).all.percent.color, "auto")
+        t.eq("bad color is auto", Y.fieldNorm("color", "javascript:"), "auto")
+        const sized = Y.edited(st, "mem", "label", "size", 999)
+        t.eq("size is clamped", sized.mem.label.size, Theme.clockFontMax)
+        t.eq("overrides listed", Y.overrides(sized, "mem", "label"), ["size"])
+        t.eq("Use All drops them", Y.overrides(Y.edited(sized, "mem", "label"), "mem", "label"), [])
 
         // The shared sampler runs only while held; GPU only while asked for.
         const S = StatsService

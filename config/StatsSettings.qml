@@ -4,7 +4,7 @@ import Quickshell
 import qs.theme
 
 // Widgets → System Stats: one pill or a widget per metric, which sections
-// the pill draws, its font, the
+// the pill draws, its text style (see StatStyle), the
 // terminal and the left/right click commands, and the color thresholds.
 // Thresholds and colors are saved in state/theme.json by Theme.
 Singleton {
@@ -30,8 +30,51 @@ Singleton {
         return root.terminalNorm(Config.statTerminal)
     }
 
-    function fontPercentValue() {
-        return Config.fontPercentNorm(Config.statFontPercent)
+    // The one font setting older layouts saved; it seeds Text Style → All.
+    function legacyBase() {
+        return {
+            font: Config.fontClamp(Config.statFont),
+            bold: Config.statBold !== false,
+            italic: !!Config.statItalic,
+            size: Config.fontPercentNorm(Config.statFontPercent),
+            color: "auto"
+        }
+    }
+
+    function styleFrom(text) {
+        const raw = String(text || "").trim()
+        if (raw.length) {
+            try {
+                return StatStyle.norm(JSON.parse(raw), root.legacyBase())
+            } catch (e) {
+            }
+        }
+        return StatStyle.norm({}, root.legacyBase())
+    }
+
+    readonly property var savedStyle: root.styleFrom(Config.statStyleJson)
+
+    // Saved style of one metric's part, for the pills.
+    function styleFor(metric, part) {
+        return StatStyle.effective(root.savedStyle, String(metric || ""), String(part || ""))
+    }
+
+    // Draft style, for the Text Style section. target is "all" or a metric.
+    function draftStyle(target, part) {
+        return StatStyle.effective(root.editor.value.style, target, part)
+    }
+
+    function draftOverrides(target, part) {
+        return StatStyle.overrides(root.editor.value.style, target, part)
+    }
+
+    function setStyle(target, part, field, value) {
+        root.editor.set("style", StatStyle.edited(root.editor.value.style, target, part, field, value))
+    }
+
+    // Drop a metric part's overrides so it follows All again.
+    function clearStyle(target, part) {
+        root.editor.set("style", StatStyle.edited(root.editor.value.style, target, part, undefined, undefined))
     }
 
     // Bar graph width in pixels, before the bar's scale.
@@ -309,10 +352,7 @@ Singleton {
             gaugeWidth: root.gaugeWidthNorm(src.gaugeWidth),
             terminal: root.terminalNorm(src.terminal),
             actions: root.actionsNorm(src.actions),
-            font: Config.fontClamp(src.font),
-            fontPercent: Config.fontPercentNorm(src.fontPercent === undefined ? 100 : src.fontPercent),
-            bold: src.bold !== false,
-            italic: !!src.italic,
+            style: StatStyle.norm(src.style, StatStyle.plainBase()),
             bands: root.bandsFrom(src.bands)
         }
     }
@@ -329,10 +369,7 @@ Singleton {
             gaugeWidth: Config.statGaugeWidth,
             terminal: Config.statTerminal,
             actions: root.savedActions(),
-            font: Config.statFont,
-            fontPercent: root.fontPercentValue(),
-            bold: Config.statBold,
-            italic: Config.statItalic,
+            style: root.savedStyle,
             bands: root.savedVisual()
         })
     }
@@ -349,10 +386,7 @@ Singleton {
             gaugeWidth: Theme.statGaugeWidth,
             terminal: "kitty",
             actions: root.actionsNorm({ cpuLeft: { cmd: "btop", term: true }, gpuLeft: { cmd: "nvtop", term: true } }),
-            font: "",
-            fontPercent: Theme.clockFontDefault,
-            bold: true,
-            italic: false,
+            style: StatStyle.defaults(),
             bands: ThemeStore.defaultStatVisual()
         }
     }
@@ -370,10 +404,7 @@ Singleton {
             Config.statGaugeWidth = clean.gaugeWidth
             Config.statTerminal = clean.terminal
             Config.statActionsJson = JSON.stringify(clean.actions)
-            Config.statFont = clean.font
-            Config.statFontPercent = clean.fontPercent
-            Config.statBold = clean.bold
-            Config.statItalic = clean.italic
+            Config.statStyleJson = JSON.stringify(clean.style)
             Config.statThresholdsJson = ""
         })
         ThemeStore.saveStats(clean.bands)

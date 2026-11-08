@@ -21,7 +21,7 @@ Scope {
                 screen: root.modelData
                 screenName: String(root.modelData.name)
                 edge: "top"
-                theme: Theme.palette
+                theme: Theme.barPalette("top")
                 onOpenSettings: root.openSettings()
             }
         }
@@ -34,7 +34,7 @@ Scope {
                 screen: root.modelData
                 screenName: String(root.modelData.name)
                 edge: "bottom"
-                theme: Theme.palette
+                theme: Theme.barPalette("bottom")
                 onOpenSettings: root.openSettings()
             }
         }
@@ -47,7 +47,7 @@ Scope {
                 screen: root.modelData
                 screenName: String(root.modelData.name)
                 edge: "left"
-                theme: Theme.palette
+                theme: Theme.barPalette("left")
                 onOpenSettings: root.openSettings()
             }
         }
@@ -60,7 +60,7 @@ Scope {
                 screen: root.modelData
                 screenName: String(root.modelData.name)
                 edge: "right"
-                theme: Theme.palette
+                theme: Theme.barPalette("right")
                 onOpenSettings: root.openSettings()
             }
         }

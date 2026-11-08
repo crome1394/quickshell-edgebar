@@ -5,8 +5,10 @@ import qs.services
 import qs.theme
 
 // One metric ("cpu", "mem", "gpu", or "vram") from StatsService, with the
-// saved font, bars, thresholds, and click commands. StatsPill draws four;
-// a StatPill draws one. The owner must hold StatsService (StatsHold).
+// saved text style, bars, thresholds, and click commands. A fixed Value
+// color replaces the temperature colors; unknown values stay muted.
+// StatsPill draws four; a StatPill draws one. The owner must hold
+// StatsService (StatsHold).
 StatGroup {
     id: root
 
@@ -66,6 +68,10 @@ StatGroup {
     valueSample: root.hasTemp ? "100°" : (root.metric === "vram" ? "99.9G" : "100G")
     percentColor: root.knownNow ? root.barColor : root.theme.colFgMuted
     valueColor: {
+        if (!root.knownNow)
+            return root.theme.colFgMuted
+        if (root.valueStyle.color !== "auto")
+            return root.valueStyle.color
         if (root.hasTemp)
             return root.tempKnown ? ThemeStore.statTempColor(root.temp) : root.theme.colFgMuted
         return root.knownNow ? root.theme.colFg : root.theme.colFgMuted
@@ -75,10 +81,10 @@ StatGroup {
     fraction: root.util / 100
     showGauge: Config.showStatGauges
     gaugeWidth: StatsSettings.gaugeWidthValue()
-    faceFont: Config.fontClamp(Config.statFont)
-    faceBold: Config.statBold !== false
-    faceItalic: !!Config.statItalic
-    facePercent: StatsSettings.fontPercentValue()
+    labelStyle: StatsSettings.styleFor(root.metric, "label")
+    percentStyle: StatsSettings.styleFor(root.metric, "percent")
+    valueStyle: StatsSettings.styleFor(root.metric, "value")
+    labelColor: root.labelStyle.color === "auto" ? root.theme.colFg : root.labelStyle.color
     tip: StatsSettings.actionHint(root.group)
 
     onActivated: (button) => {

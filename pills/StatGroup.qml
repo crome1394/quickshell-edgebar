@@ -2,7 +2,9 @@ import QtQuick
 import qs.components
 import qs.theme
 
-// One metric on the System Stats pill: label, optional bar, percent, and value.
+// One metric on the System Stats pill: label, optional bar, percent, and
+// value. Each text part has its own style, { font, bold, italic, size }
+// (see StatStyle); font "" is the bar font.
 Rectangle {
     id: root
 
@@ -24,10 +26,10 @@ Rectangle {
     required property real ui
     required property real widthFactor
     required property string tip
-    property string faceFont: ""
-    property bool faceBold: true
-    property bool faceItalic: false
-    property int facePercent: 100
+    required property color labelColor
+    required property var labelStyle
+    required property var percentStyle
+    required property var valueStyle
 
     signal activated(int button)
 
@@ -35,8 +37,21 @@ Rectangle {
     readonly property bool dockHot: dock.mag > 1.01 || Math.abs(dock.jumpY) > 0.5
 
     readonly property real faceScale: Math.max(0.5, root.ui * root.widthFactor)
-    readonly property string faceFamily: root.faceFont.length ? root.faceFont : root.theme.fontFamily
-    readonly property int px: Theme.barTextPx(root.ui, root.widthFactor, root.facePercent)
+    function family(style) {
+        const name = style && style.font ? String(style.font) : ""
+        return name.length ? name : root.theme.fontFamily
+    }
+
+    function pxOf(style) {
+        return Theme.barTextPx(root.ui, root.widthFactor, style ? style.size : 100)
+    }
+
+    readonly property string labelFamily: root.family(root.labelStyle)
+    readonly property int labelPx: root.pxOf(root.labelStyle)
+    readonly property string percentFamily: root.family(root.percentStyle)
+    readonly property int percentPx: root.pxOf(root.percentStyle)
+    readonly property string valueFamily: root.family(root.valueStyle)
+    readonly property int valuePx: root.pxOf(root.valueStyle)
     readonly property int innerPad: Math.max(3, Math.round(Theme.statInnerPad * root.faceScale))
     readonly property int rowGap: Math.max(3, Math.round(Theme.statRowGap * root.faceScale))
     readonly property int valGap: Math.max(2, Math.round(Theme.statValGap * root.faceScale))
@@ -86,19 +101,19 @@ Rectangle {
 
     TextMetrics {
         id: pctBox
-        font.family: root.faceFamily
-        font.pixelSize: root.px
-        font.bold: root.faceBold
-        font.italic: root.faceItalic
+        font.family: root.percentFamily
+        font.pixelSize: root.percentPx
+        font.bold: !!root.percentStyle.bold
+        font.italic: !!root.percentStyle.italic
         text: root.percentSample
     }
 
     TextMetrics {
         id: valBox
-        font.family: root.faceFamily
-        font.pixelSize: root.px
-        font.bold: root.faceBold
-        font.italic: root.faceItalic
+        font.family: root.valueFamily
+        font.pixelSize: root.valuePx
+        font.bold: !!root.valueStyle.bold
+        font.italic: !!root.valueStyle.italic
         text: root.valueSample
     }
 
@@ -115,11 +130,11 @@ Rectangle {
             Text {
                 id: nameLabel
                 text: root.label
-                color: hit.containsMouse ? root.theme.colAccent : root.theme.colFg
-                font.family: root.faceFamily
-                font.pixelSize: root.px
-                font.bold: root.faceBold
-                font.italic: root.faceItalic
+                color: hit.containsMouse ? root.theme.colAccent : root.labelColor
+                font.family: root.labelFamily
+                font.pixelSize: root.labelPx
+                font.bold: !!root.labelStyle.bold
+                font.italic: !!root.labelStyle.italic
             }
         }
 
@@ -165,10 +180,10 @@ Rectangle {
                     verticalAlignment: Text.AlignVCenter
                     text: root.percentText
                     color: root.percentColor
-                    font.family: root.faceFamily
-                    font.pixelSize: root.px
-                    font.bold: root.faceBold
-                    font.italic: root.faceItalic
+                    font.family: root.percentFamily
+                    font.pixelSize: root.percentPx
+                    font.bold: !!root.percentStyle.bold
+                    font.italic: !!root.percentStyle.italic
                 }
             }
 
@@ -180,9 +195,9 @@ Rectangle {
                     id: barLabel
                     text: "|"
                     color: root.theme.colStatSeparator
-                    font.family: root.faceFamily
-                    font.pixelSize: root.px
-                    font.italic: root.faceItalic
+                    font.family: root.valueFamily
+                    font.pixelSize: root.valuePx
+                    font.italic: !!root.valueStyle.italic
                 }
             }
 
@@ -197,10 +212,10 @@ Rectangle {
                     verticalAlignment: Text.AlignVCenter
                     text: root.valueText
                     color: root.valueColor
-                    font.family: root.faceFamily
-                    font.pixelSize: root.px
-                    font.bold: root.faceBold
-                    font.italic: root.faceItalic
+                    font.family: root.valueFamily
+                    font.pixelSize: root.valuePx
+                    font.bold: !!root.valueStyle.bold
+                    font.italic: !!root.valueStyle.italic
                 }
             }
         }

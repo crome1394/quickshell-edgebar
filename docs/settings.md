@@ -34,8 +34,11 @@ Nothing on those pages is saved until Apply.
   widget** off) CPU, Memory, GPU, and VRAM as separate widgets you turn on
   and place under Bars; which graphics card to read (Auto: the only one, or
   on a laptop the integrated one, so the discrete GPU can sleep; NVIDIA
-  via `nvidia-smi`, AMD from `/sys`, Intel estimated from its clock), font,
-  bold, italic, size, bar graph width, the threshold steps and colors
+  via `nvidia-smi`, AMD from `/sys`, Intel estimated from its clock), bar
+  graph width, **Text Style** (pick All widgets or one metric, and Label,
+  Percent, or Value, then font, bold, italic, size, and color; a metric
+  follows All for anything it does not set, and **Use All** drops its own
+  settings; Auto colors follow the theme, a picked color stays fixed), the threshold steps and colors
   (pick CPU, Memory, GPU, or VRAM from the Thresholds list), and the click commands
   (run directly or in your terminal, never through a shell).
 

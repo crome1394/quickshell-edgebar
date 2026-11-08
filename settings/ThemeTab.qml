@@ -24,6 +24,16 @@ Item {
     readonly property string home: Quickshell.env("HOME") || "/"
 
     property string paintKey: ""
+    // Which bar the Bar glass slider edits; "all" is the theme's bar glass.
+    property string glassEdge: "all"
+    readonly property int edgeGlass: root.glassEdge === "all" || !root.theme.barGlass ? -1 : Number(root.theme.barGlass[root.glassEdge])
+    readonly property var glassChoices: [
+        { id: "all", label: "All bars", tip: "Every bar that has no glass of its own" },
+        { id: "top", label: "Top" + (Config.showTopBar ? "" : " (off)"), tip: "The top bar" },
+        { id: "bottom", label: "Bottom" + (Config.showBottomBar ? "" : " (off)"), tip: "The bottom bar" },
+        { id: "left", label: "Left" + (Config.showLeftBar ? "" : " (off)"), tip: "The left bar" },
+        { id: "right", label: "Right" + (Config.showRightBar ? "" : " (off)"), tip: "The right bar" }
+    ]
     // Which font the picker is choosing: "ui", "bar", or "" (closed).
     property string fontKey: ""
     property string status: ""
@@ -193,15 +203,59 @@ Item {
                     width: parent.width
                     label: "Bar glass"
 
-                    IntSlider {
+                    Column {
                         width: parent.width
-                        from: 0
-                        to: 100
-                        step: Theme.themeGlassStep
-                        value: root.theme.glass
-                        readout: root.theme.glass + "%"
-                        tip: "How solid the bar is. Pills are a little more solid than the bar."
-                        onChanged: (value) => ThemeSettings.setField("glass", value)
+                        spacing: Theme.tabGap
+
+                        Row {
+                            width: parent.width
+                            spacing: Theme.tabGap
+
+                            SelectBox {
+                                width: root.glassEdge === "all" ? parent.width : parent.width - useAllGlass.width - Theme.tabGap
+                                choices: root.glassChoices
+                                currentId: root.glassEdge
+                                emptyLabel: "All bars"
+                                tip: "Which bar the slider sets. A bar with its own value keeps it when All bars changes."
+                                onPicked: (id) => root.glassEdge = id
+                            }
+
+                            ChipButton {
+                                id: useAllGlass
+                                visible: root.glassEdge !== "all"
+                                label: "Use All"
+                                enabled: root.edgeGlass >= 0
+                                opacity: enabled ? 1 : 0.5
+                                tip: "Drop this bar's own glass so it follows All bars"
+                                onClicked: ThemeSettings.setBarGlass(root.glassEdge, -1)
+                            }
+                        }
+
+                        IntSlider {
+                            width: parent.width
+                            from: 0
+                            to: 100
+                            step: Theme.themeGlassStep
+                            value: root.edgeGlass >= 0 ? root.edgeGlass : root.theme.glass
+                            readout: (root.edgeGlass >= 0 ? root.edgeGlass : root.theme.glass) + "%"
+                            tip: "How solid the bar is. Pills are a little more solid than the bar."
+                            onChanged: (value) => {
+                                if (root.glassEdge === "all")
+                                    ThemeSettings.setField("glass", value)
+                                else
+                                    ThemeSettings.setBarGlass(root.glassEdge, value)
+                            }
+                        }
+
+                        Text {
+                            visible: root.glassEdge !== "all"
+                            width: parent.width
+                            wrapMode: Text.WordWrap
+                            text: root.edgeGlass >= 0 ? "Own glass. Saved with this theme." : "Follows All bars. Move the slider to give this bar its own glass."
+                            color: Theme.subtext
+                            font.family: Theme.uiFont
+                            font.pixelSize: Theme.smallPx
+                        }
                     }
                 }
 

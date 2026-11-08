@@ -36,7 +36,6 @@ Item {
     readonly property bool fontReady: FontService.ready
     readonly property var fontNames: FontService.families
 
-    readonly property int styleWidth: Theme.chip + Theme.borderWidth * 4
     readonly property bool wide: width >= Theme.settingsTwoColMin
 
     function openFont() {
@@ -299,8 +298,36 @@ Item {
 
             SectionHeader {
                 width: parent.width
-                title: "Misc"
-                hint: "Font for the pill, and what a left or right click on each group runs. Leave a field empty to do nothing."
+                title: "Text Style"
+                hint: "Pick a widget and a part, then set its font, bold, italic, size, and color. All widgets is the base; a widget follows it for anything it does not set."
+            }
+
+            Item {
+                width: parent.width
+                height: styleEditor.implicitHeight
+
+                StatStyleEditor {
+                    id: styleEditor
+                    x: Theme.sectionInset
+                    width: parent.width - Theme.sectionInset * 2
+                    onFontRequested: root.openFont()
+                    onColorRequested: {
+                        const now = StatsSettings.draftStyle(styleEditor.target, styleEditor.part).color
+                        textColors.selectedColor = now === "auto" ? Theme.text : now
+                        textColors.open()
+                    }
+                }
+            }
+
+            Item {
+                width: parent.width
+                height: Theme.space * 2
+            }
+
+            SectionHeader {
+                width: parent.width
+                title: "Click Commands"
+                hint: "What a left or right click on each group runs. Leave a field empty to do nothing."
             }
 
             Item {
@@ -312,123 +339,6 @@ Item {
                     x: Theme.sectionInset
                     width: parent.width - Theme.sectionInset * 2
                     spacing: Theme.space
-
-                    Row {
-                        id: faceRow
-                        width: parent.width
-                        height: Theme.fieldHeight
-                        spacing: Theme.tabGap
-
-                        Rectangle {
-                            id: fontButton
-                            width: Math.max(Theme.fieldHeight * 4, Math.round((faceRow.width - root.styleWidth * 2 - Theme.tabGap * 3) * 0.46))
-                            height: Theme.fieldHeight
-                            radius: Theme.radiusSm
-                            color: fontMouse.containsMouse ? Theme.hover : Theme.fieldBg
-                            border.width: Theme.borderWidth
-                            border.color: Theme.border
-
-                            Text {
-                                anchors.fill: parent
-                                anchors.leftMargin: Theme.space
-                                anchors.rightMargin: Theme.space
-                                verticalAlignment: Text.AlignVCenter
-                                elide: Text.ElideRight
-                                text: StatsSettings.editor.value.font.length ? StatsSettings.editor.value.font : "Bar font"
-                                color: Theme.text
-                                font.family: StatsSettings.editor.value.font.length ? StatsSettings.editor.value.font : Theme.uiFont
-                                font.pixelSize: Theme.fontPx
-                                font.bold: StatsSettings.editor.value.bold
-                                font.italic: StatsSettings.editor.value.italic
-                            }
-
-                            MouseArea {
-                                id: fontMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: root.openFont()
-
-                                HoverTip {
-                                    message: "Font for the stats pill. Empty uses the bar font."
-                                    show: fontMouse.containsMouse
-                                }
-                            }
-                        }
-
-                        Rectangle {
-                            width: root.styleWidth
-                            height: Theme.fieldHeight
-                            radius: Theme.radiusSm
-                            color: StatsSettings.editor.value.bold ? Theme.accentDim : Theme.fieldBg
-                            border.width: Theme.borderWidth
-                            border.color: StatsSettings.editor.value.bold ? Theme.accent : Theme.border
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: "B"
-                                color: Theme.text
-                                font.bold: true
-                                font.family: Theme.uiFont
-                                font.pixelSize: Theme.fontPx
-                            }
-
-                            MouseArea {
-                                id: boldMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: StatsSettings.editor.set("bold", !StatsSettings.editor.value.bold)
-
-                                HoverTip {
-                                    message: "Bold the stats text"
-                                    show: boldMouse.containsMouse
-                                }
-                            }
-                        }
-
-                        Rectangle {
-                            width: root.styleWidth
-                            height: Theme.fieldHeight
-                            radius: Theme.radiusSm
-                            color: StatsSettings.editor.value.italic ? Theme.accentDim : Theme.fieldBg
-                            border.width: Theme.borderWidth
-                            border.color: StatsSettings.editor.value.italic ? Theme.accent : Theme.border
-
-                            Text {
-                                anchors.centerIn: parent
-                                text: "I"
-                                color: Theme.text
-                                font.italic: true
-                                font.family: Theme.uiFont
-                                font.pixelSize: Theme.fontPx
-                            }
-
-                            MouseArea {
-                                id: italicMouse
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: StatsSettings.editor.set("italic", !StatsSettings.editor.value.italic)
-
-                                HoverTip {
-                                    message: "Italic the stats text"
-                                    show: italicMouse.containsMouse
-                                }
-                            }
-                        }
-
-                        IntSlider {
-                            width: Math.max(Theme.fieldHeight * 4, faceRow.width - fontButton.width - root.styleWidth * 2 - Theme.tabGap * 3)
-                            from: Theme.clockFontMin
-                            to: Theme.clockFontMax
-                            step: Theme.clockFontStep
-                            value: StatsSettings.editor.value.fontPercent
-                            readout: StatsSettings.editor.value.fontPercent + "%"
-                            tip: "Stats text size, from " + Theme.clockFontMin + " to " + Theme.clockFontMax
-                            onChanged: (value) => StatsSettings.editor.set("fontPercent", value)
-                        }
-                    }
 
                     Text {
                         visible: root.actionError.length > 0
@@ -555,9 +465,9 @@ Item {
         anchors.bottom: parent.bottom
         applyEnabled: StatsSettings.editor.dirty
         undoEnabled: StatsSettings.editor.canUndo
-        applyTip: "Save the layout choice, the sections, the font, the click commands, the threshold steps and colors, and the terminal"
+        applyTip: "Save the layout choice, the sections, the text style, the click commands, the threshold steps and colors, and the terminal"
         undoTip: "Drop an unsaved draft, or put back the last applied one"
-        resetTip: "Restore one combined pill, the theme steps and colors, the bar font, all four sections, the bars, kitty, and btop and nvtop on left click. Apply saves it."
+        resetTip: "Restore one combined pill, the theme steps and colors, plain text in the bar font, all four sections, the bars, kitty, and btop and nvtop on left click. Apply saves it."
         onApplyClicked: {
             if (StatsSettings.apply())
                 root.actionError = ""
@@ -582,6 +492,12 @@ Item {
     }
 
     ColorDialog {
+        id: textColors
+        title: "Text color"
+        onAccepted: StatsSettings.setStyle(styleEditor.target, styleEditor.part, "color", selectedColor)
+    }
+
+    ColorDialog {
         id: bandColors
         title: "Threshold color"
         onAccepted: StatsSettings.setColor(root.paintMetric, root.paintSlot, selectedColor)
@@ -596,7 +512,7 @@ Item {
                 height: parent.height
                 families: root.fontNames
                 onChosen: (family) => {
-                    StatsSettings.editor.set("font", family)
+                    StatsSettings.setStyle(styleEditor.target, styleEditor.part, "font", family)
                     root.fontOpen = false
                 }
                 onDismiss: root.fontOpen = false

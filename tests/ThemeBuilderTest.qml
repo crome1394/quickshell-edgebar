@@ -51,6 +51,16 @@ ShellRoot {
             const pal = B.build(ThemePresets.list[k])
             t.ok("preset builds: " + ThemePresets.list[k].name, B.colorKeys.every((c) => pal[c] !== undefined))
         }
+
+        // Per-bar glass: -1 follows Bar glass; a bar's own value replaces it.
+        t.eq("bars follow by default", B.normalize({}).barGlass, { top: -1, bottom: -1, left: -1, right: -1 })
+        t.eq("bad bar glass follows", B.normalize({ barGlass: { top: 400, left: "x", right: 30 } }).barGlass, { top: -1, bottom: -1, left: -1, right: 30 })
+        const own = B.normalize({ glass: 56, barGlass: { top: 20 } })
+        t.eq("own glass for that bar", B.forEdge(own, "top").glass, 20)
+        t.eq("others keep bar glass", B.forEdge(own, "bottom").glass, 56)
+        t.ok("its bar and pills get thinner", B.build(B.forEdge(own, "top")).colBar.a < B.build(own).colBar.a
+            && B.build(B.forEdge(own, "top")).colSurface.a < B.build(own).colSurface.a)
+        t.eq("menus keep menu glass", B.build(B.forEdge(own, "top")).colBg, B.build(own).colBg)
         t.done()
     }
 }

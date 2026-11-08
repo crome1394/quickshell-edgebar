@@ -13,6 +13,55 @@ Singleton {
         fonts: ThemeStore.activeTheme.fonts
     }
 
+    // A bar with its own glass (Theme → Bar glass → one bar) gets its own
+    // palette, so the bar and its pills follow that value. Only colBar and
+    // colSurface differ; menus keep Menu glass. A bar that follows bar
+    // glass gets the main palette, and its palette below builds nothing.
+    function ownGlass(edge) {
+        const bars = ThemeStore.activeTheme.barGlass
+        return bars ? Number(bars[edge]) >= 0 : false
+    }
+
+    function edgeColors(edge) {
+        return root.ownGlass(edge) ? ThemeBuilder.build(ThemeBuilder.forEdge(ThemeStore.activeTheme, edge)) : root.palette.colors
+    }
+
+    function barPalette(edge) {
+        if (!root.ownGlass(edge))
+            return root.palette
+        if (edge === "top")
+            return root.topPalette
+        if (edge === "bottom")
+            return root.bottomPalette
+        if (edge === "left")
+            return root.leftPalette
+        return root.rightPalette
+    }
+
+    readonly property ThemePalette topPalette: ThemePalette {
+        colors: root.edgeColors("top")
+        temp: ThemeStore.activeTheme.temp
+        fonts: ThemeStore.activeTheme.fonts
+    }
+
+    readonly property ThemePalette bottomPalette: ThemePalette {
+        colors: root.edgeColors("bottom")
+        temp: ThemeStore.activeTheme.temp
+        fonts: ThemeStore.activeTheme.fonts
+    }
+
+    readonly property ThemePalette leftPalette: ThemePalette {
+        colors: root.edgeColors("left")
+        temp: ThemeStore.activeTheme.temp
+        fonts: ThemeStore.activeTheme.fonts
+    }
+
+    readonly property ThemePalette rightPalette: ThemePalette {
+        colors: root.edgeColors("right")
+        temp: ThemeStore.activeTheme.temp
+        fonts: ThemeStore.activeTheme.fonts
+    }
+
 
     readonly property string fontFamily: root.palette.fontFamily
     readonly property string uiFont: root.palette.uiFont

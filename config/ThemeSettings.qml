@@ -98,6 +98,7 @@ Singleton {
             next.tone = value === "light" ? "light" : "dark"
             next.colors = {}
             next.glass = next.tone === "light" ? 100 : 56
+            next.barGlass = ThemeBuilder.barGlassNorm({})
             next.menu = next.tone === "light" ? 100 : 90
             const tint = ThemeBuilder.parse(next.tint)
             const isLight = tint && ThemeBuilder.luminance(tint) > 0.5
@@ -108,6 +109,16 @@ Singleton {
         } else {
             next[key] = value
         }
+        root.editor.set("theme", next)
+    }
+
+    // One bar's own glass in the drafted theme; -1 follows Bar glass.
+    function setBarGlass(edge, value) {
+        if (ThemeBuilder.barEdges.indexOf(edge) < 0)
+            return
+        const next = Object.assign({}, root.editor.value.theme)
+        next.barGlass = Object.assign({}, ThemeBuilder.barGlassNorm(next.barGlass))
+        next.barGlass[edge] = Math.round(Number(value))
         root.editor.set("theme", next)
     }
 

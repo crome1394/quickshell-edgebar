@@ -139,6 +139,7 @@ Singleton {
     property alias statClick: data.statClick
     property alias statActionsJson: data.statActionsJson
     property alias statFont: data.statFont
+    property alias statStyleJson: data.statStyleJson
     property alias statFontPercent: data.statFontPercent
     property alias statBold: data.statBold
     property alias statItalic: data.statItalic
@@ -595,6 +596,9 @@ Singleton {
             property string statClick: "left"
             property string statActionsJson: ""
             property string statFont: ""
+            // Text Style (StatStyle). Empty: built from statFont and the
+            // three fields below, which older layouts saved.
+            property string statStyleJson: ""
             property int statFontPercent: 100
             property bool statBold: true
             property bool statItalic: false

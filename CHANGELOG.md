@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- System Stats → **Text Style**: pick All widgets or one metric (CPU, Memory, GPU, VRAM) and a part (Label, Percent, Value), then set font, bold, italic, size, and color (Value color replaces the temperature colors; Percent keeps its threshold color). Metrics follow All for anything they do not set. Your old stats font becomes All. Saved in `statStyleJson`; new `config/StatStyle.qml`, `settings/StatStyleEditor.qml`. The page's Misc section is now **Click Commands**.
+- Theme → **Bar glass** per bar: All bars, or Top, Bottom, Left, Right with its own value (its pills follow, a little more solid). Saved with the theme as `barGlass`; presets and older themes follow All bars, and switching Tone clears them. `Theme.barPalette(edge)`.
+
 - System Stats: a **Thresholds** section under Widgets → System Stats, with a list to pick CPU, Memory, GPU, or VRAM and one set of sliders and colors. A new **Combine into one widget** switch (on by default); off, each metric is its own widget (System Stats · CPU, Memory, GPU, VRAM) to turn on and place on any bar from the Bars page. All of them share one sampler, so separate widgets still run at most one `nvidia-smi`, and nothing samples while none is on a bar. `components/SystemStats.qml` became `services/StatsService.qml`; new `pills/StatPill.qml`, `pills/StatMetric.qml`, `pills/StatsHold.qml`.
 
 - Screensaver: the default video is `~/Videos/screensaver/screensaver.mp4` (no longer a monitor-specific name), and when it is missing the text screensaver runs instead of nothing. Closing the video no longer needs socat (it is still used when present). kitty and socat are in the dependency list.
