@@ -24,10 +24,13 @@ hl.bind("SUPER + R", hl.dsp.exec_cmd("qs ipc call freshRss toggle"))
 | `overview toggle` · `open` · `close` | Workspace overview |
 | `overview desktop` · `all` | Windows in place / every workspace |
 | `overview next` · `prev` | Step cards while it is open |
+| `osd preview volume\|mic\|track\|brightness` | A sample [on-screen display](settings.md#on-screen-display) popup |
 
 Settings tab ids: `bar`, `widgets`, `appearance`, `applications`,
 `connectivity`, `audio`, `notifications`, `region`, `system`, `tools`.
 `theme` and `wallpaper` still work and open those sections of Appearance.
+Notifications has the sections `notifications` and `osd`
+(`openTab notifications osd`).
 
 ## Menus (while the widget is on a bar)
 
@@ -97,7 +100,21 @@ hl.bind("SUPER + SHIFT + R",   hl.dsp.exec_cmd("qs ipc call recorder toggle"))
 hl.bind("SUPER + SHIFT + C",   hl.dsp.exec_cmd("qs ipc call caffeine toggle"))
 ```
 
-On a laptop, the brightness keys:
+Volume and media keys need no IPC: the on-screen display shows any
+volume or player change, so plain `wpctl` and `playerctl` binds work:
+
+```lua
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1.5 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"), { locked = true, repeating = true })
+hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"), { locked = true })
+hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true })
+hl.bind("XF86AudioPlay",        hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
+hl.bind("XF86AudioNext",        hl.dsp.exec_cmd("playerctl next"), { locked = true })
+hl.bind("XF86AudioPrev",        hl.dsp.exec_cmd("playerctl previous"), { locked = true })
+```
+
+On a laptop, the brightness keys (through the bar, so the popup shows
+the new level; `brightnessctl` changes are not seen):
 
 ```lua
 hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("qs ipc call brightness up"))

@@ -36,3 +36,4 @@ singleton BatteryService 1.0 BatteryService.qml
 singleton BrightnessService 1.0 BrightnessService.qml
 singleton ClipboardService 1.0 ClipboardService.qml
 singleton StatsService 1.0 StatsService.qml
+singleton OsdService 1.0 OsdService.qml

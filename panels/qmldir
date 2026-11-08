@@ -14,3 +14,5 @@ NotificationToasts 1.0 NotificationToasts.qml
 DisplayConfirmPanel 1.0 DisplayConfirmPanel.qml
 CaffeineInhibitor 1.0 CaffeineInhibitor.qml
 ClipboardPanel 1.0 ClipboardPanel.qml
+OsdHost 1.0 OsdHost.qml
+OsdPanel 1.0 OsdPanel.qml

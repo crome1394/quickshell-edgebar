@@ -90,14 +90,14 @@
             "pkg": "libcanberra",
             "area": "Audio",
             "need": "optional",
-            "use": "Volume change sound"
+            "use": "Volume change sound (On-Screen Display, Theme sound)"
         },
         {
-            "name": "swayosd-client",
-            "pkg": "swayosd",
+            "name": "pw-play",
+            "pkg": "pipewire",
             "area": "Audio",
             "need": "optional",
-            "use": "Volume pop-up"
+            "use": "Volume change sound (On-Screen Display, Sound file)"
         },
         {
             "name": "notify-send",

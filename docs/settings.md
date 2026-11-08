@@ -104,6 +104,31 @@ devices.
     popups.
   - **Send a test** shows a popup with the applied look.
 
+### On-Screen Display
+
+Settings → Notifications → On-Screen Display. A popup for volume,
+microphone, media, and brightness that replaces swayosd. Any change shows
+it: your keys, the bar's own sliders, or another app. It watches PipeWire
+and MPRIS by their change signals (nothing polls), and its window exists
+only while it shows; clicks pass through it.
+
+- **Show it for**: Volume (speaker level and mute, with the sound),
+  Output device (the name of a new speaker or headset), Microphone,
+  New track (title, artist, cover), Play and pause, and Brightness
+  (laptops, when it changes through the bar). **Preview** buttons show
+  the unsaved look.
+- **Place and size**: top, middle, or bottom; left, center, or right;
+  edge gap, width, how long it stays, and text size.
+- **Look**: glass (or the same as menus), bar and text colors (Auto
+  follows the theme; a picked color stays fixed in every theme), border,
+  and cover art for media.
+- **Symbols**: pick one (volume high, medium, low, muted, device,
+  microphone, play, pause, track, brightness) and type its replacement,
+  such as another Nerd Font glyph or an emoji. **Default** puts it back.
+- **Sound**: the theme's volume-change sound (`canberra-gtk-play`), a sound
+  file of your own (`pw-play`), or off, with its own volume and a **Test**
+  button. It plays at most once every 120 ms, so held keys do not pile up.
+
 ## Region & Clock
 
 - **Clock**: font, color, bold, italic, size, format, first day of the

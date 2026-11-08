@@ -169,6 +169,7 @@ Singleton {
     property alias notificationDnd: data.notificationDnd
     // Built-in popup look (PopupSettings), as JSON.
     property alias notificationPopupJson: data.notificationPopupJson
+    property alias osdJson: data.osdJson
     property alias notificationTimeout: data.notificationTimeout
     property alias showPowerPill: data.showPowerPill
     property alias showOpacityPill: data.showOpacityPill
@@ -625,6 +626,8 @@ Singleton {
             property string notificationServer: ""
             property bool notificationDnd: false
             property string notificationPopupJson: ""
+            // On-screen display settings (OsdSettings).
+            property string osdJson: ""
             property int notificationTimeout: 8
             property bool showPowerPill: false
             property bool showOpacityPill: false

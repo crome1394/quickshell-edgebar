@@ -73,3 +73,7 @@ NightLightTab 1.0 NightLightTab.qml
 ActionChip 1.0 ActionChip.qml
 ClipboardTab 1.0 ClipboardTab.qml
 StatStyleEditor 1.0 StatStyleEditor.qml
+NotificationPopupsTab 1.0 NotificationPopupsTab.qml
+OsdTab 1.0 OsdTab.qml
+OsdIconOptions 1.0 OsdIconOptions.qml
+OsdSoundOptions 1.0 OsdSoundOptions.qml

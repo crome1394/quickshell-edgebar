@@ -19,9 +19,6 @@ Item {
     property int inVol: 0
     property bool inMute: false
     property bool inOk: false
-    property string osdKind: "out"
-    property int osdLevel: 0
-    property bool osdMuted: false
 
     function clampVol(value) {
         let n = Math.round(Number(value))
@@ -159,64 +156,6 @@ Item {
             root.outVol = level
             root.outOk = !!node
         }
-        let muted = false
-        try {
-            muted = !!(node && node.audio && node.audio.muted)
-        } catch (e2) {
-            muted = false
-        }
-        root.queueOsd(kind, level, muted)
-    }
-
-    // Same click and swayOSD popup as ~/.local/bin/volume.sh.
-    function queueOsd(kind, percent, muted) {
-        root.osdKind = kind === "in" ? "in" : "out"
-        root.osdLevel = root.clampVol(percent)
-        root.osdMuted = !!muted
-        osdDelay.restart()
-    }
-
-    function osdIcon() {
-        if (root.osdMuted)
-            return root.osdKind === "in" ? "microphone-sensitivity-muted" : "audio-volume-muted"
-        if (root.osdKind === "in")
-            return "audio-input-microphone"
-        if (root.osdLevel > 66)
-            return "audio-volume-high"
-        if (root.osdLevel > 33)
-            return "audio-volume-medium"
-        return "audio-volume-low"
-    }
-
-    function osdProgress() {
-        if (root.osdMuted)
-            return "0.00"
-        let unit = root.osdLevel / 100
-        if (!(unit >= 0))
-            unit = 0
-        const cap = Theme.volumeMax / 100
-        if (unit > cap)
-            unit = cap
-        return unit.toFixed(2)
-    }
-
-    function flushOsd() {
-        const text = root.osdMuted ? "Muted" : (root.osdLevel + "%")
-        Quickshell.execDetached([
-            "canberra-gtk-play",
-            "-i",
-            "audio-volume-change",
-            "--volume=0.6"
-        ])
-        Quickshell.execDetached([
-            "swayosd-client",
-            "--custom-icon",
-            root.osdIcon(),
-            "--custom-progress",
-            root.osdProgress(),
-            "--custom-progress-text",
-            text
-        ])
     }
 
     function nudge(kind, dir) {
@@ -277,14 +216,7 @@ Item {
     }
 
     // No poll: the Connections below cover default-device, ready, volume,
-    // and mute changes.
-    Timer {
-        id: osdDelay
-        interval: Theme.volumeOsdMs
-        repeat: false
-        onTriggered: root.flushOsd()
-    }
-
+    // and mute changes. The on-screen display (OsdHost) reacts to them.
     Connections {
         target: Pipewire
         function onDefaultAudioSinkChanged() {

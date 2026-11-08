@@ -37,6 +37,11 @@ ShellRoot {
     // The one tooltip window every bar widget shares (TipService).
     BarTipHost {}
 
+    // The on-screen display for volume, microphone, media, and brightness
+    // (Settings → Notifications → On-Screen Display). Its window exists
+    // only while a popup shows.
+    OsdHost {}
+
     // One set of edge bars per monitor that gets bars (Widgets → Bars →
     // Monitors). An edge that is off is not created.
     Variants {

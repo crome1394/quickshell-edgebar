@@ -293,7 +293,16 @@ Singleton {
     readonly property int opacityPickMaxHeight: 220
     readonly property int volumeMax: 150
     readonly property int volumeStep: 5
-    readonly property int volumeOsdMs: 40
+    // On-screen display (Settings → Notifications → On-Screen Display).
+    readonly property int osdWidth: 320
+    readonly property int osdMargin: 96
+    readonly property int osdTimeoutMs: 1500
+    readonly property int osdFadeMs: 180
+    readonly property int osdSoundGapMs: 120
+    readonly property int osdSettleMs: 1500
+    readonly property int osdArt: 56
+    readonly property int osdBarHeight: 8
+    readonly property int osdGlyphMax: 8
     readonly property int dockScaleMin: 110
     readonly property int dockScaleMax: 160
     readonly property int dockScaleDefault: 128

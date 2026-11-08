@@ -91,7 +91,7 @@ FloatingWindow {
     // qs ipc call settings open
     // qs ipc call settings openTab applications menu
     // Tab ids: bar, widgets, appearance (theme, wallpaper), applications, connectivity, audio,
-    // notifications, region, system, tools. The section is optional ("" for none)
+    // notifications (notifications, osd), region, system, tools. The section is optional ("" for none)
     // and each tab ignores sections it does not have.
     IpcHandler {
         target: "settings"
@@ -151,6 +151,7 @@ FloatingWindow {
 
     onRevealSerialChanged: {
         window.pushReveal(appearancePage, "appearance")
+        window.pushReveal(notificationsPage, "notifications")
         window.pushReveal(applicationsPage, "applications")
         window.pushReveal(connectivityPage, "connectivity")
         window.pushReveal(systemPage, "system")
@@ -356,6 +357,7 @@ FloatingWindow {
             active: window.visible && window.currentTab === "notifications"
             visible: window.currentTab === "notifications"
             source: notificationsPage.active ? Qt.resolvedUrl("../settings/NotificationsTab.qml") : ""
+            onLoaded: window.pushReveal(notificationsPage, "notifications")
         }
 
         Loader {
