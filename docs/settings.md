@@ -30,11 +30,13 @@ Nothing on those pages is saved until Apply.
   Active Window popup and menus opened from a keybind go there). A menu
   opens on the monitor whose bar you clicked.
 - **Active Window**: show it, corner, width, and classes to exclude.
-- **System Stats**: which graphics card to read (Auto: the only one, or
+- **System Stats**: one combined pill, or (with **Combine into one
+  widget** off) CPU, Memory, GPU, and VRAM as separate widgets you turn on
+  and place under Bars; which graphics card to read (Auto: the only one, or
   on a laptop the integrated one, so the discrete GPU can sleep; NVIDIA
   via `nvidia-smi`, AMD from `/sys`, Intel estimated from its clock), font,
-  bold, italic, size, bar graph width, the CPU,
-  memory, GPU, and VRAM threshold steps and colors, and the click commands
+  bold, italic, size, bar graph width, the threshold steps and colors
+  (pick CPU, Memory, GPU, or VRAM from the Thresholds list), and the click commands
   (run directly or in your terminal, never through a shell).
 
 ## Appearance

@@ -38,3 +38,6 @@ FirewallRuleRow 1.0 FirewallRuleRow.qml
 BatteryPill 1.0 BatteryPill.qml
 BrightnessPill 1.0 BrightnessPill.qml
 ClipboardPill 1.0 ClipboardPill.qml
+StatMetric 1.0 StatMetric.qml
+StatPill 1.0 StatPill.qml
+StatsHold 1.0 StatsHold.qml

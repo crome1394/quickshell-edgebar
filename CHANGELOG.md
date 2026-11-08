@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- System Stats: a **Thresholds** section under Widgets → System Stats, with a list to pick CPU, Memory, GPU, or VRAM and one set of sliders and colors. A new **Combine into one widget** switch (on by default); off, each metric is its own widget (System Stats · CPU, Memory, GPU, VRAM) to turn on and place on any bar from the Bars page. All of them share one sampler, so separate widgets still run at most one `nvidia-smi`, and nothing samples while none is on a bar. `components/SystemStats.qml` became `services/StatsService.qml`; new `pills/StatPill.qml`, `pills/StatMetric.qml`, `pills/StatsHold.qml`.
+
 - Screensaver: the default video is `~/Videos/screensaver/screensaver.mp4` (no longer a monitor-specific name), and when it is missing the text screensaver runs instead of nothing. Closing the video no longer needs socat (it is still used when present). kitty and socat are in the dependency list.
 - Laptop widgets, on by default and hidden on machines without the hardware: **Battery** (UPower: level, charging, time left; click steps the power profile) and **Brightness** (built-in panel; wheel and click; set through logind, no root). `qs ipc call battery status|setProfile <name>|cycleProfile` and `qs ipc call brightness status|set <pct>|up|down`. New: `services/BatteryService.qml`, `services/BrightnessService.qml`, `pills/BatteryPill.qml`, `pills/BrightnessPill.qml`; `upower` and (optional, default No) `power-profiles-daemon` in the dependency list.
 - Settings, Inspector, and FreshRSS open no larger than the focused screen (less `Theme.windowScreenMargin`), so they fit a 1366×768 laptop; their minimum sizes shrink with them. `ScreenService.fitWindow()`.

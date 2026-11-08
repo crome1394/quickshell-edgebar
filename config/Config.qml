@@ -123,6 +123,11 @@ Singleton {
     property alias recNotify: data.recNotify
     property alias showWorkspacesPill: data.showWorkspacesPill
     property alias showStatsWidget: data.showStatsWidget
+    property alias statsCombined: data.statsCombined
+    property alias showStatCpuPill: data.showStatCpuPill
+    property alias showStatMemPill: data.showStatMemPill
+    property alias showStatGpuPill: data.showStatGpuPill
+    property alias showStatVramPill: data.showStatVramPill
     property alias showStatCpu: data.showStatCpu
     property alias showStatMem: data.showStatMem
     property alias showStatGpu: data.showStatGpu
@@ -572,6 +577,12 @@ Singleton {
             property bool recNotify: true
             property bool showWorkspacesPill: true
             property bool showStatsWidget: false
+            // One System Stats pill, or a widget per metric (the *Pill flags).
+            property bool statsCombined: true
+            property bool showStatCpuPill: true
+            property bool showStatMemPill: true
+            property bool showStatGpuPill: true
+            property bool showStatVramPill: true
             property bool showStatCpu: true
             property bool showStatMem: true
             property bool showStatGpu: true

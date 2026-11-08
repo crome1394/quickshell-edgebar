@@ -174,8 +174,10 @@ ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `them
   it with `busctl call … login1 … Session SetBrightness` (fixed argv,
   checked device name and number), so no root or udev rule is needed.
 - **GPU stats**: `GpuService` lists the cards in `/sys/class/drm` once
-  (vendor, driver, PCI bus, boot display) and picks one; `SystemStats`
-  reads it with `nvidia-smi`, AMD sysfs files, or Intel clock files.
+  (vendor, driver, PCI bus, boot display) and picks one; `StatsService`
+  reads it with `nvidia-smi`, AMD sysfs files, or Intel clock files. The
+  combined pill and the per-metric widgets share that one service; each
+  holds it with `StatsHold`, and it stops when none is on a bar.
 - **Recording**: `RecorderService` runs `gpu-screen-recorder` with an argv
   built by `RecorderSettings.argv()` (fixed values only), optionally after
   `slurp` for a region, and stops it with SIGINT so the file is finished.

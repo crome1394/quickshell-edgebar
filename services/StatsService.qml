@@ -1,19 +1,26 @@
+pragma Singleton
 import QtQuick
+import Quickshell
 import Quickshell.Io
-import qs.services
 import qs.theme
 
-// CPU, memory, and GPU samples for the System Stats pill.
+// CPU, memory, and GPU samples, shared by the System Stats pill and the
+// per-metric widgets, so one set of reads (and at most one nvidia-smi)
+// feeds them all. Each pill holds it with retain() and gives it back with
+// release(); nothing runs while no pill holds it.
 // CPU and memory come from /proc, CPU temp from hwmon, so no process runs
 // for them. The GPU is the card GpuService picks, read only while
-// gpuWanted is true: NVIDIA through one long-running nvidia-smi in loop
+// a holder wants it: NVIDIA through one long-running nvidia-smi in loop
 // mode; AMD from sysfs (busy percent, VRAM, hwmon temperature); Intel from
 // its current and top clock, an estimate of load, with no VRAM of its own.
 // A missing GPU reads as unknown, not 0.
-Item {
+Singleton {
     id: root
 
-    required property bool gpuWanted
+    property int users: 0
+    property int gpuUsers: 0
+    readonly property bool active: root.users > 0
+    readonly property bool gpuWanted: root.active && root.gpuUsers > 0
 
     property real cpuUtil: 0
     property int cpuTemp: 0
@@ -29,6 +36,26 @@ Item {
 
     property var lastCpu: null
     property string tempPath: ""
+    property bool sensorLooked: false
+
+    // gpu: true when the holder shows GPU or VRAM.
+    function retain(gpu) {
+        root.users += 1
+        if (gpu)
+            root.gpuUsers += 1
+    }
+
+    function release(gpu) {
+        root.users = Math.max(0, root.users - 1)
+        if (gpu)
+            root.gpuUsers = Math.max(0, root.gpuUsers - 1)
+    }
+
+    // A fresh start measures CPU from the next two samples, not the gap.
+    onActiveChanged: {
+        if (!root.active)
+            root.lastCpu = null
+    }
 
     readonly property real kibPerGib: 1048576
     readonly property real mibPerGib: 1024
@@ -158,30 +185,34 @@ Item {
 
     FileView {
         id: statFile
-        path: "/proc/stat"
+        path: root.active ? "/proc/stat" : ""
         onLoaded: root.readCpu(statFile.text())
     }
 
     FileView {
         id: memFile
-        path: "/proc/meminfo"
+        path: root.active ? "/proc/meminfo" : ""
         onLoaded: root.readMem(memFile.text())
     }
 
     FileView {
         id: tempFile
-        path: root.tempPath.length ? root.tempPath + "/temp1_input" : ""
+        path: root.active && root.tempPath.length ? root.tempPath + "/temp1_input" : ""
         onLoaded: root.readTemp(tempFile.text())
     }
 
-    // One-shot lookup of the CPU sensor folder. No shell, fixed argv.
+    // One-shot lookup of the CPU sensor folder, on first use. No shell,
+    // fixed argv.
     Process {
-        running: true
+        running: root.active && !root.sensorLooked
         command: ["find", "-L", "/sys/class/hwmon", "-mindepth", "2", "-maxdepth", "2",
             "-name", "name", "-exec", "grep", "-H", ".", "{}", "+"]
         stdout: StdioCollector {
             id: sensorList
-            onStreamFinished: root.tempPath = root.pickSensor(sensorList.text)
+            onStreamFinished: {
+                root.tempPath = root.pickSensor(sensorList.text)
+                root.sensorLooked = true
+            }
         }
     }
 
@@ -258,7 +289,7 @@ Item {
 
     Timer {
         interval: Theme.statPollMs
-        running: true
+        running: root.active
         repeat: true
         triggeredOnStart: true
         onTriggered: {

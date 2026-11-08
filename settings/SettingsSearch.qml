@@ -26,7 +26,7 @@ Item {
             { tab: "widgets", section: "bars", title: "Widgets · Bars", keys: "bar edge widget placement show" },
             { tab: "widgets", section: "bars", title: "Widgets · Bars · Monitors", keys: "monitor monitors screen screens display multi multiple main primary every all" },
             { tab: "widgets", section: "activewindow", title: "Widgets · Active Window", keys: "active window corner width exclude title class" },
-            { tab: "widgets", section: "stats", title: "Widgets · System Stats", keys: "cpu memory gpu vram font bold italic threshold terminal btop" },
+            { tab: "widgets", section: "stats", title: "Widgets · System Stats", keys: "cpu memory gpu vram combine separate font bold italic threshold terminal btop" },
             { tab: "appearance", section: "wallpaper", title: "Appearance · Wallpaper", keys: "wallpaper image hyprpaper folder" },
             { tab: "appearance", section: "theme", title: "Appearance · Theme", keys: "theme preset color colour accent alert tint glass light dark import export save palette look font size" },
             { tab: "applications", section: "launcher", title: "Applications · App Launcher", keys: "pin launcher application command" },

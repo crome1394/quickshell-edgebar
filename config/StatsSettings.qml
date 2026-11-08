@@ -3,7 +3,8 @@ import QtQuick
 import Quickshell
 import qs.theme
 
-// Widgets → System Stats: which sections the pill draws, its font, the
+// Widgets → System Stats: one pill or a widget per metric, which sections
+// the pill draws, its font, the
 // terminal and the left/right click commands, and the color thresholds.
 // Thresholds and colors are saved in state/theme.json by Theme.
 Singleton {
@@ -299,6 +300,7 @@ Singleton {
     function normalize(src) {
         return {
             gpuCard: root.gpuCardNorm(src.gpuCard),
+            combined: src.combined !== false,
             cpu: !!src.cpu,
             mem: !!src.mem,
             gpu: !!src.gpu,
@@ -318,6 +320,7 @@ Singleton {
     function snapshot() {
         return root.normalize({
             gpuCard: Config.statGpu,
+            combined: Config.statsCombined,
             cpu: Config.showStatCpu,
             mem: Config.showStatMem,
             gpu: Config.showStatGpu,
@@ -337,6 +340,7 @@ Singleton {
     function defaults() {
         return {
             gpuCard: "auto",
+            combined: true,
             cpu: true,
             mem: true,
             gpu: true,
@@ -357,6 +361,7 @@ Singleton {
         const clean = root.normalize(snap)
         Config.saveFields(() => {
             Config.statGpu = clean.gpuCard
+            Config.statsCombined = clean.combined
             Config.showStatCpu = clean.cpu
             Config.showStatMem = clean.mem
             Config.showStatGpu = clean.gpu

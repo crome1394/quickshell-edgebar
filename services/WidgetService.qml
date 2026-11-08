@@ -118,6 +118,22 @@ Singleton {
         return StatsSettings.anyShown()
     }
 
+    // The per-metric System Stats widgets, in bar order.
+    readonly property var statMetricIds: ["statCpu", "statMem", "statGpu", "statVram"]
+
+    function isStatMetric(id) {
+        return root.statMetricIds.indexOf(String(id || "")) >= 0
+    }
+
+    // Entries the current System Stats mode does not draw. They keep their
+    // place in the layout, so switching modes back restores it.
+    function parked(id) {
+        const key = String(id || "")
+        if (Config.statsCombined)
+            return root.isStatMetric(key)
+        return key === "stats"
+    }
+
     function buildCatalog() {
         const count = LauncherSettings.slots()
         const rows = [
@@ -136,6 +152,10 @@ Singleton {
             { id: "brightness", label: "Brightness (laptops)" },
             { id: "workspaces", label: "Workspaces" },
             { id: "stats", label: "System Stats" },
+            { id: "statCpu", label: "System Stats · CPU" },
+            { id: "statMem", label: "System Stats · Memory" },
+            { id: "statGpu", label: "System Stats · GPU" },
+            { id: "statVram", label: "System Stats · VRAM" },
             { id: "tray", label: "System Tray" },
             { id: "networkPanel", label: "Network" },
             { id: "bluetooth", label: "Bluetooth" },
@@ -162,6 +182,10 @@ Singleton {
             { id: "power", zone: "bottom" },
             { id: "hyprInsp", zone: "bottom" },
             { id: "stats", zone: "bottom" },
+            { id: "statCpu", zone: "bottom" },
+            { id: "statMem", zone: "bottom" },
+            { id: "statGpu", zone: "bottom" },
+            { id: "statVram", zone: "bottom" },
             { id: "launcher", zone: "bottom" }
         ]
         const count = LauncherSettings.slots()
@@ -232,7 +256,7 @@ Singleton {
             || key === "tailscale" || key === "hyprInsp" || key === "freshRss" || key === "clipboard"
             || key === "caffeine" || key === "nightLight" || key === "recorder" || key === "firewall"
             || key === "battery" || key === "brightness"
-            || root.isLauncherId(key)
+            || root.isStatMetric(key) || root.isLauncherId(key)
     }
 
     function labelFor(id) {
@@ -289,10 +313,28 @@ Singleton {
         }
         const defaults = root.defaultLayout()
         for (let i = 0; i < defaults.length; i++) {
-            if (!seen[defaults[i].id])
-                out.push({ id: defaults[i].id, zone: defaults[i].zone })
+            const id = defaults[i].id
+            if (seen[id])
+                continue
+            seen[id] = true
+            // A missing metric widget starts next to System Stats.
+            const after = root.isStatMetric(id) ? root.lastStatIndex(out) : -1
+            if (after >= 0)
+                out.splice(after + 1, 0, { id: id, zone: out[after].zone })
+            else
+                out.push({ id: id, zone: defaults[i].zone })
         }
         return out
+    }
+
+    // Index of the last System Stats entry (combined or per metric), or -1.
+    function lastStatIndex(list) {
+        let at = -1
+        for (let i = 0; i < list.length; i++) {
+            if (list[i].id === "stats" || root.isStatMetric(list[i].id))
+                at = i
+        }
+        return at
     }
 
     function copyLayout(src) {
@@ -337,7 +379,7 @@ Singleton {
         const all = root.editingLayout()
         const rows = []
         for (let i = 0; i < all.length; i++) {
-            if (all[i].zone === zone)
+            if (all[i].zone === zone && !root.parked(all[i].id))
                 rows.push(all[i])
         }
         const out = []
@@ -359,7 +401,7 @@ Singleton {
         const all = root.layoutEntries
         const out = []
         for (let i = 0; i < all.length; i++) {
-            if (all[i].zone !== zone)
+            if (all[i].zone !== zone || root.parked(all[i].id))
                 continue
             const id = String(all[i].id)
             if (root.isDivider(id)) {
@@ -446,7 +488,7 @@ Singleton {
         const fromZone = layout[from].zone
         const zoneIds = []
         for (let i = 0; i < layout.length; i++) {
-            if (layout[i].zone === target)
+            if (layout[i].zone === target && !root.parked(layout[i].id))
                 zoneIds.push(layout[i].id)
         }
         if (at < 0)
@@ -476,7 +518,7 @@ Singleton {
         let seen = 0
         let insertAt = next.length
         for (let i = 0; i < next.length; i++) {
-            if (next[i].zone === target) {
+            if (next[i].zone === target && !root.parked(next[i].id)) {
                 if (seen === local) {
                     insertAt = i
                     break
@@ -509,7 +551,7 @@ Singleton {
         const zone = layout[idx].zone
         const zoneIdxs = []
         for (let i = 0; i < layout.length; i++) {
-            if (layout[i].zone === zone)
+            if (layout[i].zone === zone && !root.parked(layout[i].id))
                 zoneIdxs.push(i)
         }
         let pos = -1

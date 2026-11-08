@@ -3,7 +3,6 @@ AudioLevels 1.0 AudioLevels.qml
 BarTip 1.0 BarTip.qml
 DockFace 1.0 DockFace.qml
 SpannerIcon 1.0 SpannerIcon.qml
-SystemStats 1.0 SystemStats.qml
 TailscaleMark 1.0 TailscaleMark.qml
 LevelMeter 1.0 LevelMeter.qml
 MenuIconImage 1.0 MenuIconImage.qml

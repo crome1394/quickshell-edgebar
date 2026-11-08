@@ -16,6 +16,15 @@ Item {
     property string paintMetric: "cpu"
     property int paintSlot: 0
     property bool fontWaiting: false
+    // Which metric the Thresholds sliders edit. Not saved.
+    property string bandMetric: "cpu"
+
+    readonly property var bandChoices: [
+        { id: "cpu", label: "CPU", tip: "CPU percent steps and colors" },
+        { id: "mem", label: "Memory", tip: "Memory percent steps and colors" },
+        { id: "gpu", label: "GPU", tip: "GPU percent steps and colors" },
+        { id: "vram", label: "VRAM", tip: "VRAM percent steps and colors" }
+    ]
 
     // The shared font list arrived while a picker was waiting for it.
     onFontReadyChanged: {
@@ -84,7 +93,9 @@ Item {
             SectionHeader {
                 width: parent.width
                 title: "System Stats Toggles"
-                hint: "Which parts of the pill are drawn. Apply saves this page. Turn the widget on under Bars."
+                hint: StatsSettings.editor.value.combined
+                    ? "Which parts of the pill are drawn. Apply saves this page. Turn the widget on under Bars."
+                    : "Each metric is its own widget. Turn them on and place them under Bars. Apply saves this page."
             }
 
             Item {
@@ -99,6 +110,17 @@ Item {
 
                     CheckRow {
                         width: parent.width
+                        title: "Combine into one widget"
+                        detail: "Off: CPU, Memory, GPU, and VRAM are separate widgets you can place on any bar"
+                        tip: "One System Stats pill, or one widget per metric on the Bars page"
+                        checked: StatsSettings.editor.value.combined
+                        onToggled: StatsSettings.editor.set("combined", !StatsSettings.editor.value.combined)
+                    }
+
+                    // With separate widgets, the Bars page turns each one on.
+                    CheckRow {
+                        visible: StatsSettings.editor.value.combined
+                        width: parent.width
                         title: "Show CPU"
                         detail: "CPU percent, temperature, and bar"
                         tip: "Show the CPU section on the System Stats pill"
@@ -107,6 +129,7 @@ Item {
                     }
 
                     CheckRow {
+                        visible: StatsSettings.editor.value.combined
                         width: parent.width
                         title: "Show Memory"
                         detail: "Memory percent, used memory, and bar"
@@ -116,6 +139,7 @@ Item {
                     }
 
                     CheckRow {
+                        visible: StatsSettings.editor.value.combined
                         width: parent.width
                         title: "Show GPU"
                         detail: "GPU percent, temperature, and bar"
@@ -125,6 +149,7 @@ Item {
                     }
 
                     CheckRow {
+                        visible: StatsSettings.editor.value.combined
                         width: parent.width
                         title: "Show VRAM"
                         detail: "VRAM percent, used memory, and bar"
@@ -136,7 +161,7 @@ Item {
                     // Which card the GPU and VRAM sections read.
                     Column {
                         id: gpuChoice
-                        visible: StatsSettings.editor.value.gpu || StatsSettings.editor.value.vram
+                        visible: !StatsSettings.editor.value.combined || StatsSettings.editor.value.gpu || StatsSettings.editor.value.vram
                         width: parent.width
                         spacing: Theme.tabGap
 
@@ -224,6 +249,45 @@ Item {
                             tip: "Width of each bar graph, from " + Theme.statGaugeWidthMin + " to " + Theme.statGaugeWidthMax + " px. Default " + Theme.statGaugeWidth + "."
                             onChanged: (value) => StatsSettings.editor.set("gaugeWidth", value)
                         }
+                    }
+                }
+            }
+
+            Item {
+                width: parent.width
+                height: Theme.space * 2
+            }
+
+            SectionHeader {
+                width: parent.width
+                title: "Thresholds"
+                hint: "Pick a metric, then set its steps and colors. The chip sits to the left of the buttons. Apply stores the steps and colors in the theme."
+            }
+
+            Item {
+                width: parent.width
+                height: bandCol.implicitHeight
+
+                Column {
+                    id: bandCol
+                    x: Theme.sectionInset
+                    width: parent.width - Theme.sectionInset * 2
+                    spacing: Theme.space
+
+                    SelectBox {
+                        width: parent.width
+                        choices: root.bandChoices
+                        currentId: root.bandMetric
+                        emptyLabel: "CPU"
+                        tip: "Which metric the sliders below edit"
+                        onPicked: (id) => root.bandMetric = id
+                    }
+
+                    StatBandGroup {
+                        width: parent.width
+                        metric: root.bandMetric
+                        title: ""
+                        onColorRequested: (slot) => root.pickStatColor(root.bandMetric, slot)
                     }
                 }
             }
@@ -491,9 +555,9 @@ Item {
         anchors.bottom: parent.bottom
         applyEnabled: StatsSettings.editor.dirty
         undoEnabled: StatsSettings.editor.canUndo
-        applyTip: "Save the sections, the font, the click commands, the threshold steps and colors, and the terminal"
+        applyTip: "Save the layout choice, the sections, the font, the click commands, the threshold steps and colors, and the terminal"
         undoTip: "Drop an unsaved draft, or put back the last applied one"
-        resetTip: "Restore the theme steps and colors, the bar font, all four sections, the bars, kitty, and btop and nvtop on left click. Apply saves it."
+        resetTip: "Restore one combined pill, the theme steps and colors, the bar font, all four sections, the bars, kitty, and btop and nvtop on left click. Apply saves it."
         onApplyClicked: {
             if (StatsSettings.apply())
                 root.actionError = ""

@@ -4,8 +4,9 @@ import qs.config
 import qs.services
 import "tests"
 
-// Caffeine steps and IPC limits, the night light schedule window, and the
-// recorder's argv (fixed values only, never a shell).
+// Caffeine steps and IPC limits, the night light schedule window, the
+// recorder's argv (fixed values only, never a shell), the System Stats
+// widget layout, and the shared stats sampler.
 ShellRoot {
     Check { id: t }
 
@@ -51,6 +52,28 @@ ShellRoot {
         const mkv = R.normalize({ codec: "av1", container: "mkv", audio: "none" })
         t.eq("argv for a region, no audio", R.argv(mkv, "region", "800x600+10+20", "/tmp/b.mkv"),
             ["gpu-screen-recorder", "-w", "region", "-region", "800x600+10+20", "-c", "mkv", "-k", "av1", "-q", "very_high", "-f", "60", "-cursor", "yes", "-o", "/tmp/b.mkv"])
+
+        // System Stats: per-metric widgets start beside the combined pill.
+        const W = WidgetService
+        const laid = W.normalizeLayout([{ id: "clock", zone: "top" }, { id: "stats", zone: "top" }, { id: "tray", zone: "top" }], false)
+        t.eq("metric widgets follow System Stats", laid.slice(0, 7).map(e => e.id),
+            ["clock", "stats", "statCpu", "statMem", "statGpu", "statVram", "tray"])
+        t.eq("and share its bar", laid[3].zone, "top")
+        const kept = W.normalizeLayout([{ id: "statGpu", zone: "left" }, { id: "stats", zone: "top" }], false)
+        t.eq("a placed metric keeps its bar", kept[0], { id: "statGpu", zone: "left" })
+        t.eq("one mode parks the other", W.parked("stats") !== W.parked("statCpu"), true)
+        t.eq("combined is the default", StatsSettings.normalize({}).combined, true)
+
+        // The shared sampler runs only while held; GPU only while asked for.
+        const S = StatsService
+        const before = [S.users, S.gpuUsers]
+        S.retain(false)
+        S.retain(true)
+        t.eq("held twice, once for GPU", [S.users - before[0], S.gpuUsers - before[1], S.active, S.gpuWanted], [2, 1, true, true])
+        S.release(true)
+        t.eq("GPU let go", S.gpuUsers, before[1])
+        S.release(false)
+        t.eq("all let go", S.users, before[0])
         t.done()
     }
 }

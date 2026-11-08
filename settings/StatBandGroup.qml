@@ -14,7 +14,9 @@ Column {
 
     spacing: Theme.space
 
+    // Hidden when the page already names the metric, as with a picker.
     Text {
+        visible: group.title.length > 0
         width: group.width
         text: group.title
         color: Theme.text

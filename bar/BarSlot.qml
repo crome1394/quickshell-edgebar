@@ -30,7 +30,7 @@ Item {
         || cell.widgetId === "freshRss" || cell.widgetId === "clipboard"
         || cell.widgetId === "caffeine" || cell.widgetId === "nightLight" || cell.widgetId === "recorder"
         || cell.widgetId === "firewall" || cell.widgetId === "battery" || cell.widgetId === "brightness"
-        || WidgetService.isLauncherId(cell.widgetId)
+        || WidgetService.isStatMetric(cell.widgetId) || WidgetService.isLauncherId(cell.widgetId)
     // An empty launcher, stats with every section off, or a battery or
     // brightness widget on a machine without one stays unloaded.
     readonly property bool shown: {
@@ -123,6 +123,10 @@ Item {
             file = "BatteryPill.qml"
         else if (cell.widgetId === "brightness")
             file = "BrightnessPill.qml"
+        else if (WidgetService.isStatMetric(cell.widgetId)) {
+            file = "StatPill.qml"
+            props.metric = ({ statCpu: "cpu", statMem: "mem", statGpu: "gpu", statVram: "vram" })[cell.widgetId]
+        }
         else if (WidgetService.isLauncherId(cell.widgetId)) {
             file = "LaunchPill.qml"
             props.launcher = cell.launcherIndex()
@@ -203,7 +207,7 @@ Item {
             }
         }
 
-        // Loaded by URL so tray, power, transparency, network, bluetooth, stats, notifications, audio, the Inspector, FreshRSS, Clipboard, Caffeine, Night Light, the recorder, Firewall, Battery, Brightness, and the app launchers stay unloaded until that widget is on the bar.
+        // Loaded by URL so tray, power, transparency, network, bluetooth, stats, notifications, audio, the Inspector, FreshRSS, Clipboard, Caffeine, Night Light, the recorder, Firewall, Battery, Brightness, the per-metric stats, and the app launchers stay unloaded until that widget is on the bar.
         Loader {
             id: tool
             active: !cell.divider && cell.toolWidget && cell.shown
