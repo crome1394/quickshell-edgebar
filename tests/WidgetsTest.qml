@@ -100,6 +100,16 @@ ShellRoot {
         t.eq("overrides listed", Y.overrides(sized, "mem", "label"), ["size"])
         t.eq("Use All drops them", Y.overrides(Y.edited(sized, "mem", "label"), "mem", "label"), [])
 
+        // Transparency: an app can keep its level fullscreen.
+        const O = OpacitySettings
+        t.eq("fullscreen solid by default", O.overrideNorm({ cls: "foot", active: 85 }).fullSolid, true)
+        const lua = O.luaText(100, [{ cls: "foot", active: 85, inactive: 80, fullSolid: false }, { cls: "brave-origin", active: 90 }])
+        const generic = lua.indexOf("qs-opacity-fullscreen'")
+        const keep = lua.indexOf("qs-opacity-app-1-fullscreen")
+        t.ok("the kept level comes after the solid fullscreen rule", generic > 0 && keep > generic)
+        t.ok("it keeps 85% fullscreen", lua.indexOf("fullscreen = true }, opacity = '0.85 override 0.80 override 0.85 override'") > 0)
+        t.ok("other apps stay solid fullscreen", lua.indexOf("qs-opacity-app-2-fullscreen") < 0)
+
         // The shared sampler runs only while held; GPU only while asked for.
         const S = StatsService
         const before = [S.users, S.gpuUsers]

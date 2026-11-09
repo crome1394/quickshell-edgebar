@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Transparency: each override has **Fullscreen: Solid / Same as windowed**. Fullscreen windows stay solid by default (video, games); "Same as windowed" keeps the app's level fullscreen too, so a see-through terminal no longer looks darker when it goes fullscreen over a bright wallpaper.
+
 - **Tack replaces satty** as the screenshot editor dependency: the Dependencies page and `install-deps.sh` list Tack (not packaged, so they point to https://github.com/crome1394/tack instead of installing), capture-screenshot and Tools → Capture try Tack first (also from `~/.local/bin` when that is off PATH), then satty, swappy, tensaku-edit, and Transparency's default "keep solid" rule is for Tack's editor window. A dependency entry may now have `"pkg": ""` with a `"from"` link.
 
 - Network and Bluetooth menus: **Close** sits along the bottom with the other buttons, like the audio menu, instead of an ✕ at the top.

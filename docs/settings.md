@@ -194,9 +194,13 @@ only while it shows; clicks pass through it.
   [Hyprland setup](hyprland.md#display).
 - **Transparency**: one opacity for every app, plus per-app overrides with
   focused and unfocused levels. Add an app from the open windows or by its
-  class. The Settings and Inspector windows, Tack pins, and fullscreen
-  windows always stay solid. Needs one line in your Hyprland config; see
+  class. The Settings and Inspector windows and Tack pins always stay
+  solid. Needs one line in your Hyprland config; see
   [Hyprland setup](hyprland.md#transparency).
+  Fullscreen windows are solid (so video and games are never see-through);
+  an override's **Fullscreen: Same as windowed** keeps its own level
+  fullscreen too, so a see-through terminal looks equally bright either
+  way.
 
 ## Tools
 

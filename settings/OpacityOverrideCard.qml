@@ -187,5 +187,38 @@ Rectangle {
                 }
             }
         }
+
+        // Fullscreen windows are solid by default (video, games); a
+        // see-through terminal can keep its level so it looks the same.
+        FormRow {
+            width: parent.width
+            label: "Fullscreen"
+
+            Row {
+                width: parent.width
+                spacing: Theme.tabGap
+
+                ChipButton {
+                    id: fullChip
+                    label: root.row.fullSolid ? "Solid" : "Same as windowed"
+                    active: !root.row.fullSolid
+                    tip: root.row.fullSolid
+                        ? "Solid while fullscreen, like video and games. Click to keep this app's level fullscreen too, so it looks the same either way."
+                        : "Keeps " + root.row.active + "% fullscreen too. Click to go solid while fullscreen."
+                    onClicked: root.set("fullSolid", !root.row.fullSolid)
+                }
+
+                Text {
+                    width: parent.width - fullChip.width - parent.spacing
+                    height: Theme.fieldHeight
+                    verticalAlignment: Text.AlignVCenter
+                    elide: Text.ElideRight
+                    text: root.row.fullSolid ? "Goes solid fullscreen, so it looks darker over a bright wallpaper" : "Looks the same windowed and fullscreen"
+                    color: Theme.subtext
+                    font.family: Theme.uiFont
+                    font.pixelSize: Theme.smallPx
+                }
+            }
+        }
     }
 }
