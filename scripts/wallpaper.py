@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""List and apply wallpapers through hyprpaper.
+"""List and apply wallpapers through awww.
 
 Usage:
   wallpaper.py list <directory>
@@ -12,9 +12,13 @@ Usage:
 Prints one JSON object. Errors go to stderr and a non-zero status.
 
 apply sets the wallpaper on one monitor (the focused one unless named)
-and saves it in hyprpaper.conf next to every other monitor's entry, so
-each monitor keeps its own. fit is cover, contain, tile, or fill.
-status prints each monitor's saved path and fit from hyprpaper.conf.
+with awww and saves it in the bar's state/wallpapers.json next to every
+other monitor's entry, so each monitor keeps its own. fit is cover,
+contain, center, or fill. status prints each monitor's saved path and fit.
+awww-daemon must be running (Hyprland starts it); it brings the last
+wallpapers back by itself after a restart.
+
+The first time, the saved wallpapers are read from an old hyprpaper.conf.
 """
 
 import json
@@ -27,7 +31,16 @@ import tempfile
 
 EXTS = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".jxl"}
 MONITOR_OK = re.compile(r"^[A-Za-z0-9_.-]+$")
-FITS = ("cover", "contain", "tile", "fill")
+FITS = ("cover", "contain", "center", "fill")
+# awww --resize for each fit. hyprpaper's "tile" has no awww match; it
+# becomes center.
+RESIZE = {"cover": "crop", "contain": "fit", "center": "no", "fill": "stretch"}
+FADE_SECONDS = "1"
+
+
+def fit_norm(value):
+    value = "center" if value == "tile" else value
+    return value if value in FITS else "cover"
 
 
 def fail(message, code=1):
@@ -158,8 +171,38 @@ def cmd_list(root):
     emit({"ok": True, "dir": root, "count": len(images), "images": images})
 
 
-def conf_path():
+def legacy_conf_path():
     return os.environ.get("HYPR_WALLPAPER_CONF", os.path.expanduser("~/.config/hypr/hyprpaper.conf"))
+
+
+def state_path():
+    here = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    return os.environ.get("WALLPAPER_STATE", os.path.join(here, "state", "wallpapers.json"))
+
+
+def read_state():
+    """monitor -> {path, fit}. Without a state file yet, the old
+    hyprpaper.conf entries carry over."""
+    path = state_path()
+    try:
+        with open(path, encoding="utf-8") as handle:
+            data = json.load(handle)
+    except FileNotFoundError:
+        _, monitors = read_conf(legacy_conf_path())
+        return monitors
+    except (OSError, ValueError):
+        return {}
+    rows = data.get("monitors") if isinstance(data, dict) else None
+    out = {}
+    if isinstance(rows, dict):
+        for name, row in rows.items():
+            if MONITOR_OK.match(str(name)) and isinstance(row, dict) and isinstance(row.get("path"), str):
+                out[str(name)] = {"path": row["path"], "fit": fit_norm(row.get("fit"))}
+    return out
+
+
+def write_state(monitors):
+    atomic_write(state_path(), json.dumps({"monitors": monitors}, ensure_ascii=False, indent=2) + "\n")
 
 
 def read_conf(path):
@@ -182,8 +225,7 @@ def read_conf(path):
             if text == "}":
                 name = block.get("monitor", "")
                 if MONITOR_OK.match(name) and block.get("path"):
-                    fit = block.get("fit_mode", "cover")
-                    monitors[name] = {"path": block["path"], "fit": fit if fit in FITS else "cover"}
+                    monitors[name] = {"path": block["path"], "fit": fit_norm(block.get("fit_mode", "cover"))}
                 block = None
             elif "=" in text:
                 key, _, value = text.partition("=")
@@ -208,53 +250,36 @@ def read_conf(path):
     return other, monitors
 
 
-def write_conf(path, other, monitors):
-    keep = [line for line in other if line.strip()]
-    if not any(line.strip().startswith("splash") for line in keep):
-        keep.append("splash = false")
-    if not any(line.strip().startswith("ipc") for line in keep):
-        keep.append("ipc = true")
-    body = "\n".join(keep) + "\n"
-    for name, row in monitors.items():
-        body += f"\nwallpaper {{\n\tmonitor = {name}\n\tpath = {row['path']}\n\tfit_mode = {row['fit']}\n}}\n"
-    atomic_write(path, body)
-
-
 def cmd_apply(path, monitor="", fit=""):
     if monitor and not MONITOR_OK.match(monitor):
         fail("refusing monitor name")
-    if fit and fit not in FITS:
-        fail("fit must be cover, contain, tile, or fill")
+    if fit and fit_norm(fit) != fit and fit != "tile":
+        fail("fit must be cover, contain, center, or fill")
     monitor = monitor or focused_monitor()
-    conf = conf_path()
-    other, monitors = read_conf(conf)
-    if not fit:
-        fit = monitors.get(monitor, {}).get("fit", "cover")
-    first = subprocess.run(
-        ["hyprctl", "hyprpaper", "wallpaper", f"{monitor},{path},{fit}"],
-        check=False,
-        capture_output=True,
-        text=True,
-        timeout=8,
-    )
-    if first.returncode != 0:
-        second = subprocess.run(
-            ["hyprctl", "hyprpaper", "wallpaper", f"{monitor},{path}"],
-            check=False,
-            capture_output=True,
-            text=True,
-            timeout=8,
-        )
-        if second.returncode != 0:
-            fail("hyprpaper did not accept the image")
+    monitors = read_state()
+    fit = fit_norm(fit or monitors.get(monitor, {}).get("fit", "cover"))
+    command = [
+        "awww", "img", "--outputs", monitor, "--resize", RESIZE[fit],
+        "--transition-type", "fade", "--transition-duration", FADE_SECONDS, path,
+    ]
+    try:
+        done = subprocess.run(command, check=False, capture_output=True, text=True, timeout=15)
+    except FileNotFoundError:
+        fail("awww is not installed")
+    except subprocess.TimeoutExpired:
+        fail("awww did not answer")
+    if done.returncode != 0:
+        detail = (done.stderr or done.stdout or "").strip().lower()
+        if "daemon" in detail or "socket" in detail or "connect" in detail:
+            fail("awww-daemon is not running")
+        fail("awww did not accept the image")
     monitors[monitor] = {"path": path, "fit": fit}
-    write_conf(conf, other, monitors)
+    write_state(monitors)
     emit({"ok": True, "path": path, "monitor": monitor, "fit": fit})
 
 
 def cmd_status():
-    _, monitors = read_conf(conf_path())
-    emit({"ok": True, "monitors": monitors})
+    emit({"ok": True, "monitors": read_state()})
 
 
 def unique_dest(root, name):

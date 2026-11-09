@@ -52,8 +52,9 @@ Nothing on those pages is saved until Apply.
 - **Wallpaper** (kept apart from the theme; switching themes never
   changes it):
   - **Monitor**: pick a monitor, see its wallpaper, and set its fit
-    (Cover, Contain, Tile, Fill). Each monitor keeps its own wallpaper and
-    fit in `hyprpaper.conf`; setting one leaves the others alone.
+    (Cover, Contain, Center, Fill). Each monitor keeps its own wallpaper and
+    fit in `state/wallpapers.json`; setting one leaves the others alone.
+    Wallpapers are set with awww; `awww-daemon` must be running.
   - **Wallpaper**: a folder of images; click one to set it on the monitor
     picked above. Rename (pencil) or delete (✕) files, and change the
     preview size.

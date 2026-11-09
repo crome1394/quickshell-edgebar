@@ -184,9 +184,11 @@ ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `them
   `BrightnessService` by their change signals; `OsdService.show()` is the
   way in. The popup (`OsdPanel`) exists only while it shows.
 - **Wallpaper**: `WallpaperService` lists the folder and applies through
-  `scripts/wallpaper.py`, which keeps each monitor's entry in
-  `hyprpaper.conf`. The picker (`panels/WallpaperPicker`) previews with
-  one `hyprctl` call and saves only on Enter.
+  `scripts/wallpaper.py`, which sets it with `awww img` and keeps each
+  monitor's entry in `state/wallpapers.json` (read once from an old
+  `hyprpaper.conf`). The picker (`panels/WallpaperPicker`) previews with
+  one `awww` call and saves only on Enter. `awww-daemon` (started by
+  Hyprland) restores the last wallpapers by itself.
 - **Display power and edges**: `DisplayService.setPower()` turns a monitor
   off (remembering its mode and workspaces) and on again in one
   `hyprctl eval`, then writes the monitors file from a fresh read.

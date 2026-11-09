@@ -37,7 +37,12 @@ Singleton {
         Config.touch()
     }
 
-    readonly property var fits: ["cover", "contain", "tile", "fill"]
+    readonly property var fits: ["cover", "contain", "center", "fill"]
+
+    // awww's --resize for each fit.
+    function resizeFor(fit) {
+        return ({ cover: "crop", contain: "fit", center: "no", fill: "stretch" })[String(fit || "")] || "crop"
+    }
 
     // The picker's saved options, cleaned.
     readonly property var picker: root.pickerFrom(Config.wallpaperPickerJson)

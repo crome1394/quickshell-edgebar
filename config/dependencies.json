@@ -168,11 +168,11 @@
             "ask": "no"
         },
         {
-            "name": "hyprpaper",
-            "pkg": "hyprpaper",
+            "name": "awww",
+            "pkg": "awww",
             "area": "Wallpaper",
             "need": "optional",
-            "use": "Set the wallpaper"
+            "use": "Set the wallpaper (awww-daemon must be running; Hyprland starts it)"
         },
         {
             "name": "timedatectl",

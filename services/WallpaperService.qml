@@ -4,13 +4,15 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
 import qs.config
+import qs.theme
 
-// Wallpaper folder and hyprpaper apply, per monitor. Processes start from
-// the Wallpaper tab, the picker, or IPC; nothing runs otherwise.
+// Wallpaper folder and apply, per monitor, through awww (awww-daemon must
+// be running; Hyprland starts it). Processes start from the Wallpaper
+// tab, the picker, or IPC; nothing runs otherwise.
 //
 // The picker (panels/WallpaperPicker.qml) previews an image with one
-// hyprctl call and saves only on Enter, through scripts/wallpaper.py,
-// which keeps every monitor's entry in hyprpaper.conf.
+// awww call and saves only on Enter, through scripts/wallpaper.py, which
+// keeps every monitor's entry in state/wallpapers.json.
 //
 // qs ipc call wallpaper toggle | open | close   the picker (Ctrl+Super+Space)
 // qs ipc call wallpaper next | previous         the next image on the focused monitor
@@ -18,7 +20,7 @@ import qs.config
 Singleton {
     id: root
 
-    // monitor → { path, fit }, from hyprpaper.conf.
+    // monitor → { path, fit }, from state/wallpapers.json.
     property var monitors: ({})
     property bool pickerOpen: false
     // The monitor the picker opened on.
@@ -83,7 +85,7 @@ Singleton {
         return row && WallpaperSettings.fits.indexOf(row.fit) >= 0 ? row.fit : "cover"
     }
 
-    // A monitor's wallpaper from hyprpaper.conf, else the last one set.
+    // A monitor's saved wallpaper, else the last one set.
     function pathFor(name) {
         const row = root.monitors[String(name || "")]
         return row && row.path ? String(row.path) : String(Config.wallpaperCurrent || "")
@@ -105,15 +107,15 @@ Singleton {
         }
     }
 
-    // Show an image on a monitor now, without saving it. One hyprctl call,
-    // fixed argv; a comma would split hyprctl's argument, so such a path
-    // is not previewed.
+    // Show an image on a monitor now, without saving it. One awww call,
+    // fixed argv, with a quick fade.
     function preview(path, monitor) {
         const file = String(path || "")
         const name = String(monitor || "")
-        if (!file.length || /[,\n\r]/.test(file) || !root.monitorOk(name))
+        if (file.charAt(0) !== "/" || /[\n\r]/.test(file) || !root.monitorOk(name))
             return
-        Quickshell.execDetached(["hyprctl", "hyprpaper", "wallpaper", name + "," + file + "," + root.fitFor(name)])
+        Quickshell.execDetached(["awww", "img", "--outputs", name, "--resize", WallpaperSettings.resizeFor(root.fitFor(name)),
+            "--transition-type", "fade", "--transition-duration", Theme.wallpaperPreviewFade, file])
     }
 
     // Set and save an image on one monitor (fit "" keeps its fit).
@@ -298,8 +300,8 @@ Singleton {
         function close(): void { root.closePicker() }
         function next(): void { root.cycle(1) }
         function previous(): void { root.cycle(-1) }
-        // Reads hyprpaper.conf again; a call right after start may show
-        // the previous reading.
+        // Reads the saved wallpapers again; a call right after start may
+        // show the previous reading.
         function status(): string {
             root.loadStatus()
             const names = Object.keys(root.monitors)

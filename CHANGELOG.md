@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **Wallpaper uses awww** instead of hyprpaper, whose 0.8.5 release leaked about 60 MB of video memory on every change (and the picker changes it on each preview). `scripts/wallpaper.py` sets wallpapers with `awww img` (a 1 s fade; previews fade in 0.3 s) and keeps each monitor's wallpaper and fit in `state/wallpapers.json`, read once from an old `hyprpaper.conf`. Fits are Cover, Contain, Center, and Fill; awww has no Tile, so a saved Tile becomes Center. `awww-daemon` must be running.
+
+- **Built-in launcher and App Library** (Pop!_OS style), with Settings → Applications → Launcher and App Library pages; each can be turned off to run your own command instead. "App Launcher" (pins) is now "Quick Launch". Side-bar pill icons stay upright. Recorder: region picking works again, and the button turns red while recording. Bar popups open beside their widget, closer to the bar.
+
 - **One place for transparency**: System → Transparency now sets the bar's own glass (Bar glass, with the per-bar list) and Menu glass (menus, Settings, readers, popups) beside the application levels, and the Transparency widget has Bar and Menus sliders. Glass is no longer part of a theme: it is saved apart (`glassJson` in `state/theme.json`), so switching themes never changes it, and theme cards preview with it. Reset makes everything solid. An older setup keeps its theme's glass until changed.
 
 - Cleanup: removed six unused Theme values, five unused functions (`DisplaySettings.isRejected`, `modeOk`; `WidgetService.setZone`, `zoneActive`, `barShown`), and the unused `widgetLayoutClassicJson` field. Shared helpers instead of copies: `Config.stepped()`, `ScreenService.screenNamed()`, `IconService.fileUrl()`, and `DisplaySettings.outputOk()` for monitor names. ARCHITECTURE.md covers the on-screen display, wallpaper picker, display power and edges, and the full IPC list.

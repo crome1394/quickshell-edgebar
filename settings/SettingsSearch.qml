@@ -27,7 +27,7 @@ Item {
             { tab: "widgets", section: "bars", title: "Widgets · Bars · Monitors", keys: "monitor monitors screen screens display multi multiple main primary every all" },
             { tab: "widgets", section: "activewindow", title: "Widgets · Active Window", keys: "active window corner width exclude title class" },
             { tab: "widgets", section: "stats", title: "Widgets · System Stats", keys: "cpu memory gpu vram combine separate text style font bold italic size color label percent value threshold click terminal btop" },
-            { tab: "appearance", section: "wallpaper", title: "Appearance · Wallpaper", keys: "wallpaper image hyprpaper folder" },
+            { tab: "appearance", section: "wallpaper", title: "Appearance · Wallpaper", keys: "wallpaper image awww swww folder fit" },
             { tab: "appearance", section: "theme", title: "Appearance · Theme", keys: "theme preset color colour accent alert tint glass light dark import export save palette look font size" },
             { tab: "applications", section: "search", title: "Applications · Launcher", keys: "launcher search pop rofi run calculator web shortcut terminal files find recent scripts history" },
             { tab: "applications", section: "library", title: "Applications · App Library", keys: "app library drawer grid folder pop applications menu" },

@@ -7,7 +7,7 @@ import qs.theme
 // Settings → Wallpaper → Monitor: pick a monitor, see its wallpaper, and
 // set how the image fits it. Clicking an image on this page sets it on the
 // monitor picked here. Each monitor keeps its own wallpaper and fit in
-// hyprpaper.conf. Changes save at once.
+// the bar's saved state. Changes save at once.
 Column {
     id: root
 
@@ -21,7 +21,7 @@ Column {
     readonly property var fitChoices: [
         { id: "cover", label: "Cover", tip: "Fill the screen, cropping the edges that do not fit" },
         { id: "contain", label: "Contain", tip: "Show the whole image, with bars where it does not fill" },
-        { id: "tile", label: "Tile", tip: "Repeat the image at its own size" },
+        { id: "center", label: "Center", tip: "Show the image at its own size in the middle" },
         { id: "fill", label: "Fill", tip: "Stretch to the screen, changing its shape" }
     ]
 

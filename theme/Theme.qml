@@ -236,6 +236,8 @@ Singleton {
     // Launcher (Pop Launcher style): a search box with results under it.
     // Recorder: how much the red lightens on hover (and darkens for its edge).
     readonly property real recordingHoverLift: 1.15
+    // Wallpaper picker: the fade, in seconds, as each highlighted image shows.
+    readonly property string wallpaperPreviewFade: "0.3"
     readonly property int searchWidth: 640
     readonly property int searchRowHeight: 52
     readonly property int searchIconPx: 32
