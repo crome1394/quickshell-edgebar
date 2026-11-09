@@ -173,9 +173,10 @@ esac
 [[ -r "$list" ]] || die "Cannot read $list"
 command -v python3 >/dev/null 2>&1 || die "python3 is needed to read the dependency list (install the 'python' package)."
 
-# Rows as tab-separated fields: name, pkg, need, scope, area, ask. Every
-# value is checked against a strict pattern, so nothing odd from the file
-# reaches a command line. SwayNC-only tools are never installed: the bar
+# Rows as tab-separated fields: name, pkg, need, scope, area, ask, from.
+# Every value is checked against a strict pattern, so nothing odd from the
+# file reaches a command line. A program with no package ("pkg": "") is
+# not installed here; its "from" link is printed instead. SwayNC-only tools are never installed: the bar
 # uses SwayNC when it is already there, and its own server otherwise.
 # NVIDIA-only tools are offered only when an NVIDIA card is present, and
 # laptop tools only when there is a battery.
@@ -203,12 +204,15 @@ for row in data.get(kind, []):
     scope = str(row.get("scope", "")) or "-"
     area = str(row.get("area", "Other"))
     ask = "n" if row.get("ask") == "no" else "y"
+    origin = str(row.get("from", ""))
+    if not re.match(r"^https://[A-Za-z0-9./_~:-]{1,200}$", origin):
+        origin = "-"
     if not safe.match(name) or (pkg and not safe.match(pkg)) or " " in pkg or not safe.match(area):
         print(f"skip\t{name!r}", file=sys.stderr)
         continue
     if kind == "services" and (" " in name or scope not in ("user", "system")):
         continue
-    print("\t".join([name, pkg or "-", need, scope, area, ask]))
+    print("\t".join([name, pkg or "-", need, scope, area, ask, origin]))
 PY
 }
 
@@ -228,9 +232,14 @@ declare -A opt_pkgs=() opt_names=() opt_default=()
 declare -a opt_order=()
 
 say "${bold}Programs${reset}"
-while IFS=$'\t' read -r name pkg need _ area ask_default; do
-    if command -v -- "$name" >/dev/null 2>&1; then
+while IFS=$'\t' read -r name pkg need _ area ask_default origin; do
+    if command -v -- "$name" >/dev/null 2>&1 || [[ -x "$HOME/.local/bin/$name" ]]; then
         say "  ${green}✓${reset} $name"
+        continue
+    fi
+    # Not packaged: say where it comes from, install nothing.
+    if [[ "$pkg" == "-" ]]; then
+        say "  ${red}✗${reset} $name ${dim}($need, $area, get it from ${origin})${reset}"
         continue
     fi
     say "  ${red}✗${reset} $name ${dim}($need, $area, package: $pkg)${reset}"

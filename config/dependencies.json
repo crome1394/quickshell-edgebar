@@ -217,12 +217,12 @@
             "use": "Read text for OCR capture (plus tesseract-data-<language>)"
         },
         {
-            "name": "satty",
-            "pkg": "satty",
+            "name": "tack",
+            "pkg": "",
+            "from": "https://github.com/crome1394/tack",
             "area": "Screenshot editor",
             "need": "optional",
-            "use": "Annotate screenshots (Capture settings also accept swappy, tensaku-edit, or Tack)",
-            "ask": "no"
+            "use": "Annotate and pin screenshots (Capture settings also accept satty, swappy, or tensaku-edit)"
         },
         {
             "name": "hypridle",

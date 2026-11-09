@@ -23,15 +23,16 @@
 #   edit-latest Open the most recent saved screenshot in the editor
 #
 # The completion notification is actionable, like Omarchy's: click the toast
-# (or Edit) to annotate in satty, or choose Open for the default image viewer.
+# (or Edit) to annotate in the editor (Tack first), or choose Open for the
+# default image viewer.
 #
 # `slurp` is accepted as a legacy alias for `both` (Omarchy's name).
 #
 # Settings come from ~/.config/hypr/capture.conf, written by the Quickshell
 # bar (Settings → Tools → Capture). Missing keys use the defaults below:
 #   screenshot_dir     save folder (default: XDG Pictures)
-#   screenshot_editor  program for the toast's Edit action (default: satty,
-#                      swappy, or tensaku-edit if installed)
+#   screenshot_editor  program for the toast's Edit action (default: tack,
+#                      satty, swappy, or tensaku-edit, the first installed)
 #   screenshot_freeze  1 freezes the screen while you select (needs hyprpicker)
 #   screenshot_notify  1 shows the "Screenshot saved" toast
 #
@@ -90,8 +91,8 @@ Actions:
 Command:
   edit-latest Open the most recent saved screenshot in the editor
 
-The completion toast is actionable: click it (or Edit) to annotate in satty,
-or choose Open for the default image viewer.
+The completion toast is actionable: click it (or Edit) to annotate in the
+editor (Tack first), or choose Open for the default image viewer.
 
 `slurp` is accepted as a legacy alias for `both` (Omarchy's name).
 
@@ -99,7 +100,8 @@ Environment:
   SCREENSHOT_DIR          Override the menu setting and XDG Pictures folder
   OMARCHY_SCREENSHOT_DIR  Backwards-compatible alias for SCREENSHOT_DIR
   SCREENSHOT_EDITOR       Executable opened by the notification's Edit action
-                          (default: satty, swappy, or tensaku-edit if installed)
+                          (default: tack, satty, swappy, or tensaku-edit,
+                          the first installed)
 EOF
 }
 
@@ -162,7 +164,12 @@ screenshot_editor() {
     printf '%s\n' "$editor"
     return 0
   fi
-  for editor in satty swappy tensaku-edit; do
+  # Tack installs to ~/.local/bin, which keybinds may not have on PATH.
+  if [[ ( -z $editor || $editor == tack ) && -x $HOME/.local/bin/tack ]]; then
+    printf '%s\n' tack
+    return 0
+  fi
+  for editor in tack satty swappy tensaku-edit; do
     if command -v "$editor" >/dev/null 2>&1; then
       printf '%s\n' "$editor"
       return 0
@@ -175,6 +182,9 @@ open_screenshot() {
   local file=$1 editor
   if editor=$(screenshot_editor); then
     case $editor in
+      tack | */tack)
+        open_in_tack "$file"
+        ;;
       satty)
         satty --filename "$file" --output-filename "$file" \
           --actions-on-enter save-to-clipboard --save-after-copy \

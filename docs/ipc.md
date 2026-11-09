@@ -26,6 +26,9 @@ hl.bind("SUPER + R", hl.dsp.exec_cmd("qs ipc call freshRss toggle"))
 | `overview toggle` · `open` · `close` | Workspace overview |
 | `overview desktop` · `all` | Windows in place / every workspace |
 | `overview next` · `prev` | Step cards while it is open |
+| `display toggle` · `on` · `off` | Every monitor except the main one off or on (Settings → System → Display) |
+| `display toggleMonitor <name>` · `onMonitor` · `offMonitor` | One monitor, e.g. `toggleMonitor HDMI-A-1` |
+| `display status` | Each monitor, on or off |
 | `wallpaper toggle` · `open` · `close` | The wallpaper picker strip on the focused monitor |
 | `wallpaper next` · `previous` | The next or previous image in the folder on the focused monitor |
 | `wallpaper status` | Each monitor's saved wallpaper and fit |

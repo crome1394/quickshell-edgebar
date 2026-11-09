@@ -59,6 +59,7 @@ Singleton {
     property alias topBarAlign: data.topBarAlign
     property alias barMonitorsJson: data.barMonitorsJson
     property alias displayInsetsJson: data.displayInsetsJson
+    property alias displayOffJson: data.displayOffJson
     property alias bottomBarAlign: data.bottomBarAlign
     property alias leftBarAlign: data.leftBarAlign
     property alias rightBarAlign: data.rightBarAlign
@@ -523,6 +524,9 @@ Singleton {
             // Monitor → { top, bottom, left, right } px kept clear for TV
             // overscan (DisplaySettings.insetsFor).
             property string displayInsetsJson: ""
+            // Monitors turned off in System → Display: name → { spec (to
+            // turn it back on as it was), workspaces (to move back) }.
+            property string displayOffJson: ""
             property string bottomBarAlign: "left"
             property string leftBarAlign: "left"
             property string rightBarAlign: "left"

@@ -272,7 +272,7 @@ def _screenshot_files() -> list[tuple[float, str]]:
 def _looks_like_capture(entry: dict) -> bool:
     app = str(entry.get("app") or "").lower()
     summary = str(entry.get("summary") or "").lower()
-    if app in ("screenshot", "satty", "swappy", "grim"):
+    if app in ("screenshot", "tack", "satty", "swappy", "grim"):
         return True
     return "screenshot" in app or "screenshot" in summary
 

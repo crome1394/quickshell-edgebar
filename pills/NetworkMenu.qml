@@ -62,7 +62,8 @@ Item {
         return [
             { id: "editor", label: "Connection editor", tip: "Open the connection editor" },
             { id: "dns", label: "Flush DNS", tip: "Flush the system DNS cache" },
-            { id: "ip", label: "Refresh IP", tip: "Reapply the active connection" }
+            { id: "ip", label: "Refresh IP", tip: "Reapply the active connection" },
+            { id: "close", label: "Close", tip: "Close this menu" }
         ]
     }
 
@@ -73,6 +74,8 @@ Item {
             NetworkService.flushDns()
         else if (id === "ip")
             NetworkService.refreshIp()
+        else if (id === "close")
+            root.closeRequested()
     }
 
     function headerIcon() {
@@ -228,7 +231,7 @@ Item {
             spacing: Theme.tabGap
 
             Text {
-                width: parent.width - closeBox.width - Theme.tabGap
+                width: parent.width
                 height: Theme.fieldHeight
                 verticalAlignment: Text.AlignVCenter
                 text: "Network"
@@ -236,38 +239,6 @@ Item {
                 font.family: root.theme.uiFont
                 font.pixelSize: root.theme.fontPx
                 font.bold: true
-            }
-
-            Rectangle {
-                id: closeBox
-                width: Theme.fieldHeight
-                height: Theme.fieldHeight
-                radius: Theme.radiusSm
-                color: closeMouse.containsMouse ? root.theme.colHover : root.theme.colSurface
-                border.width: Theme.borderWidth
-                border.color: root.theme.colBorder
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "✕"
-                    color: root.theme.colFg
-                    font.family: root.theme.uiFont
-                    font.pixelSize: root.theme.fontPx
-                    font.bold: true
-                }
-
-                MouseArea {
-                    id: closeMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.closeRequested()
-
-                    HoverTip {
-                        message: "Close"
-                        show: closeMouse.containsMouse
-                    }
-                }
             }
         }
 
@@ -1039,7 +1010,7 @@ Item {
         Text {
             width: parent.width
             wrapMode: Text.WordWrap
-            text: "Right-click the pill to toggle Wi-Fi. Escape or ✕ closes this menu."
+            text: "Right-click the pill to toggle Wi-Fi. Escape or Close closes this menu."
             color: root.theme.colFgMuted
             font.family: root.theme.uiFont
             font.pixelSize: root.theme.smallPx
@@ -1064,7 +1035,8 @@ Item {
                 id: foot
                 required property var modelData
                 required property int index
-                width: Math.max(1, Math.floor((footerRow.width - Theme.tabGap * 3) / 3))
+                readonly property int count: root.footerActions().length
+                width: Math.max(1, Math.floor((footerRow.width - Theme.tabGap * (foot.count - 1)) / foot.count))
                 height: Theme.fieldHeight
                 radius: Theme.radiusSm
                 color: footMouse.containsMouse ? root.theme.colHover : root.theme.colSurface

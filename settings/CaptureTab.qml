@@ -163,7 +163,7 @@ Item {
                         PathField {
                             width: parent.width - editorBrowse.width - parent.spacing
                             value: root.draft.shotEditor
-                            placeholderText: "No editor found: install satty or swappy, or enter one"
+                            placeholderText: "No editor found: install Tack (or satty, swappy), or enter one"
                             bad: root.editorBad
                             tip: "Opens when you click the toast or press Edit. It gets the image path as its only argument."
                             onEdited: (text) => CaptureSettings.editor.set("shotEditor", text)

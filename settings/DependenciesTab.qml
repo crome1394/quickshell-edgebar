@@ -214,7 +214,7 @@ Item {
                             need: modelData.need
                             known: root.dep.checkedOnce
                             ok: !!root.dep.found[modelData.name]
-                            detail: root.dep.found[modelData.name] || ("Install " + modelData.pkg)
+                            detail: root.dep.found[modelData.name] || (String(modelData.pkg || "").length ? "Install " + modelData.pkg : "Get it from " + String(modelData.from || "its project page"))
                         }
                     }
                 }

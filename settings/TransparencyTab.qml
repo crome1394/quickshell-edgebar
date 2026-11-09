@@ -351,7 +351,7 @@ Item {
         undoEnabled: OpacitySettings.editor.canUndo
         applyTip: "Save and apply the levels"
         undoTip: "Drop an unsaved draft, or put back the last applied one"
-        resetTip: "All applications to the theme default and only the Satty override. Apply saves it."
+        resetTip: "All applications to the theme default and only the Tack override (screenshots stay solid). Apply saves it."
         onApplyClicked: OpacitySettings.editor.apply()
         onUndoClicked: OpacitySettings.editor.undo()
         onResetClicked: OpacitySettings.editor.reset()

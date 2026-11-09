@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Tack replaces satty** as the screenshot editor dependency: the Dependencies page and `install-deps.sh` list Tack (not packaged, so they point to https://github.com/crome1394/tack instead of installing), capture-screenshot and Tools → Capture try Tack first (also from `~/.local/bin` when that is off PATH), then satty, swappy, tensaku-edit, and Transparency's default "keep solid" rule is for Tack's editor window. A dependency entry may now have `"pkg": ""` with a `"from"` link.
+
+- Network and Bluetooth menus: **Close** sits along the bottom with the other buttons, like the audio menu, instead of an ✕ at the top.
+
+- System → Display → **Turn off / Turn on** for any monitor but the main one, as if unplugged: windows move over, the pointer cannot go there, and it stays off after a restart (written as `disabled = true` in the monitors file). On brings back its mode, place, and the workspaces that were on it, with the one it was showing on screen. `qs ipc call display toggle|on|off` (every secondary monitor) and `toggleMonitor|onMonitor|offMonitor <name>`; `display status`. Monitor lines now say `disabled = false`, since Hyprland keeps a monitor off without it.
+
 - System → Display → **Edges**: keep space clear around a monitor for a TV that crops its picture (overscan), on all edges or each one, with a **Show guide** frame to match against the TV. Invisible background-layer strips reserve the space (`panels/ScreenInsets.qml`), so bars, popups, and windows all land inside, on any GPU. Saved per monitor in `displayInsetsJson`. New: `settings/DisplayInsetOptions.qml`, `panels/InsetGuide.qml`.
 
 - Widgets → Bars: an **M** button on each bar puts it on a monitor of its own (or every bar monitor), from a small list of the connected monitors; an unplugged choice falls back to the main monitor. Saved with Apply (`barMonitorsJson`); `ScreenService.edgeOn()`, `barHostScreens`.

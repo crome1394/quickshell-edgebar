@@ -45,7 +45,7 @@ Singleton {
     })
 
     // The editors capture-screenshot looks for when none is set, in its order.
-    readonly property var editorChoices: ["satty", "swappy", "tensaku-edit"]
+    readonly property var editorChoices: ["tack", "satty", "swappy", "tensaku-edit"]
 
     // Last values read from capture.conf, already normalized. Set by the service.
     property var saved: root.normalize({})

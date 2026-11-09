@@ -1,6 +1,7 @@
 pragma Singleton
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Io
 import qs.config
 import qs.theme
@@ -17,6 +18,14 @@ import qs.theme
 // Keep saves to a monitors file only when one already carries the
 // "Managed by Quickshell" marker; otherwise the change lasts until
 // Hyprland restarts. Every command is a fixed argv, never a shell.
+//
+// A monitor can be turned off and on (setPower), for a second screen used
+// for other things. Off remembers its mode and the workspaces on it; on
+// brings both back. The main monitor and the last one on stay on. No
+// countdown: turning it back on is one call.
+//   qs ipc call display toggle | on | off        every monitor but the main one
+//   qs ipc call display toggleMonitor <name>     one monitor (also onMonitor, offMonitor)
+//   qs ipc call display status                   one line per monitor
 Singleton {
     id: root
 
@@ -55,6 +64,127 @@ Singleton {
 
     property int verifyTries: 0
     property bool useKeyword: false
+
+    // Power changes waiting for a fresh monitor list: [{ name, on }].
+    property var powerQueue: []
+    // After turning one on: { name, workspaces, active, focus } until it is up.
+    property var restoring: null
+    // Write the monitors file after the next fresh read (an off/on).
+    property bool pendingSave: false
+
+    function mainName() {
+        return ScreenService.mainName
+    }
+
+    // Monitors other than the main one, on or off.
+    function secondaryNames() {
+        return root.monitors.map((m) => m.name).filter((n) => n !== root.mainName())
+    }
+
+    // on: true, false, or "toggle". name "" means every secondary monitor.
+    // Reads the monitors first, so it works with the page closed.
+    function setPower(name, on) {
+        const key = String(name || "")
+        if (key.length && !DisplaySettings.outputOk(key))
+            return "bad monitor name"
+        root.powerQueue = root.powerQueue.concat([{ name: key, on: on }])
+        if (!root.managedFile.length)
+            root.findFile(0)
+        root.refresh()
+        return "ok"
+    }
+
+    function runPowerQueue() {
+        const queue = root.powerQueue
+        root.powerQueue = []
+        for (let i = 0; i < queue.length; i++) {
+            const job = queue[i]
+            const names = job.name.length ? [job.name] : root.secondaryNames()
+            if (job.on === "toggle" && !job.name.length) {
+                // Every secondary together: off if any is on, else all on.
+                const anyOn = names.some((n) => { const m = root.monitorNamed(n); return m && !m.disabled })
+                names.forEach((n) => root.powerOne(n, !anyOn))
+                continue
+            }
+            names.forEach((n) => {
+                const m = root.monitorNamed(n)
+                root.powerOne(n, job.on === "toggle" ? !!(m && m.disabled) : !!job.on)
+            })
+        }
+    }
+
+    function powerOne(name, on) {
+        const m = root.monitorNamed(name)
+        if (!m) {
+            root.notice = name + " is not connected."
+            return
+        }
+        if (!on && m.disabled || on && !m.disabled)
+            return
+        if (!on) {
+            if (name === root.mainName()) {
+                root.notice = name + " is the main monitor; make another one main first (Widgets → Bars → Monitors)."
+                return
+            }
+            if (root.monitors.filter((x) => !x.disabled).length < 2) {
+                root.notice = "That is the only monitor on."
+                return
+            }
+            const spaces = (Hyprland.workspaces ? Hyprland.workspaces.values : [])
+                .filter((w) => w && w.id > 0 && w.monitor && String(w.monitor.name) === name)
+                .map((w) => w.id)
+            const hmon = (Hyprland.monitors ? Hyprland.monitors.values : []).find((x) => x && String(x.name) === name)
+            const active = hmon && hmon.activeWorkspace ? hmon.activeWorkspace.id : 0
+            DisplaySettings.setOff(name, { spec: root.specFor(m, root.liveMode(m), m.depth), workspaces: spaces, active: active })
+            root.runLua([DisplaySettings.luaMonitorOff(name)])
+            root.notice = name + " is off. Its windows moved to the other monitors."
+        } else {
+            const record = DisplaySettings.offMonitors[name] || { spec: null, workspaces: [], active: 0 }
+            const line = record.spec ? DisplaySettings.luaMonitor(record.spec) : DisplaySettings.luaMonitorAuto(name)
+            const focused = Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : 0
+            root.restoring = { name: name, workspaces: record.workspaces, active: record.active, focus: focused }
+            DisplaySettings.setOff(name, null)
+            root.runLua([line])
+            powerSettle.restart()
+            root.notice = name + " is on."
+        }
+    }
+
+    // Workspaces that were on the monitor go back; the one it was showing
+    // is shown again (focusing it puts it on screen), then focus returns.
+    function finishRestore() {
+        const job = root.restoring
+        root.restoring = null
+        if (!job)
+            return
+        const lines = job.workspaces.map((id) => DisplaySettings.luaMoveWorkspace(id, job.name)).filter((l) => l.length)
+        if (job.active > 0 && job.workspaces.indexOf(job.active) >= 0)
+            lines.push("hl.dispatch(hl.dsp.focus({ workspace = " + Math.round(job.active) + " }))")
+        if (job.focus > 0)
+            lines.push("hl.dispatch(hl.dsp.focus({ workspace = " + Math.round(job.focus) + " }))")
+        if (lines.length) {
+            root.runLua(lines)
+        } else {
+            root.pendingSave = true
+            root.refresh()
+        }
+    }
+
+    // One hyprctl eval with these Lua lines; then the monitors are read
+    // again and, for an off/on, the monitors file is updated.
+    function runLua(lines) {
+        const list = lines.filter((l) => String(l || "").length)
+        if (!list.length)
+            return
+        powerProc.queue = powerProc.queue.concat([list.join("\n")])
+        if (!powerProc.running)
+            powerProc.next()
+    }
+
+    // Save what runs now (used after an off/on).
+    function saveCurrent() {
+        root.save([])
+    }
 
     function retain() {
         root.watchers += 1
@@ -328,15 +458,20 @@ Singleton {
             return
         }
         const specs = []
+        const off = []
         for (let i = 0; i < root.monitors.length; i++) {
             const m = root.monitors[i]
-            if (m.disabled)
+            // A monitor that is off is written as off: left out, Hyprland
+            // would turn it on again at its own default place.
+            if (m.disabled || DisplaySettings.isOff(m.name)) {
+                off.push(m.name)
                 continue
+            }
             const mine = kept.find((k) => k.output === m.name)
             specs.push(mine ? mine : root.specFor(m, root.liveMode(m), m.depth))
         }
         const stamp = new Date().toISOString()
-        const text = DisplaySettings.monitorsFile(specs, stamp)
+        const text = DisplaySettings.monitorsFile(specs, stamp, off)
         if (!text.length) {
             root.error = "Applied, but the monitors file was not written: a value did not pass its check."
             return
@@ -395,8 +530,72 @@ Singleton {
             }
             root.monitorSerial = monitorProc.startedAt
             root.readMonitors(monitorOut.text)
+            if (root.pendingSave && monitorProc.startedAt === root.applySerial) {
+                root.pendingSave = false
+                root.saveCurrent()
+            }
+            if (root.powerQueue.length)
+                root.runPowerQueue()
             if (root.pending && !confirmTimer.running)
                 root.verify()
+        }
+    }
+
+    // Runs power changes one after another.
+    Process {
+        id: powerProc
+        property var queue: []
+
+        function next() {
+            if (!powerProc.queue.length)
+                return
+            const script = powerProc.queue[0]
+            powerProc.queue = powerProc.queue.slice(1)
+            powerProc.command = ["hyprctl", "eval", script]
+            powerProc.running = true
+        }
+
+        onExited: {
+            if (powerProc.queue.length) {
+                powerProc.next()
+                return
+            }
+            // Turning one on waits for powerSettle; otherwise read the
+            // monitors again shortly, then save what they show.
+            if (!root.restoring)
+                readAfter.restart()
+        }
+    }
+
+    Timer {
+        id: powerSettle
+        interval: Theme.displayPowerSettleMs
+        onTriggered: root.finishRestore()
+    }
+
+    // Hyprland needs a moment before its monitor list shows the change.
+    Timer {
+        id: readAfter
+        interval: Theme.displayPowerSettleMs / 2
+        onTriggered: {
+            root.pendingSave = true
+            root.refresh()
+        }
+    }
+
+    IpcHandler {
+        target: "display"
+        function toggle(): string { return root.setPower("", "toggle") }
+        function on(): string { return root.setPower("", true) }
+        function off(): string { return root.setPower("", false) }
+        function toggleMonitor(name: string): string { return root.setPower(name, "toggle") }
+        function onMonitor(name: string): string { return root.setPower(name, true) }
+        function offMonitor(name: string): string { return root.setPower(name, false) }
+        function status(): string {
+            root.refresh()
+            if (!root.monitors.length)
+                return "reading monitors; ask again in a moment"
+            return root.monitors.map((m) => m.name + (m.disabled ? ": off" : ": on") + (m.name === root.mainName() ? " (main)" : "")).join("\n")
         }
     }
 

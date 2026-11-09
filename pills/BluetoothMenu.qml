@@ -233,7 +233,7 @@ Item {
             spacing: Theme.tabGap
 
             Text {
-                width: parent.width - closeBox.width - Theme.tabGap
+                width: parent.width
                 height: Theme.fieldHeight
                 verticalAlignment: Text.AlignVCenter
                 text: "Bluetooth"
@@ -241,38 +241,6 @@ Item {
                 font.family: root.theme.uiFont
                 font.pixelSize: root.theme.fontPx
                 font.bold: true
-            }
-
-            Rectangle {
-                id: closeBox
-                width: Theme.fieldHeight
-                height: Theme.fieldHeight
-                radius: Theme.radiusSm
-                color: closeMouse.containsMouse ? root.theme.colHover : root.theme.colSurface
-                border.width: Theme.borderWidth
-                border.color: root.theme.colBorder
-
-                Text {
-                    anchors.centerIn: parent
-                    text: "✕"
-                    color: root.theme.colFg
-                    font.family: root.theme.uiFont
-                    font.pixelSize: root.theme.fontPx
-                    font.bold: true
-                }
-
-                MouseArea {
-                    id: closeMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: root.closeRequested()
-
-                    HoverTip {
-                        message: "Close"
-                        show: closeMouse.containsMouse
-                    }
-                }
             }
         }
 
@@ -456,8 +424,11 @@ Item {
         spacing: Theme.tabGap
         height: Theme.fieldHeight
 
+        // Four equal buttons: Scan, Discoverable, Power, Close.
+        readonly property real cell: Math.max(1, (footerRow.width - Theme.tabGap * 3) / 4)
+
         Rectangle {
-            width: Math.max(1, (footerRow.width - Theme.tabGap * 2) / 3)
+            width: footerRow.cell
             height: Theme.fieldHeight
             radius: Theme.radiusSm
             color: scanMouse.containsMouse ? root.theme.colHover : root.theme.colSurface
@@ -492,7 +463,7 @@ Item {
         }
 
         Rectangle {
-            width: Math.max(1, (footerRow.width - Theme.tabGap * 2) / 3)
+            width: footerRow.cell
             height: Theme.fieldHeight
             radius: Theme.radiusSm
             color: discoverMouse.containsMouse ? root.theme.colHover : root.theme.colSurface
@@ -530,7 +501,7 @@ Item {
         }
 
         Rectangle {
-            width: Math.max(1, (footerRow.width - Theme.tabGap * 2) / 3)
+            width: footerRow.cell
             height: Theme.fieldHeight
             radius: Theme.radiusSm
             color: powerMouse.containsMouse ? root.theme.colHover : root.theme.colSurface
@@ -563,6 +534,40 @@ Item {
                 HoverTip {
                     message: "Turn the Bluetooth adapter on or off"
                     show: powerMouse.containsMouse
+                }
+            }
+        }
+
+        Rectangle {
+            width: footerRow.cell
+            height: Theme.fieldHeight
+            radius: Theme.radiusSm
+            color: closeMouse.containsMouse ? root.theme.colHover : root.theme.colSurface
+            border.width: Theme.borderWidth
+            border.color: root.theme.colBorder
+
+            Text {
+                anchors.centerIn: parent
+                width: parent.width - Theme.space
+                horizontalAlignment: Text.AlignHCenter
+                elide: Text.ElideRight
+                text: "Close"
+                color: root.theme.colFg
+                font.family: root.theme.uiFont
+                font.pixelSize: root.theme.smallPx
+                font.bold: true
+            }
+
+            MouseArea {
+                id: closeMouse
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onClicked: root.closeRequested()
+
+                HoverTip {
+                    message: "Close this menu"
+                    show: closeMouse.containsMouse
                 }
             }
         }

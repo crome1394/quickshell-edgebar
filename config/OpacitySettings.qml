@@ -102,7 +102,7 @@ Singleton {
     function defaults() {
         return root.normalize({
             all: DefaultTheme.opacityQuickshell,
-            overrides: [{ cls: "com.gabm.satty", label: "Satty", active: DefaultTheme.opacitySatty, inactive: DefaultTheme.opacitySatty, on: true }]
+            overrides: [{ cls: "io.github.crome1394.Tack", label: "Tack", active: DefaultTheme.opacitySatty, inactive: DefaultTheme.opacitySatty, on: true }]
         })
     }
 

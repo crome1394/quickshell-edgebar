@@ -409,6 +409,9 @@ Singleton {
     readonly property int displayInsetMax: 200
     readonly property int displayInsetStep: 2
     readonly property int displayGuidePx: 3
+    // After turning a monitor on, how long to wait for Hyprland to bring it
+    // up before moving its workspaces back.
+    readonly property int displayPowerSettleMs: 1200
     // The open Arrangement column's width range.
     readonly property int displayArrangeMin: 300
     readonly property int displayArrangeMax: 460

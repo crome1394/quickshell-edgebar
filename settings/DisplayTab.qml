@@ -259,7 +259,7 @@ Item {
                                         delegate: ChipButton {
                                             id: monChip
                                             required property var modelData
-                                            label: monChip.modelData.name
+                                            label: monChip.modelData.name + (monChip.modelData.disabled ? " (off)" : "")
                                             active: monChip.modelData.name === root.selName
                                             enabled: !root.waiting
                                             tip: monChip.modelData.label + (monChip.modelData.disabled ? " (off)" : "")
@@ -267,7 +267,60 @@ Item {
                                         }
                                     }
                                 }
+
+                                // On / off, for a second screen used for other things.
+                                Row {
+                                    visible: root.monitors.length > 1 && !!root.monitor
+                                    width: parent.width
+                                    spacing: Theme.space
+
+                                    ChipButton {
+                                        id: powerChip
+                                        readonly property bool isMain: !!root.monitor && root.monitor.name === ScreenService.mainName
+                                        label: root.monitor && root.monitor.disabled ? "Turn on" : "Turn off"
+                                        bold: true
+                                        active: !!root.monitor && root.monitor.disabled
+                                        enabled: !root.waiting && !DisplayService.busy && (!powerChip.isMain || (root.monitor && root.monitor.disabled))
+                                        opacity: enabled ? 1 : 0.5
+                                        tip: powerChip.isMain
+                                            ? "The main monitor stays on. Make another one main first (Widgets → Bars → Monitors)."
+                                            : (root.monitor && root.monitor.disabled
+                                                ? "Use " + root.monitor.name + " again, with its mode, place, and workspaces as before"
+                                                : "Stop using " + (root.monitor ? root.monitor.name : "it") + ", as if unplugged: its windows move over and the pointer cannot go there. Stays off after a restart.")
+                                        onClicked: DisplayService.setPower(root.monitor.name, root.monitor.disabled)
+                                    }
+
+                                    Text {
+                                        width: parent.width - powerChip.width - parent.spacing
+                                        height: powerChip.height
+                                        verticalAlignment: Text.AlignVCenter
+                                        elide: Text.ElideRight
+                                        text: "For a key: qs ipc call display toggle"
+                                        color: Theme.subtext
+                                        font.family: Theme.uiFont
+                                        font.pixelSize: Theme.smallPx
+
+                                        HoverHandler {
+                                            id: powerHint
+                                        }
+
+                                        HoverTip {
+                                            message: "qs ipc call display toggle turns every monitor but the main one off or on; qs ipc call display toggleMonitor " + (root.monitor ? root.monitor.name : "HDMI-A-1") + " does just that one."
+                                            show: powerHint.hovered
+                                        }
+                                    }
+                                }
                             }
+                        }
+
+                        Text {
+                            visible: !!root.monitor && root.monitor.disabled
+                            width: parent.width
+                            wrapMode: Text.WordWrap
+                            text: root.monitor ? root.monitor.name + " is off. Turn it on to change its mode or edges." : ""
+                            color: Theme.subtext
+                            font.family: Theme.uiFont
+                            font.pixelSize: Theme.fontPx
                         }
 
                         Text {
@@ -462,7 +515,7 @@ Item {
                         }
 
                         DisplayInsetOptions {
-                            visible: root.selName.length > 0
+                            visible: root.selName.length > 0 && !(root.monitor && root.monitor.disabled)
                             width: parent.width
                             monitor: root.selName
                         }

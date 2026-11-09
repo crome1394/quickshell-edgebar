@@ -36,6 +36,9 @@ ShellRoot {
     // Registers the wallpaper IPC target (picker, next, previous). Nothing
     // runs until one is used.
     property bool wallpaperWatch: WallpaperService.pickerOpen
+    // Registers the display IPC target (turn a monitor off or on). Nothing
+    // runs until it is used or the Display page opens.
+    property bool displayWatch: DisplayService.busy
 
     // The one tooltip window every bar widget shares (TipService).
     BarTipHost {}

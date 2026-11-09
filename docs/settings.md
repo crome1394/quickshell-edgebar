@@ -174,6 +174,14 @@ only while it shows; clicks pass through it.
   back. A green line marks where two monitors touch, and the text below
   says how long it is: the pointer can cross only there, so a shorter
   monitor beside a taller one leaves part of the taller one's edge closed.
+- **Turn off / Turn on** (in Display, for the monitor picked at the top):
+  stop using a second screen, as if it were unplugged, for a TV or
+  monitor you use for other things. Its windows move to the other
+  monitors and the pointer cannot go there. It stays off after a restart
+  (written as disabled in the monitors file). Turning it on brings back
+  its mode, place, and the workspaces that were on it. The main monitor
+  and the last one on stay on. For a key: `qs ipc call display toggle`
+  (every monitor but the main one).
 - **Edges** (in Display, for the monitor picked at the top): for a TV that
   crops the edges of the picture (overscan). Best fixed on the TV itself
   (often Picture Size → Fit to Screen, or Just Scan, sometimes only with

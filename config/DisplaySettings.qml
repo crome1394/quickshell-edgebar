@@ -192,8 +192,10 @@ Singleton {
         const transform = Math.round(Number(spec.transform) || 0)
         if (!isFinite(x) || !isFinite(y) || !(scale >= 0.25 && scale <= 4) || transform < 0 || transform > 7)
             return ""
+        // disabled = false: a monitor once turned off stays off without it.
         const parts = [
             "output = \"" + spec.output + "\"",
+            "disabled = false",
             "mode = \"" + mode.mode + "\"",
             "position = \"" + x + "x" + y + "\"",
             "scale = " + scale.toFixed(2),
@@ -203,6 +205,65 @@ Singleton {
         if (transform)
             parts.push("transform = " + transform)
         return "hl.monitor({ " + parts.join(", ") + " })"
+    }
+
+    // A monitor turned off: Hyprland drops it from the layout and moves its
+    // windows to the others.
+    function luaMonitorOff(output) {
+        return root.outputOk(output) ? "hl.monitor({ output = \"" + output + "\", disabled = true })" : ""
+    }
+
+    // Turned on with no saved mode: Hyprland's preferred mode, placed
+    // automatically.
+    function luaMonitorAuto(output) {
+        return root.outputOk(output) ? "hl.monitor({ output = \"" + output + "\", disabled = false, mode = \"preferred\", position = \"auto\", scale = 1 })" : ""
+    }
+
+    // Move a numbered workspace to a monitor.
+    function luaMoveWorkspace(id, output) {
+        const n = Math.round(Number(id))
+        if (!(n >= 1 && n <= 999) || !root.outputOk(output))
+            return ""
+        return "hl.dispatch(hl.dsp.workspace.move({ workspace = \"" + n + "\", monitor = \"" + output + "\" }))"
+    }
+
+    // Monitors turned off here, saved: name → { spec, workspaces, active
+    // (the one it was showing) }.
+    readonly property var offMonitors: root.offFrom(Config.displayOffJson)
+
+    function offFrom(text) {
+        let raw = {}
+        try {
+            const t = String(text || "").trim()
+            raw = t.length ? JSON.parse(t) : {}
+        } catch (e) {
+            raw = {}
+        }
+        const out = {}
+        for (const name in raw) {
+            if (!root.outputOk(name) || !raw[name] || typeof raw[name] !== "object")
+                continue
+            const spec = raw[name].spec && root.luaMonitor(raw[name].spec).length ? raw[name].spec : null
+            const ws = Array.isArray(raw[name].workspaces) ? raw[name].workspaces.map(Number).filter((n) => n >= 1 && n <= 999) : []
+            const active = Math.round(Number(raw[name].active))
+            out[name] = { spec: spec, workspaces: ws, active: active >= 1 && active <= 999 ? active : 0 }
+        }
+        return out
+    }
+
+    function isOff(name) {
+        return root.offMonitors[String(name || "")] !== undefined
+    }
+
+    function setOff(name, record) {
+        const next = Object.assign({}, root.offMonitors)
+        if (record)
+            next[name] = record
+        else
+            delete next[name]
+        Config.saveFields(() => {
+            Config.displayOffJson = JSON.stringify(root.offFrom(JSON.stringify(next)))
+        })
     }
 
     // Whole monitors.lua text for these monitors, or "" when one is off.
@@ -287,10 +348,19 @@ Singleton {
         return ""
     }
 
-    function monitorsFile(specs, stamp) {
+    // offNames: monitors written as disabled, so they stay off after a
+    // restart.
+    function monitorsFile(specs, stamp, offNames) {
         const blocks = []
         for (let i = 0; i < specs.length; i++) {
             const line = root.luaMonitor(specs[i])
+            if (!line.length)
+                return ""
+            blocks.push(line)
+        }
+        const off = Array.isArray(offNames) ? offNames : []
+        for (let i = 0; i < off.length; i++) {
+            const line = root.luaMonitorOff(off[i])
             if (!line.length)
                 return ""
             blocks.push(line)

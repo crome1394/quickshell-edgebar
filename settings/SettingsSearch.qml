@@ -44,13 +44,13 @@ Item {
             { tab: "notifications", section: "notifications", title: "Notifications · History", keys: "notification history bell counter dnd expand stagger boot" },
             { tab: "notifications", section: "osd", title: "Notifications · On-Screen Display", keys: "osd on-screen display volume popup swayosd mute microphone mic media track song play pause cover brightness sound click symbol icon" },
             { tab: "system", section: "dependencies", title: "System · Dependencies", keys: "dependencies packages programs fonts services missing install reinstall check" },
-            { tab: "system", section: "transparency", title: "System · Transparency", keys: "transparency opacity transparent dim glass override satty window application" },
+            { tab: "system", section: "transparency", title: "System · Transparency", keys: "transparency opacity transparent dim glass override tack satty window application" },
             { tab: "system", section: "display", title: "System · Display", keys: "display monitor resolution screen refresh rate hz bit depth 10-bit color mode" },
             { tab: "tools", section: "screensaver", title: "Tools · Screensaver", keys: "screensaver idle hypridle timeout inhibit fullscreen video program script brightness dim ddcutil" },
             { tab: "tools", section: "recording", title: "Tools · Recording", keys: "record recording screen video capture gpu-screen-recorder av1 hevc codec folder fps audio" },
             { tab: "tools", section: "nightlight", title: "Tools · Night Light", keys: "night light blue light warm temperature kelvin hyprsunset schedule evening" },
             { tab: "tools", section: "clipboard", title: "Tools · Clipboard", keys: "clipboard history copy paste cliphist clip snippets viewer" },
-            { tab: "tools", section: "capture", title: "Tools · Capture", keys: "capture screenshot screen shot print grim slurp freeze ocr text tesseract language satty editor folder keybind" }
+            { tab: "tools", section: "capture", title: "Tools · Capture", keys: "capture screenshot screen shot print grim slurp freeze ocr text tesseract language tack satty editor folder keybind" }
         ]
     }
 

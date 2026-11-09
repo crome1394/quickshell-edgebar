@@ -230,7 +230,8 @@ Singleton {
     // `which` prints the path of each editor it finds, in argument order.
     Process {
         id: editorProc
-        command: ["which"].concat(CaptureSettings.editorChoices)
+        // Tack also counts where cargo installs it, off some PATHs.
+        command: ["which"].concat(CaptureSettings.editorChoices).concat([String(Quickshell.env("HOME") || "") + "/.local/bin/tack"])
         stdout: StdioCollector {
             id: editorOut
             waitForEnd: true
