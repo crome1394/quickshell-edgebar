@@ -70,7 +70,7 @@ Singleton {
     }
 
     function monitorOk(name) {
-        return /^[A-Za-z0-9_.-]{1,64}$/.test(String(name || ""))
+        return DisplaySettings.outputOk(name)
     }
 
     function focusedName() {

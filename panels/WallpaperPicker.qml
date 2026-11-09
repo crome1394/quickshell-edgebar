@@ -31,20 +31,6 @@ PanelWindow {
     // land on the current image.
     property bool moved: false
 
-    function screenFor(name) {
-        const list = Quickshell.screens
-        for (let i = 0; i < list.length; i++) {
-            if (String(list[i].name) === name)
-                return list[i]
-        }
-        return ScreenService.mainScreen
-    }
-
-    // Each part encoded, so a #, %, or space in a name stays part of it.
-    function fileUrl(path) {
-        return "file://" + String(path).split("/").map(encodeURIComponent).join("/")
-    }
-
     function indexOfPath(path) {
         for (let i = 0; i < root.shown.length; i++) {
             if (String(root.shown[i].path) === path)
@@ -118,7 +104,7 @@ PanelWindow {
         }
     }
 
-    screen: root.screenFor(root.monitor)
+    screen: ScreenService.screenNamed(root.monitor) || ScreenService.mainScreen
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
@@ -284,7 +270,7 @@ PanelWindow {
                         Image {
                             anchors.fill: parent
                             anchors.margins: frame.border.width
-                            source: root.fileUrl(String(tile.modelData.path))
+                            source: IconService.fileUrl(String(tile.modelData.path))
                             fillMode: Image.PreserveAspectCrop
                             asynchronous: true
                             cache: false

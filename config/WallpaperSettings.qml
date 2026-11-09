@@ -42,10 +42,6 @@ Singleton {
     // The picker's saved options, cleaned.
     readonly property var picker: root.pickerFrom(Config.wallpaperPickerJson)
 
-    function stepped(value, low, high, step, fallback) {
-        const n = Math.round(Number(value) / step) * step
-        return n >= low && n <= high ? n : fallback
-    }
 
     // live: preview each image on the screen while you move to it.
     // delay: how long to rest on one before it previews (ms).
@@ -54,8 +50,8 @@ Singleton {
         const s = src && typeof src === "object" ? src : {}
         return {
             live: s.live !== false,
-            delay: root.stepped(s.delay, 0, 1500, 50, Theme.wallpaperPickDelay),
-            height: root.stepped(s.height, 120, 400, 20, Theme.wallpaperPickHeight),
+            delay: Config.stepped(s.delay, 0, 1500, 50, Theme.wallpaperPickDelay),
+            height: Config.stepped(s.height, 120, 400, 20, Theme.wallpaperPickHeight),
             close: s.close !== false
         }
     }

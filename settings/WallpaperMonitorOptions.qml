@@ -25,10 +25,6 @@ Column {
         { id: "fill", label: "Fill", tip: "Stretch to the screen, changing its shape" }
     ]
 
-    function fileUrl(path) {
-        return "file://" + String(path).split("/").map(encodeURIComponent).join("/")
-    }
-
     Component.onCompleted: {
         const focused = WallpaperService.focusedName()
         root.monitor = root.names.indexOf(focused) >= 0 ? focused : (root.names[0] || "")
@@ -55,7 +51,7 @@ Column {
                 anchors.fill: parent
                 anchors.margins: Theme.borderWidth
                 visible: root.path.length > 0
-                source: root.path.length ? root.fileUrl(root.path) : ""
+                source: root.path.length ? IconService.fileUrl(root.path) : ""
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
                 sourceSize.height: thumb.height

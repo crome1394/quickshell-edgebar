@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import qs.config
+import qs.services
 import qs.theme
 
 // A frame drawn on one monitor at its edge inset while you adjust it
@@ -15,16 +16,7 @@ PanelWindow {
     readonly property string name: DisplaySettings.guideMonitor
     readonly property var inset: DisplaySettings.insetsFor(root.name)
 
-    function screenFor(name) {
-        const list = Quickshell.screens
-        for (let i = 0; i < list.length; i++) {
-            if (String(list[i].name) === name)
-                return list[i]
-        }
-        return null
-    }
-
-    screen: root.screenFor(root.name)
+    screen: ScreenService.screenNamed(root.name)
     visible: root.screen !== null
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore

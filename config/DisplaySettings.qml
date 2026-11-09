@@ -104,10 +104,6 @@ Singleton {
         return { w: w, h: h, hz: hz, mode: w + "x" + h + "@" + hz.toFixed(2) }
     }
 
-    function modeOk(text) {
-        return root.parseMode(text) !== null
-    }
-
     // Modes grouped by resolution, largest first, each with its refresh
     // rates fastest first: [{ w, h, key, rates: [{ hz, mode, label }] }].
     function groupModes(list) {
@@ -391,10 +387,6 @@ Singleton {
 
     function rejectKey(output, mode, depth) {
         return String(output) + "|" + String(mode) + "|" + Number(depth)
-    }
-
-    function isRejected(output, mode, depth) {
-        return root.rejectedList().indexOf(root.rejectKey(output, mode, depth)) >= 0
     }
 
     function markRejected(output, mode, depth) {

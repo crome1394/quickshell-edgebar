@@ -36,10 +36,6 @@ Singleton {
         { id: "brightness", label: "Brightness", glyph: "" }
     ]
 
-    function stepped(value, low, high, step, fallback) {
-        const n = Math.round(Number(value) / step) * step
-        return n >= low && n <= high ? n : fallback
-    }
 
     function defaultGlyph(slot) {
         for (let i = 0; i < root.iconSlots.length; i++) {
@@ -92,19 +88,19 @@ Singleton {
             brightness: s.brightness !== false,
             vplace: root.vplaces.indexOf(s.vplace) >= 0 ? s.vplace : "bottom",
             hplace: root.hplaces.indexOf(s.hplace) >= 0 ? s.hplace : "center",
-            margin: root.stepped(s.margin, 0, 400, 4, Theme.osdMargin),
-            timeout: root.stepped(s.timeout, 500, 6000, 100, Theme.osdTimeoutMs),
-            width: root.stepped(s.width, 200, 640, 20, Theme.osdWidth),
-            textSize: root.stepped(s.textSize, 80, 160, 10, 100),
+            margin: Config.stepped(s.margin, 0, 400, 4, Theme.osdMargin),
+            timeout: Config.stepped(s.timeout, 500, 6000, 100, Theme.osdTimeoutMs),
+            width: Config.stepped(s.width, 200, 640, 20, Theme.osdWidth),
+            textSize: Config.stepped(s.textSize, 80, 160, 10, 100),
             // 0 follows the theme's menu glass.
-            glass: glass === 0 ? 0 : root.stepped(glass, 40, 100, 2, 0),
+            glass: glass === 0 ? 0 : Config.stepped(glass, 40, 100, 2, 0),
             accent: root.colorNorm(s.accent === undefined ? "auto" : s.accent),
             text: root.colorNorm(s.text === undefined ? "auto" : s.text),
             border: s.border !== false,
             art: s.art !== false,
             sound: root.sounds.indexOf(s.sound) >= 0 ? s.sound : "theme",
             soundFile: root.soundFileNorm(s.soundFile),
-            soundVolume: root.stepped(s.soundVolume, 0, 100, 5, 60),
+            soundVolume: Config.stepped(s.soundVolume, 0, 100, 5, 60),
             icons: root.iconsNorm(s.icons)
         }
     }

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Cleanup: removed six unused Theme values, five unused functions (`DisplaySettings.isRejected`, `modeOk`; `WidgetService.setZone`, `zoneActive`, `barShown`), and the unused `widgetLayoutClassicJson` field. Shared helpers instead of copies: `Config.stepped()`, `ScreenService.screenNamed()`, `IconService.fileUrl()`, and `DisplaySettings.outputOk()` for monitor names. ARCHITECTURE.md covers the on-screen display, wallpaper picker, display power and edges, and the full IPC list.
+
 - Workspaces: with numbers shown, the hidden (special) workspace is numbered **0**, in front of workspace 1.
 
 - Transparency: each override has **Fullscreen: Solid / Same as windowed**. Fullscreen windows stay solid by default (video, games); "Same as windowed" keeps the app's level fullscreen too, so a see-through terminal no longer looks darker when it goes fullscreen over a bright wallpaper.

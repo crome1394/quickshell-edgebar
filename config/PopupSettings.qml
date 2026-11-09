@@ -17,10 +17,6 @@ Singleton {
     // The saved look, cleaned. Popups read this.
     readonly property var live: root.saved()
 
-    function stepped(value, low, high, step, fallback) {
-        const n = Math.round(Number(value) / step) * step
-        return n >= low && n <= high ? n : fallback
-    }
 
     function appName(text) {
         return String(text || "").replace(/[\u0000-\u001f]/g, "").trim().substring(0, 60)
@@ -48,13 +44,13 @@ Singleton {
         return {
             style: root.styles.indexOf(s.style) >= 0 ? s.style : "standard",
             motion: root.motions.indexOf(s.motion) >= 0 ? s.motion : "slide",
-            width: root.stepped(s.width, 280, 560, 20, Theme.notificationToastWidth),
-            max: root.stepped(s.max, 1, 8, 1, Theme.notificationToastMax),
-            image: root.stepped(s.image, 32, 128, 8, Theme.notificationToastImage),
-            lines: root.stepped(s.lines, 0, 10, 1, Theme.notificationToastBodyLines),
-            margin: root.stepped(s.margin, 0, 64, 4, Theme.notificationToastMargin),
+            width: Config.stepped(s.width, 280, 560, 20, Theme.notificationToastWidth),
+            max: Config.stepped(s.max, 1, 8, 1, Theme.notificationToastMax),
+            image: Config.stepped(s.image, 32, 128, 8, Theme.notificationToastImage),
+            lines: Config.stepped(s.lines, 0, 10, 1, Theme.notificationToastBodyLines),
+            margin: Config.stepped(s.margin, 0, 64, 4, Theme.notificationToastMargin),
             // 0 follows the theme's menu glass.
-            glass: glass === 0 ? 0 : root.stepped(glass, 40, 100, 2, 0),
+            glass: glass === 0 ? 0 : Config.stepped(glass, 40, 100, 2, 0),
             stripe: s.stripe !== false,
             group: s.group !== false,
             progress: s.progress !== false,

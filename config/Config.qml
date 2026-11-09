@@ -76,7 +76,6 @@ Singleton {
     property alias barHideDelayMs: data.barHideDelayMs
     property alias barRevealDelayMs: data.barRevealDelayMs
     property alias widgetLayoutJson: data.widgetLayoutJson
-    property alias widgetLayoutClassicJson: data.widgetLayoutClassicJson
     property alias widgetLayoutDualJson: data.widgetLayoutDualJson
     property alias widgetScalesJson: data.widgetScalesJson
     property alias showLauncherPill: data.showLauncherPill
@@ -342,6 +341,12 @@ Singleton {
         }
     }
 
+    // A number snapped to step, or fallback when outside low–high.
+    function stepped(value, low, high, step, fallback) {
+        const n = Math.round(Number(value) / step) * step
+        return n >= low && n <= high ? n : fallback
+    }
+
     // A text size percent, on the clock's step and range.
     function fontPercentNorm(pct) {
         const step = Math.max(1, Theme.clockFontStep)
@@ -543,7 +548,6 @@ Singleton {
             property int barHideDelayMs: 600
             property int barRevealDelayMs: 150
             property string widgetLayoutJson: ""
-            property string widgetLayoutClassicJson: ""
             property string widgetLayoutDualJson: ""
             property string widgetScalesJson: ""
             property bool showLauncherPill: false

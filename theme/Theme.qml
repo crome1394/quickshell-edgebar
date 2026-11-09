@@ -140,8 +140,6 @@ Singleton {
     // Rainbow divider colors, one per Settings tab in order.
     readonly property var indexTabColors: ["#e53935", "#fdd835", "#1e88e5", "#43a047", "#fb8c00", "#f48fb1", "#8e24aa", "#00acc1", "#a1887f", "#78909c"]
     readonly property int fieldHeight: 30
-    readonly property int slotMinHeight: 112
-    readonly property int sliderHeight: 22
     readonly property int footerHeight: 44
 
     readonly property int colorAnimMs: 140
@@ -425,7 +423,6 @@ Singleton {
     readonly property int displaySettleMs: 1500
     readonly property int displayTileWidth: 150
     readonly property int displayTileHeight: 92
-    readonly property int displayPreviewHeight: 120
     readonly property int displayRejectedMax: 64
     readonly property int menuCommandMax: 400
 
@@ -500,7 +497,6 @@ Singleton {
     // Behind a notification image while it loads or has transparent parts.
     readonly property color thumbBackdrop: Qt.rgba(0, 0, 0, 0.25)
     readonly property int toggleWidth: 28
-    readonly property int widgetRowHeight: 72
     readonly property int dividerRowHeight: 40
     readonly property int dividerLength: 18
     readonly property int dividerThickness: 2
@@ -526,9 +522,7 @@ Singleton {
     readonly property color border: root.palette.colBorder
     readonly property color ok: root.palette.colOk
     readonly property color danger: root.palette.colDanger
-    readonly property color wsActiveBg: root.palette.colWsActive
     readonly property color wsActiveText: root.palette.colWsActiveFg
-    readonly property color wsInactiveText: root.palette.colWsIdleFg
     // Inspector → Bindings key chips: one fixed color per key type, so no
     // two types match whatever the theme accent is.
     readonly property color keySuper: "#facc15"

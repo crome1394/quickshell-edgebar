@@ -45,15 +45,20 @@ Singleton {
 
     readonly property string mainName: root.mainScreen ? String(root.mainScreen.name) : ""
 
+    // The connected screen called `name`, or null.
+    function screenNamed(name) {
+        const want = String(name || "")
+        for (let i = 0; i < root.screens.length; i++) {
+            if (String(root.screens[i].name) === want)
+                return root.screens[i]
+        }
+        return null
+    }
+
     // The screen with focus, where a new window opens.
     function focusedScreen() {
         const mon = Hyprland.focusedMonitor
-        const name = mon ? String(mon.name) : ""
-        for (let i = 0; i < root.screens.length; i++) {
-            if (String(root.screens[i].name) === name)
-                return root.screens[i]
-        }
-        return root.mainScreen
+        return root.screenNamed(mon ? String(mon.name) : "") || root.mainScreen
     }
 
     // A window size no larger than the focused screen less a margin, so

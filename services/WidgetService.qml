@@ -436,15 +436,6 @@ Singleton {
         return out
     }
 
-    function zoneActive(zone) {
-        const entries = root.barEntries(zone)
-        for (let i = 0; i < entries.length; i++) {
-            if (!root.isDivider(entries[i].id))
-                return true
-        }
-        return false
-    }
-
     function toggle(id) {
         const key = String(id || "")
         if (root.isDivider(key)) {
@@ -464,31 +455,6 @@ Singleton {
         next[key] = !root.editorVisible(key)
         root.editorShown = next
         root.editorDirty = true
-    }
-
-    function setZone(id, zone) {
-        const key = String(id || "")
-        const z = root.coerceZone(zone, false)
-        const layout = root.layoutCopy()
-        let found = false
-        for (let i = 0; i < layout.length; i++) {
-            if (layout[i].id === key) {
-                layout[i].zone = z
-                found = true
-                break
-            }
-        }
-        if (!found) {
-            if (!root.knownId(key))
-                return
-            layout.push({ id: key, zone: z })
-        }
-        root.writeLayout(
-            layout,
-            z === "left",
-            z === "right",
-            z === "top",
-            z === "bottom")
     }
 
     function place(id, zone, index) {
@@ -854,16 +820,6 @@ Singleton {
             return
         }
         root.editorDirty = true
-    }
-
-    function barShown(edge) {
-        switch (String(edge || "")) {
-        case "bottom": return Config.showBottomBar
-        case "left": return Config.showLeftBar
-        case "right": return Config.showRightBar
-        case "top": return Config.showTopBar
-        }
-        return false
     }
 
     function setUiScaleAuto(on) {

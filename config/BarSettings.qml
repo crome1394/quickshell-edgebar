@@ -98,7 +98,7 @@ Singleton {
         const out = {}
         for (let i = 0; i < root.edges.length; i++) {
             const name = String(raw[root.edges[i]] || "")
-            out[root.edges[i]] = /^[A-Za-z0-9_.-]{1,64}$/.test(name) ? name : ""
+            out[root.edges[i]] = DisplaySettings.outputOk(name) ? name : ""
         }
         return out
     }

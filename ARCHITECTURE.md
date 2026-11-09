@@ -62,7 +62,8 @@ shell.qml
   it asks `TipService` for the one shared tooltip, which `BarTipHost` (in
   `shell.qml`) draws outside the bar. No pill owns a window for its tip.
 - **Monitors**: `ScreenService` decides which monitors get bars and which
-  is main. Menus with shared state (Audio, Transparency, notification
+  is main; a bar with its own monitor (the M button) is placed by
+  `edgeOn()`, and `barHostScreens` lists the monitors that draw any bar. Menus with shared state (Audio, Transparency, notification
   history) record the monitor that opened them, and each pill shows the
   menu only when it is on that monitor (`ScreenService.owns()`).
 - A menu that can be opened from a keybind has a tiny `<Name>MenuService`
@@ -178,6 +179,19 @@ ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `them
   reads it with `nvidia-smi`, AMD sysfs files, or Intel clock files. The
   combined pill and the per-metric widgets share that one service; each
   holds it with `StatsHold`, and it stops when none is on a bar.
+- **On-screen display**: `panels/OsdHost` is always loaded and watches the
+  default speaker and microphone (`AudioLevels`), MPRIS players, and
+  `BrightnessService` by their change signals; `OsdService.show()` is the
+  way in. The popup (`OsdPanel`) exists only while it shows.
+- **Wallpaper**: `WallpaperService` lists the folder and applies through
+  `scripts/wallpaper.py`, which keeps each monitor's entry in
+  `hyprpaper.conf`. The picker (`panels/WallpaperPicker`) previews with
+  one `hyprctl` call and saves only on Enter.
+- **Display power and edges**: `DisplayService.setPower()` turns a monitor
+  off (remembering its mode and workspaces) and on again in one
+  `hyprctl eval`, then writes the monitors file from a fresh read.
+  `panels/ScreenInsets` reserves a TV's cropped edges with invisible
+  background-layer strips, which Hyprland lays out before the bars.
 - **Recording**: `RecorderService` runs `gpu-screen-recorder` with an argv
   built by `RecorderSettings.argv()` (fixed values only), optionally after
   `slurp` for a region, and stops it with SIGINT so the file is finished.
@@ -202,9 +216,11 @@ ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `them
 ## IPC targets
 
 `qs ipc show` lists them while the bar runs: `settings` (open, close,
-toggle, openTab), `theme` (apply, list, current), `freshRss` (toggle, open,
-close, refresh), `caffeine`, `nightLight`, `recorder`, `firewall`, `battery`, `brightness`, `inspector`, `overview`, `notificationBell`, `audioMenu`,
-`opacityMenu`, and `shell`. Avoid naming a function `show`: `qs ipc show`
+toggle, openTab, listTabs, currentTab), `theme` (apply, list, current),
+`freshRss` (toggle, open, close, refresh), `clipboard`, `wallpaper`,
+`display`, `osd`, `caffeine`, `nightLight`, `recorder`, `firewall`,
+`battery`, `brightness`, `inspector`, `overview`, `notificationBell`,
+`audioMenu`, `opacityMenu`, and `shell`. Avoid naming a function `show`: `qs ipc show`
 is a command of its own. Each handler
 calls the same function as its button and validates its arguments; the
 calls are listed in a comment beside the handler.
