@@ -83,6 +83,18 @@ Singleton {
         return "quickLaunch" + index
     }
 
+    // How far a bar popup moves in from the outer edge of its bar window,
+    // toward the bar. The window is the bar plus a band for the dock's
+    // zoom; popups sit Theme.popupGapCut of the way across that band.
+    // content is the bar window's content item.
+    function popupInset(content, edge) {
+        if (!content)
+            return 0
+        const thick = Math.max(1, Math.round(Theme.barHeight * root.uiScale))
+        const across = edge === "left" || edge === "right" ? content.width : content.height
+        return Math.round(Math.max(0, across - thick) * Theme.popupGapCut)
+    }
+
     // BarSlot turns a side-bar pill 90° clockwise so it lies along the bar.
     // A pill's icon turns back by this much so it stays upright:
     // rotation: WidgetService.iconTurn(root.edge). Text that runs along

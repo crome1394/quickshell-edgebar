@@ -392,6 +392,8 @@ Singleton {
     readonly property int wallpaperPickDelay: 250
     readonly property int wallpaperPickGap: 12
     readonly property int popupWidth: 280
+    // Bar popups close this share of the gap the dock's band leaves (WidgetService.popupInset).
+    readonly property real popupGapCut: 0.8
     readonly property int networkPopupWidth: 460
     readonly property int networkPopupMaxHeight: 560
     readonly property int bluetoothPopupWidth: 380

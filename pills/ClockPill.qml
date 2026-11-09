@@ -36,20 +36,22 @@ Rectangle {
         const cx = Math.round(bounds.x + bounds.width / 2)
         const cy = Math.round(bounds.y + bounds.height / 2)
         let x = cx
-        let y = Math.round(content.height)
+        // Closer to the bar than the window's outer edge (Theme.popupGapCut).
+        const inset = WidgetService.popupInset(content, root.edge)
+        let y = Math.round(content.height) - inset
         let edgeFlags = Edges.Bottom
         let grow = Edges.Bottom
         if (root.edge === "bottom") {
-            y = 0
+            y = inset
             edgeFlags = Edges.Top
             grow = Edges.Top
         } else if (root.edge === "left") {
-            x = Math.round(content.width)
+            x = Math.round(content.width) - inset
             y = cy
             edgeFlags = Edges.Right
             grow = Edges.Right
         } else if (root.edge === "right") {
-            x = 0
+            x = inset
             y = cy
             edgeFlags = Edges.Left
             grow = Edges.Left
