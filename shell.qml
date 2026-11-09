@@ -43,6 +43,8 @@ ShellRoot {
     // window until it opens.
     property bool searchWatch: SearchService.open
     property bool libraryWatch: LibraryService.open
+    // Registers the Code Aid IPC target; it reads nothing until opened.
+    property bool codeAidWatch: CodeAidService.open
 
     // The one tooltip window every bar widget shares (TipService).
     BarTipHost {}
@@ -134,6 +136,14 @@ ShellRoot {
         active: LibraryService.open
         sourceComponent: Component {
             LibraryPanel {}
+        }
+    }
+
+    // Code Aid exists only while open (qs ipc call codeAid toggle).
+    Loader {
+        active: CodeAidService.open
+        sourceComponent: Component {
+            CodeAidPanel {}
         }
     }
 

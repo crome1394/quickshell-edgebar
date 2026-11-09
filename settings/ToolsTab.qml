@@ -12,7 +12,7 @@ Item {
 
     function applyReveal() {
         const id = root.revealSection
-        if (id === "capture" || id === "screensaver" || id === "recording" || id === "nightlight" || id === "clipboard")
+        if (id === "capture" || id === "screensaver" || id === "recording" || id === "nightlight" || id === "clipboard" || id === "codeaid")
             root.section = id
     }
 
@@ -29,7 +29,8 @@ Item {
             { id: "screensaver", label: "Screensaver" },
             { id: "recording", label: "Recording" },
             { id: "nightlight", label: "Night Light" },
-            { id: "clipboard", label: "Clipboard" }
+            { id: "clipboard", label: "Clipboard" },
+            { id: "codeaid", label: "Code Aid" }
         ]
         currentId: root.section
         onSelected: (tabId) => { root.section = tabId }
@@ -88,5 +89,16 @@ Item {
         anchors.topMargin: Theme.space
         active: root.section === "clipboard"
         source: clipboardPage.active ? Qt.resolvedUrl("ClipboardTab.qml") : ""
+    }
+
+    Loader {
+        id: codeAidPage
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: sections.bottom
+        anchors.bottom: parent.bottom
+        anchors.topMargin: Theme.space
+        active: root.section === "codeaid"
+        source: codeAidPage.active ? Qt.resolvedUrl("CodeAidTab.qml") : ""
     }
 }

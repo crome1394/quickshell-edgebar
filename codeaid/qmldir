@@ -1,0 +1,7 @@
+module codeaid
+CodeAidLogic 1.0 CodeAidLogic.js
+CodeAidStore 1.0 CodeAidStore.qml
+CodeAidModel 1.0 CodeAidModel.qml
+CodeAidKeys 1.0 CodeAidKeys.qml
+SnippetRow 1.0 SnippetRow.qml
+SnippetEditor 1.0 SnippetEditor.qml

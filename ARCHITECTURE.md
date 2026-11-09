@@ -183,6 +183,7 @@ ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `them
   default speaker and microphone (`AudioLevels`), MPRIS players, and
   `BrightnessService` by their change signals; `OsdService.show()` is the
   way in. The popup (`OsdPanel`) exists only while it shows.
+- **Code Aid**: `CodeAidService` owns the snippet folder (`codeaid/CodeAidStore`, created only while Code Aid is open or a copy by name waits), copying, and saving or deleting files. `codeaid/CodeAidLogic.js` holds the file format and blanks; `panels/CodeAidPanel` exists only while open.
 - **Wallpaper**: `WallpaperService` lists the folder and applies through
   `scripts/wallpaper.py`, which sets it with `awww img` and keeps each
   monitor's entry in `state/wallpapers.json` (read once from an old

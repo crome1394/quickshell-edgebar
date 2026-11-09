@@ -6,7 +6,7 @@ import qs.services
 import qs.settings
 import qs.theme
 
-// History list: expand, copy, dismiss, DND, and clear.
+// History list: expand, copy, mark read, dismiss, DND, and clear.
 Item {
     id: root
 
@@ -37,6 +37,11 @@ Item {
             event.accepted = true
             return
         }
+        if (ctrl && event.key === Qt.Key_R) {
+            NotificationService.markAllRead()
+            event.accepted = true
+            return
+        }
         if (ctrl && event.key === Qt.Key_Delete) {
             NotificationService.clearHistory()
             event.accepted = true
@@ -50,6 +55,11 @@ Item {
             NotificationService.expandAll(false)
         else if (event.key === Qt.Key_D)
             NotificationService.toggleDnd()
+        else if (event.key === Qt.Key_R) {
+            const row = NotificationService.itemAt(NotificationService.cursor)
+            if (row)
+                NotificationService.markRead(row.id)
+        }
         else if (event.key === Qt.Key_Delete || event.key === Qt.Key_Backspace) {
             const row = NotificationService.itemAt(NotificationService.cursor)
             if (row)
@@ -122,7 +132,7 @@ Item {
                 anchors.right: closeButton.left
                 anchors.rightMargin: Theme.space
                 anchors.verticalCenter: parent.verticalCenter
-                text: NotificationService.count + " kept"
+                text: (NotificationService.unread > 0 ? NotificationService.unread + " unread · " : "") + NotificationService.count + " kept"
                 color: Theme.subtext
                 font.family: Theme.uiFont
                 font.pixelSize: Theme.smallPx
@@ -163,7 +173,7 @@ Item {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             wrapMode: Text.WordWrap
-            text: "↑↓ move · → expand · ← collapse · a all · c collapse all · d DND · Del remove · Ctrl+C copy · Ctrl+Del clear · Esc close"
+            text: "↑↓ move · → expand · ← collapse · a all · c collapse all · r read · Ctrl+R all read · d DND · Del remove · Ctrl+C copy · Ctrl+Del clear · Esc close"
             color: Theme.subtext
             font.family: Theme.uiFont
             font.pixelSize: Theme.smallPx
@@ -179,7 +189,7 @@ Item {
             spacing: Theme.tabGap
 
             Rectangle {
-                width: Math.max(Theme.fieldHeight * 3, (parent.width - Theme.tabGap * 2 - 96 - 110))
+                width: Math.max(Theme.fieldHeight * 3, parent.width - Theme.tabGap * 3 - Theme.historyButtonWidth - Theme.historyWideButtonWidth * 2)
                 height: Theme.fieldHeight
                 radius: Theme.radiusSm
                 opacity: NotificationService.count > 0 ? 1 : Theme.widgetOffOpacity
@@ -239,6 +249,35 @@ Item {
                     HoverTip {
                         message: NotificationService.dnd ? "Turn off Do Not Disturb" : "Turn on Do Not Disturb"
                         show: dndMouse.containsMouse
+                    }
+                }
+            }
+
+            Rectangle {
+                width: Theme.historyWideButtonWidth
+                height: Theme.fieldHeight
+                radius: Theme.radiusSm
+                opacity: NotificationService.unread > 0 ? 1 : Theme.widgetOffOpacity
+                color: readAllMouse.containsMouse ? Theme.hover : root.theme.colSurface
+                border.width: Theme.borderWidth
+                border.color: NotificationService.unread > 0 ? Theme.accent : Theme.border
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "Mark all read"
+                    color: root.theme.colFg
+                    font.family: Theme.uiFont
+                    font.pixelSize: Theme.smallPx
+                }
+
+                MouseArea {
+                    id: readAllMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        NotificationService.markAllRead()
+                        root.focusKeys()
                     }
                 }
             }
@@ -349,8 +388,18 @@ Item {
                             width: parent.width
                             spacing: Theme.tabGap
 
+                            Rectangle {
+                                visible: !row.modelData.read
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: Theme.notificationUnreadDot
+                                height: Theme.notificationUnreadDot
+                                radius: Theme.notificationUnreadDot / 2
+                                color: Theme.accent
+                            }
+
                             Text {
-                                width: Math.max(0, parent.width - timeLabel.implicitWidth - Theme.chip * 3 - Theme.tabGap * 4)
+                                width: Math.max(0, parent.width - timeLabel.implicitWidth - Theme.chip * 3 - Theme.tabGap * 4
+                                                - (row.modelData.read ? 0 : Theme.notificationUnreadDot + Theme.chip + Theme.tabGap * 2))
                                 anchors.verticalCenter: parent.verticalCenter
                                 elide: Text.ElideRight
                                 text: row.modelData.app || "App"
@@ -366,6 +415,41 @@ Item {
                                 color: Theme.subtext
                                 font.family: root.theme.fontFamily
                                 font.pixelSize: Theme.smallPx
+                            }
+
+                            Rectangle {
+                                visible: !row.modelData.read
+                                width: Theme.chip
+                                height: Theme.chip
+                                radius: Theme.radiusSm
+                                color: readMouse.containsMouse ? Theme.hover : "transparent"
+                                border.width: Theme.borderWidth
+                                border.color: readMouse.containsMouse ? Theme.accent : Theme.border
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: String.fromCodePoint(0xf012c)
+                                    color: root.theme.colFg
+                                    font.family: root.theme.iconFont
+                                    font.pixelSize: Theme.smallPx
+                                }
+
+                                MouseArea {
+                                    id: readMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        NotificationService.cursor = row.index
+                                        NotificationService.markRead(row.modelData.id)
+                                        root.focusKeys()
+                                    }
+
+                                    HoverTip {
+                                        message: "Mark as read"
+                                        show: readMouse.containsMouse
+                                    }
+                                }
                             }
 
                             Rectangle {

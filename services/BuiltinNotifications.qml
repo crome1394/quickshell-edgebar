@@ -78,7 +78,7 @@ Singleton {
     function save(items) {
         const list = (items || []).slice(0, 80).map((x) => ({
             id: x.id, ts: x.ts, app: x.app, summary: x.summary, body: x.body,
-            icon: x.icon, image: x.image, urgency: x.urgency, expanded: false
+            icon: x.icon, image: x.image, urgency: x.urgency, read: !!x.read, expanded: false
         }))
         list.reverse()
         historyFile.setText(JSON.stringify(list))

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **Notifications: mark as read.** The bell's badge now counts unread notifications only. Middle-click the bell, press Ctrl+R in the history, or use its **Mark all read** button to clear the count; each unread row has a dot and a check button (or press r) to mark just that one. Read marks are saved, and the time of the last "mark all read" (`notificationReadTs`) keeps SwayNC or other daemons' history from coming back unread. `qs ipc call notificationBell markAllRead`.
+
+- **Code Aid** (Super+;, `qs ipc call codeAid toggle`) replaces rofi-code-aid: snippets by language with Recent first, search across names, languages, and code, and the code shown beside the list. Snippets can have blanks to fill before copying (`{{name}}`, `{{name:default}}`; the same name fills every place) and `{{clipboard}}`, which wraps what you last copied. Add, edit, and delete snippets in the window; files stay in the rofi-code-aid format in `~/.config/rofi/code-aid/snippets`. `qs ipc call codeAid copy "<label>"` copies one directly. Settings → Tools → Code Aid can turn it off and run your own command instead.
+
 - **Wallpaper uses awww** instead of hyprpaper, whose 0.8.5 release leaked about 60 MB of video memory on every change (and the picker changes it on each preview). `scripts/wallpaper.py` sets wallpapers with `awww img` (a 1 s fade; previews fade in 0.3 s) and keeps each monitor's wallpaper and fit in `state/wallpapers.json`, read once from an old `hyprpaper.conf`. Fits are Cover, Contain, Center, and Fill; awww has no Tile, so a saved Tile becomes Center. `awww-daemon` must be running.
 
 - **Built-in launcher and App Library** (Pop!_OS style), with Settings → Applications → Launcher and App Library pages; each can be turned off to run your own command instead. "App Launcher" (pins) is now "Quick Launch". Side-bar pill icons stay upright. Recorder: region picking works again, and the button turns red while recording. Bar popups open beside their widget, closer to the bar.

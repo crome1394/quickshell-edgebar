@@ -38,6 +38,16 @@ Singleton {
     property bool allExpanded: false
 
     readonly property int count: root.items ? root.items.length : 0
+    // Notifications not marked read; the bell's badge shows this.
+    readonly property int unread: {
+        const list = root.items || []
+        let n = 0
+        for (let i = 0; i < list.length; i++) {
+            if (!list[i].read)
+                n++
+        }
+        return n
+    }
     readonly property bool watching: (root.mode === "swaync" || root.mode === "external") && (Config.showNotificationPill || root.historyOpen)
 
     function historyScript() {
@@ -59,6 +69,7 @@ Singleton {
             icon: String(row.icon || ""),
             image: String(row.image || ""),
             urgency: Number(row.urgency) || 1,
+            read: !!row.read,
             expanded: expanded === undefined ? !!row.expanded : !!expanded
         }
     }
@@ -94,10 +105,22 @@ Singleton {
         const out = []
         const list = arr || []
         const expand = root.keepExpanded()
+        // A watcher snapshot has no read flags: keep the ones already known,
+        // and count anything up to the last "mark all read" as read.
+        const known = {}
+        const old = root.items || []
+        for (let i = 0; i < old.length; i++) {
+            if (old[i].read)
+                known[old[i].id] = true
+        }
+        const readTs = Number(Config.notificationReadTs) || 0
         for (let i = 0; i < list.length; i++) {
             if (!list[i])
                 continue
-            out.push(root.cloneItem(list[i], expand ? true : !!list[i].expanded))
+            const row = root.cloneItem(list[i], expand ? true : !!list[i].expanded)
+            if (known[row.id] || (row.ts > 0 && row.ts <= readTs))
+                row.read = true
+            out.push(row)
         }
         out.sort((a, b) => (b.ts || 0) - (a.ts || 0))
         while (out.length > 80)
@@ -109,6 +132,7 @@ Singleton {
 
     function addItem(it) {
         const row = root.cloneItem(it, root.keepExpanded())
+        row.read = false
         if (!row.id.length)
             row.id = "n" + Date.now()
         const list = (root.items || []).slice()
@@ -255,6 +279,52 @@ Singleton {
             list[i] = root.cloneItem(list[i], !!on)
         root.items = list
         root.allExpanded = !!on && list.length > 0
+    }
+
+    function saveBuiltin() {
+        if (root.builtin)
+            BuiltinNotifications.save(root.items)
+    }
+
+    // Mark one notification read (the check button, or r in the history).
+    function markRead(id) {
+        const want = String(id || "")
+        const list = (root.items || []).slice()
+        for (let i = 0; i < list.length; i++) {
+            if (list[i].id === want && !list[i].read) {
+                const row = root.cloneItem(list[i])
+                row.read = true
+                list[i] = row
+                root.items = list
+                root.saveBuiltin()
+                return
+            }
+        }
+    }
+
+    // Mark every notification read. The time is saved too, so the watcher
+    // (SwayNC or another daemon) does not bring them back as unread.
+    function markAllRead() {
+        const list = (root.items || []).slice()
+        let newest = Number(Config.notificationReadTs) || 0
+        let changed = false
+        for (let i = 0; i < list.length; i++) {
+            newest = Math.max(newest, Number(list[i].ts) || 0)
+            if (!list[i].read) {
+                const row = root.cloneItem(list[i])
+                row.read = true
+                list[i] = row
+                changed = true
+            }
+        }
+        if (changed) {
+            root.items = list
+            root.saveBuiltin()
+        }
+        if (newest !== Config.notificationReadTs)
+            Config.saveFields(() => {
+                Config.notificationReadTs = newest
+            })
     }
 
     function dismiss(id) {
@@ -468,9 +538,11 @@ Singleton {
 
     IpcHandler {
         target: "notificationBell"
+        // qs ipc call notificationBell toggleHistory | showHistory | hideHistory | toggleDoNotDisturb | markAllRead
         function toggleHistory(): void { root.toggleHistory() }
         function showHistory(): void { root.showHistory() }
         function hideHistory(): void { root.hideHistory() }
         function toggleDoNotDisturb(): void { root.toggleDnd() }
+        function markAllRead(): void { root.markAllRead() }
     }
 }

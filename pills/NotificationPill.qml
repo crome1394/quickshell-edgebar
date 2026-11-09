@@ -6,7 +6,8 @@ import qs.panels
 import qs.services
 import qs.theme
 
-// Bell. Left click opens history. Right click toggles Do Not Disturb.
+// Bell. Left click opens history. Middle click marks all read. Right
+// click toggles Do Not Disturb. The badge counts unread notifications.
 // Loaded only while the Notifications widget is on the bar.
 Rectangle {
     id: root
@@ -22,19 +23,17 @@ Rectangle {
     readonly property int cell: Math.max(1, Math.round((Theme.barHeight - Theme.barPad) * root.ui))
     readonly property int icon: Math.max(1, Math.round(root.theme.iconPx * root.ui * root.widthFactor))
     readonly property bool dnd: NotificationService.dnd
-    readonly property int count: NotificationService.count
+    readonly property int count: NotificationService.unread
     readonly property string bellGlyph: {
         if (root.dnd)
             return root.count > 0 ? String.fromCodePoint(0xf00a0) : String.fromCodePoint(0xf0a93)
         return root.count > 0 ? String.fromCodePoint(0xf116b) : String.fromCodePoint(0xf009c)
     }
     readonly property string tipText: {
-        const noun = root.count === 1 ? " notification" : " notifications"
-        if (root.dnd)
-            return root.count + noun + " · DND on · Left: history · Right: DND"
-        if (root.count > 0)
-            return root.count + noun + " · Left: history · Right: DND"
-        return "Notifications · Left: history · Right: DND"
+        const head = root.count > 0 ? root.count + " unread" : "Notifications"
+        const dnd = root.dnd ? " · DND on" : ""
+        const middle = root.count > 0 ? " · Middle: mark read" : ""
+        return head + dnd + " · Left: history" + middle + " · Right: DND"
     }
 
     // Sit outside the bar: under a top bar, over a bottom bar, and beside a side bar.
@@ -153,11 +152,13 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
         onClicked: (mouse) => {
             dock.play()
             if (mouse.button === Qt.RightButton)
                 NotificationService.toggleDnd()
+            else if (mouse.button === Qt.MiddleButton)
+                NotificationService.markAllRead()
             else
                 NotificationService.toggleHistory(root.screenName)
         }

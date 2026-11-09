@@ -21,3 +21,4 @@ ScreenInsets 1.0 ScreenInsets.qml
 InsetGuide 1.0 InsetGuide.qml
 SearchPanel 1.0 SearchPanel.qml
 LibraryPanel 1.0 LibraryPanel.qml
+CodeAidPanel 1.0 CodeAidPanel.qml

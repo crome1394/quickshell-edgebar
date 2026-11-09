@@ -52,6 +52,7 @@ Item {
             { tab: "tools", section: "recording", title: "Tools · Recording", keys: "record recording screen video capture gpu-screen-recorder av1 hevc codec folder fps audio" },
             { tab: "tools", section: "nightlight", title: "Tools · Night Light", keys: "night light blue light warm temperature kelvin hyprsunset schedule evening" },
             { tab: "tools", section: "clipboard", title: "Tools · Clipboard", keys: "clipboard history copy paste cliphist clip snippets viewer" },
+            { tab: "tools", section: "codeaid", title: "Tools · Code Aid", keys: "code aid snippet snippets rofi copy template blanks programming" },
             { tab: "tools", section: "capture", title: "Tools · Capture", keys: "capture screenshot screen shot print grim slurp freeze ocr text tesseract language tack satty editor folder keybind" }
         ]
     }

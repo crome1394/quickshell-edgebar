@@ -83,3 +83,4 @@ DisplayInsetOptions 1.0 DisplayInsetOptions.qml
 SearchTab 1.0 SearchTab.qml
 LibraryTab 1.0 LibraryTab.qml
 WebRuleRow 1.0 WebRuleRow.qml
+CodeAidTab 1.0 CodeAidTab.qml

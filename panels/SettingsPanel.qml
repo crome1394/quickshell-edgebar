@@ -82,7 +82,7 @@ FloatingWindow {
         notifications: ["notifications", "osd"],
         region: ["region", "clock"],
         system: ["dependencies", "display", "transparency"],
-        tools: ["capture", "screensaver", "recording", "nightlight", "clipboard"]
+        tools: ["capture", "screensaver", "recording", "nightlight", "clipboard", "codeaid"]
     })
 
     // One line per tab: "widgets: bars activewindow stats".

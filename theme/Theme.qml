@@ -233,6 +233,15 @@ Singleton {
     // Clipboard viewer: window size, list row height, preview pane share,
     // history sizes to pick from (cliphist's own default is 750), the
     // longest preview read per entry, and the pause before a preview loads.
+    // Code Aid: snippets on the left, the code and its blanks on the right.
+    readonly property int codeAidWidth: 1000
+    readonly property int codeAidHeight: 620
+    readonly property real codeAidListShare: 0.38
+    readonly property int codeAidRowHeight: 30
+    readonly property int codeAidRecentMax: 5
+    readonly property int codeAidFlashMs: 700
+    readonly property string codeAidGlyph: "\u{f0169}"
+    readonly property string codeAidDefaultDir: "~/.config/rofi/code-aid/snippets"
     // Launcher (Pop Launcher style): a search box with results under it.
     // Recorder: how much the red lightens on hover (and darkens for its edge).
     readonly property real recordingHoverLift: 1.15
@@ -536,6 +545,8 @@ Singleton {
     readonly property int buttonPadX: 20
     readonly property int historyButtonWidth: 96
     readonly property int historyWideButtonWidth: 110
+    // The dot beside an unread notification in the history.
+    readonly property int notificationUnreadDot: 8
     // Behind a notification image while it loads or has transparent parts.
     readonly property color thumbBackdrop: Qt.rgba(0, 0, 0, 0.25)
     readonly property int toggleWidth: 28

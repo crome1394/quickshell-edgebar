@@ -101,6 +101,11 @@ Singleton {
     property alias clipboardMaxItems: data.clipboardMaxItems
     property alias clipboardImages: data.clipboardImages
     property alias menuAction: data.menuAction
+    property alias codeAidBuiltIn: data.codeAidBuiltIn
+    property alias codeAidCommand: data.codeAidCommand
+    property alias codeAidDir: data.codeAidDir
+    property alias codeAidCloseOnCopy: data.codeAidCloseOnCopy
+    property alias codeAidRecent: data.codeAidRecent
     property alias searchBuiltIn: data.searchBuiltIn
     property alias searchCommand: data.searchCommand
     property alias searchPluginsJson: data.searchPluginsJson
@@ -188,6 +193,7 @@ Singleton {
     property alias notificationServer: data.notificationServer
     // Do Not Disturb for the built-in server.
     property alias notificationDnd: data.notificationDnd
+    property alias notificationReadTs: data.notificationReadTs
     // Built-in popup look (PopupSettings), as JSON.
     property alias notificationPopupJson: data.notificationPopupJson
     property alias osdJson: data.osdJson
@@ -591,6 +597,12 @@ Singleton {
             property bool clipboardHistory: true
             property int clipboardMaxItems: 0
             property bool clipboardImages: true
+            // Code Aid (CodeAidSettings): built in, or a command run instead.
+            property bool codeAidBuiltIn: true
+            property string codeAidCommand: ""
+            property string codeAidDir: ""
+            property bool codeAidCloseOnCopy: true
+            property bool codeAidRecent: true
             // Application Menu click: "library" (App Library, or menuCommand
             // when the built-in one is off) or "search" (the launcher).
             property string menuAction: "library"
@@ -684,6 +696,8 @@ Singleton {
             property string notificationCorner: "bottomRight"
             property string notificationServer: ""
             property bool notificationDnd: false
+            // Notifications at or before this time (seconds) count as read.
+            property real notificationReadTs: 0
             property string notificationPopupJson: ""
             // On-screen display settings (OsdSettings).
             property string osdJson: ""
