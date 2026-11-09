@@ -104,7 +104,9 @@ Rectangle {
 
         Text {
             visible: root.showNumber
-            text: root.special ? "" : String(root.workspaceId)
+            // The hidden (special) workspace is numbered 0: it sits in front
+            // of workspace 1 on the bar.
+            text: root.special ? "0" : String(root.workspaceId)
             font.pixelSize: Theme.barTextPx(root.ui, 1)
             font.bold: true
             font.family: root.theme.fontFamily

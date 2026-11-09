@@ -97,9 +97,10 @@ Rectangle {
                 hoverFg: WorkspaceSettings.customColor("wsHoverFg")
                 edge: root.edge
                 dockNeighbor: DockSettings.neighbor(root.hoverX, button.x + button.width / 2)
+                // The hidden workspace shows 0 with the numbers on.
                 showNumber: {
                     if (button.modelData.isSpecial)
-                        return false
+                        return !!Config.showNumbers
                     if (Config.showNumbers)
                         return true
                     const glyph = String(button.face.label || "")
