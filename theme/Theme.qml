@@ -351,6 +351,10 @@ Singleton {
     readonly property int wallpaperTileMax: 260
     readonly property int wallpaperTileStep: 10
     readonly property int wallpaperTile: 148
+    // The wallpaper picker strip (Ctrl+Super+Space).
+    readonly property int wallpaperPickHeight: 200
+    readonly property int wallpaperPickDelay: 250
+    readonly property int wallpaperPickGap: 12
     readonly property int popupWidth: 280
     readonly property int networkPopupWidth: 460
     readonly property int networkPopupMaxHeight: 560
@@ -397,7 +401,14 @@ Singleton {
     readonly property int displayConfirmSeconds: 15
     readonly property int displayConfirmWidth: 420
     // Settings → System → Display → Arrangement.
-    readonly property int displayLayoutHeight: 240
+    readonly property int displayLayoutHeight: 380
+    // Thickness of the green line where two monitors touch.
+    readonly property int displayJoinPx: 4
+    // Edge inset for TV overscan: the most a slider allows, its step, and
+    // the guide frame's line.
+    readonly property int displayInsetMax: 200
+    readonly property int displayInsetStep: 2
+    readonly property int displayGuidePx: 3
     // The open Arrangement column's width range.
     readonly property int displayArrangeMin: 300
     readonly property int displayArrangeMax: 460

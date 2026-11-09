@@ -7,8 +7,9 @@ import qs.theme
 // Settings → System → Display → Arrangement. The enabled monitors drawn to
 // scale where Hyprland places them. Drag one next to another: on release it
 // snaps to the nearest free side (left, right, above, below), edges lined
-// up when close. Apply tries the arrangement (with Keep or Go back, like a
-// mode change); Reset drops the draft.
+// up when close. A green line marks where two monitors touch: the pointer
+// can cross only there. Apply tries the arrangement (with Keep or Go back,
+// like a mode change); Reset drops the draft.
 Column {
     id: root
 
@@ -38,6 +39,38 @@ Column {
         return m && (root.draft[name].x !== m.x || root.draft[name].y !== m.y)
     })
 
+    // Where two monitors touch: { a, b, vertical, at, from, to, aLen, bLen }
+    // in layout pixels. The pointer crosses between them only along it.
+    readonly property var joins: {
+        const names = Object.keys(root.rects)
+        const out = []
+        const near = (p, q) => Math.abs(p - q) < 1
+        for (let i = 0; i < names.length; i++) {
+            for (let j = i + 1; j < names.length; j++) {
+                const a = root.rects[names[i]]
+                const b = root.rects[names[j]]
+                if (near(a.x + a.w, b.x) || near(b.x + b.w, a.x)) {
+                    const from = Math.max(a.y, b.y)
+                    const to = Math.min(a.y + a.h, b.y + b.h)
+                    if (to > from)
+                        out.push({ a: names[i], b: names[j], vertical: true, at: near(a.x + a.w, b.x) ? b.x : a.x, from: from, to: to, aLen: a.h, bLen: b.h })
+                } else if (near(a.y + a.h, b.y) || near(b.y + b.h, a.y)) {
+                    const from = Math.max(a.x, b.x)
+                    const to = Math.min(a.x + a.w, b.x + b.w)
+                    if (to > from)
+                        out.push({ a: names[i], b: names[j], vertical: false, at: near(a.y + a.h, b.y) ? b.y : a.y, from: from, to: to, aLen: a.w, bLen: b.w })
+                }
+            }
+        }
+        return out
+    }
+
+    function joinText(j) {
+        const len = Math.round(j.to - j.from)
+        const side = (name, total) => len >= Math.round(total) ? "all of " + name + "'s " + Math.round(total) : len + " of " + name + "'s " + Math.round(total)
+        return "The pointer crosses between " + j.a + " and " + j.b + " along " + len + " px (" + side(j.a, j.aLen) + ", " + side(j.b, j.bLen) + ")."
+    }
+
     // Fixed while dragging so the canvas does not rescale under the pointer.
     property var view: ({ k: 1, ox: 0, oy: 0 })
 
@@ -46,12 +79,14 @@ Column {
         if (!names.length || canvas.width <= 0)
             return
         const r = names.map((n) => root.rects[n])
-        // Room around the monitors to drag into: one largest monitor each side.
-        const spare = Math.max.apply(null, r.map((x) => Math.max(x.w, x.h)))
-        const minX = Math.min.apply(null, r.map((x) => x.x)) - spare
-        const minY = Math.min.apply(null, r.map((x) => x.y)) - spare / 2
-        const maxX = Math.max.apply(null, r.map((x) => x.x + x.w)) + spare
-        const maxY = Math.max.apply(null, r.map((x) => x.y + x.h)) + spare / 2
+        // Room around the monitors to drag into: a third of the smallest
+        // monitor each side, so the monitors themselves stay large.
+        const spareX = Math.min.apply(null, r.map((x) => x.w)) / 3
+        const spareY = Math.min.apply(null, r.map((x) => x.h)) / 3
+        const minX = Math.min.apply(null, r.map((x) => x.x)) - spareX
+        const minY = Math.min.apply(null, r.map((x) => x.y)) - spareY
+        const maxX = Math.max.apply(null, r.map((x) => x.x + x.w)) + spareX
+        const maxY = Math.max.apply(null, r.map((x) => x.y + x.h)) + spareY
         const k = Math.min(canvas.width / (maxX - minX), canvas.height / (maxY - minY))
         root.view = {
             k: k,
@@ -119,10 +154,12 @@ Column {
                     width: parent.width - Theme.tabGap * 2
                     spacing: 0
 
+                    // Shrinks to fit a small monitor instead of cutting off.
                     Text {
                         width: parent.width
                         horizontalAlignment: Text.AlignHCenter
-                        elide: Text.ElideRight
+                        fontSizeMode: Text.HorizontalFit
+                        minimumPixelSize: Theme.smallPx - 2
                         text: screen.modelData.name
                         color: Theme.text
                         font.family: Theme.uiFont
@@ -133,7 +170,8 @@ Column {
                     Text {
                         width: parent.width
                         horizontalAlignment: Text.AlignHCenter
-                        elide: Text.ElideRight
+                        fontSizeMode: Text.HorizontalFit
+                        minimumPixelSize: Theme.smallPx - 3
                         text: screen.modelData.width + " × " + screen.modelData.height
                         color: Theme.subtext
                         font.family: Theme.uiFont
@@ -165,6 +203,26 @@ Column {
                 HoverHandler {
                     cursorShape: root.monitors.length > 1 ? Qt.OpenHandCursor : Qt.ArrowCursor
                 }
+            }
+        }
+
+        // The shared edges, drawn over the monitors.
+        Repeater {
+            model: root.dragging ? [] : root.joins
+            delegate: Rectangle {
+                id: join
+                required property var modelData
+                z: 3
+                color: Theme.ok
+                radius: Theme.displayJoinPx / 2
+                x: join.modelData.vertical
+                    ? root.view.ox + join.modelData.at * root.view.k - Theme.displayJoinPx / 2
+                    : root.view.ox + join.modelData.from * root.view.k
+                y: join.modelData.vertical
+                    ? root.view.oy + join.modelData.from * root.view.k
+                    : root.view.oy + join.modelData.at * root.view.k - Theme.displayJoinPx / 2
+                width: join.modelData.vertical ? Theme.displayJoinPx : (join.modelData.to - join.modelData.from) * root.view.k
+                height: join.modelData.vertical ? (join.modelData.to - join.modelData.from) * root.view.k : Theme.displayJoinPx
             }
         }
 
@@ -202,6 +260,34 @@ Column {
         color: Theme.subtext
         font.family: Theme.uiFont
         font.pixelSize: Theme.smallPx
+    }
+
+    // Where the pointer can cross, in words; the green lines above.
+    Repeater {
+        model: root.monitors.length > 1 ? root.joins : []
+        delegate: Text {
+            required property var modelData
+            width: root.width
+            wrapMode: Text.WordWrap
+            text: root.joinText(modelData)
+            color: Theme.ok
+            font.family: Theme.uiFont
+            font.pixelSize: Theme.smallPx
+        }
+    }
+
+    // A monitor that touches none: the pointer can never reach it.
+    Repeater {
+        model: root.monitors.length > 1 ? Object.keys(root.rects).filter((n) => !root.joins.some((j) => j.a === n || j.b === n)) : []
+        delegate: Text {
+            required property string modelData
+            width: root.width
+            wrapMode: Text.WordWrap
+            text: modelData + " touches no other monitor, so the pointer cannot reach it. Drag it against one."
+            color: Theme.danger
+            font.family: Theme.uiFont
+            font.pixelSize: Theme.smallPx
+        }
     }
 
     Row {

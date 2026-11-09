@@ -57,6 +57,8 @@ Singleton {
     property alias showTopBar: data.showTopBar
     property alias showBottomBar: data.showBottomBar
     property alias topBarAlign: data.topBarAlign
+    property alias barMonitorsJson: data.barMonitorsJson
+    property alias displayInsetsJson: data.displayInsetsJson
     property alias bottomBarAlign: data.bottomBarAlign
     property alias leftBarAlign: data.leftBarAlign
     property alias rightBarAlign: data.rightBarAlign
@@ -214,6 +216,7 @@ Singleton {
     property alias wallpaperDir: data.wallpaperDir
     property alias wallpaperCurrent: data.wallpaperCurrent
     property alias wallpaperTileSize: data.wallpaperTileSize
+    property alias wallpaperPickerJson: data.wallpaperPickerJson
     property alias showNetworkFullIp: data.showNetworkFullIp
     property alias showNetworkLastOctet: data.showNetworkLastOctet
     property alias showNetworkDeviceName: data.showNetworkDeviceName
@@ -515,6 +518,11 @@ Singleton {
             property bool showTopBar: true
             property bool showBottomBar: false
             property string topBarAlign: "left"
+            // Edge → monitor name, or "" for every bar monitor (BarSettings).
+            property string barMonitorsJson: ""
+            // Monitor → { top, bottom, left, right } px kept clear for TV
+            // overscan (DisplaySettings.insetsFor).
+            property string displayInsetsJson: ""
             property string bottomBarAlign: "left"
             property string leftBarAlign: "left"
             property string rightBarAlign: "left"
@@ -673,6 +681,8 @@ Singleton {
             property string wallpaperDir: ""
             property string wallpaperCurrent: ""
             property int wallpaperTileSize: 148
+            // The Ctrl+Super+Space picker (WallpaperSettings.picker).
+            property string wallpaperPickerJson: ""
             property bool showNetworkFullIp: false
             property bool showNetworkLastOctet: true
             property bool showNetworkDeviceName: false

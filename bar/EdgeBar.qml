@@ -115,6 +115,9 @@ PanelWindow {
 
     visible: root.shown
     color: "transparent"
+    // A TV's cropped edges (System → Display → Edges) are kept clear by
+    // ScreenInsets, which Hyprland lays out first, so the bar already sits
+    // inside them.
     exclusiveZone: {
         if (!root.shown || root.autoHide)
             return 0

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- System → Display → **Edges**: keep space clear around a monitor for a TV that crops its picture (overscan), on all edges or each one, with a **Show guide** frame to match against the TV. Invisible background-layer strips reserve the space (`panels/ScreenInsets.qml`), so bars, popups, and windows all land inside, on any GPU. Saved per monitor in `displayInsetsJson`. New: `settings/DisplayInsetOptions.qml`, `panels/InsetGuide.qml`.
+
+- Widgets → Bars: an **M** button on each bar puts it on a monitor of its own (or every bar monitor), from a small list of the connected monitors; an unplugged choice falls back to the main monitor. Saved with Apply (`barMonitorsJson`); `ScreenService.edgeOn()`, `barHostScreens`.
+- System → Display → Arrangement: monitors draw much larger (less empty room around them, a taller view), labels shrink to fit instead of cutting off, and a green line marks where two monitors touch, with a line of text giving its length, since the pointer can cross only there. A monitor touching none is flagged.
+
+- **Wallpaper picker** (Ctrl+Super+Space, `qs ipc call wallpaper toggle`): a strip of thumbnails from the wallpaper folder on the focused monitor. Moving previews the image live after a short rest (one `hyprctl` call, nothing saved); Enter or a click saves it for that monitor; Esc puts the old one back; type to filter. `qs ipc call wallpaper next|previous|status`. Settings → Wallpaper gets a **Monitor** section (per-monitor wallpaper and fit; page clicks go to the picked monitor) and a **Picker** section (live preview, delay, thumbnail size, close after setting). New: `panels/WallpaperPicker.qml`, `settings/WallpaperMonitorOptions.qml`, `settings/WallpaperPickerOptions.qml`.
+- Fix: setting a wallpaper rewrote `hyprpaper.conf` with only that monitor, dropping the others. `scripts/wallpaper.py apply <image> [monitor [fit]]` now keeps every monitor's entry (and other settings lines); `wallpaper.py status` reads them back.
+
 - Audio → **Combine into one widget** (on by default). Off, Speaker and Microphone are separate widgets (Audio · Speaker, Audio · Microphone) to turn on and place on any bar; positions are kept in both modes, and only the pill you click opens the audio menu (`AudioMenuService.owner`).
 - Settings IPC: `qs ipc call settings listTabs` lists every tab and its sections, `currentTab` names the open one, and `openTab` refuses an unknown section with the valid names instead of ignoring it.
 

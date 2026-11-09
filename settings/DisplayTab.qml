@@ -461,6 +461,17 @@ Item {
                             height: Theme.space
                         }
 
+                        DisplayInsetOptions {
+                            visible: root.selName.length > 0
+                            width: parent.width
+                            monitor: root.selName
+                        }
+
+                        Item {
+                            width: parent.width
+                            height: Theme.space
+                        }
+
                         // Where Keep saves, and housekeeping.
                         Row {
                             width: parent.width

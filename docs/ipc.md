@@ -26,6 +26,9 @@ hl.bind("SUPER + R", hl.dsp.exec_cmd("qs ipc call freshRss toggle"))
 | `overview toggle` · `open` · `close` | Workspace overview |
 | `overview desktop` · `all` | Windows in place / every workspace |
 | `overview next` · `prev` | Step cards while it is open |
+| `wallpaper toggle` · `open` · `close` | The wallpaper picker strip on the focused monitor |
+| `wallpaper next` · `previous` | The next or previous image in the folder on the focused monitor |
+| `wallpaper status` | Each monitor's saved wallpaper and fit |
 | `osd preview volume\|mic\|track\|brightness` | A sample [on-screen display](settings.md#on-screen-display) popup |
 
 Settings tab ids: `bar`, `widgets`, `appearance`, `applications`,
@@ -100,6 +103,7 @@ hl.bind("SUPER + COMMA",       hl.dsp.exec_cmd("qs ipc call settings toggle"))
 hl.bind("SUPER + N",           hl.dsp.exec_cmd("qs ipc call notificationBell toggleHistory"))
 hl.bind("SUPER + SHIFT + R",   hl.dsp.exec_cmd("qs ipc call recorder toggle"))
 hl.bind("SUPER + SHIFT + C",   hl.dsp.exec_cmd("qs ipc call caffeine toggle"))
+hl.bind("CTRL + SUPER + SPACE", hl.dsp.exec_cmd("qs ipc call wallpaper toggle"))
 ```
 
 Volume and media keys need no IPC: the on-screen display shows any

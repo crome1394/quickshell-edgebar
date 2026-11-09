@@ -19,7 +19,7 @@ Item {
         root.selectedName = String(name || "")
         root.confirmName = ""
         if (applyNow)
-            WallpaperService.apply(root.selectedPath)
+            WallpaperService.applyTo(root.selectedPath, monitorOpts.monitor, "")
     }
 
     function startRename(path, name) {
@@ -76,8 +76,25 @@ Item {
 
             SectionHeader {
                 width: parent.width
+                title: "Monitor"
+                hint: "Each monitor keeps its own wallpaper and fit. Images clicked below go on the monitor picked here. Saves at once."
+            }
+
+            WallpaperMonitorOptions {
+                id: monitorOpts
+                x: Theme.sectionInset
+                width: parent.width - Theme.sectionInset * 2
+            }
+
+            Item {
+                width: parent.width
+                height: Theme.space * 2
+            }
+
+            SectionHeader {
+                width: parent.width
                 title: "Wallpaper"
-                hint: "Click an image to set it. The pencil renames the file, and ✕ deletes it."
+                hint: "Click an image to set it on " + (monitorOpts.monitor.length ? monitorOpts.monitor : "the monitor above") + ". The pencil renames the file, and ✕ deletes it."
             }
 
             Item {
@@ -490,9 +507,23 @@ Item {
                         font.family: Theme.uiFont
                         font.pixelSize: Theme.fontPx
                     }
-
-
                 }
+            }
+
+            Item {
+                width: parent.width
+                height: Theme.space * 2
+            }
+
+            SectionHeader {
+                width: parent.width
+                title: "Picker"
+                hint: "Ctrl+Super+Space (qs ipc call wallpaper toggle) opens a strip of these images on the focused monitor: ← → to move, type to filter, Enter to set, Esc to cancel. Saves at once."
+            }
+
+            WallpaperPickerOptions {
+                x: Theme.sectionInset
+                width: parent.width - Theme.sectionInset * 2
             }
         }
     }

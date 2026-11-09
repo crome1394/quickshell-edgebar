@@ -5,13 +5,87 @@ import qs.theme
 
 // System → Display: value helpers for monitor modes. Parsing what Hyprland
 // reports, labels, the hl.monitor() Lua call, the monitors.lua text, and
-// the saved list of mode + color depth pairs Hyprland would not keep.
-// Every value that reaches Lua is checked against a strict pattern first.
+// the saved list of mode + color depth pairs Hyprland would not keep, and
+// each monitor's edge inset for TV overscan. Every value that reaches Lua
+// is checked against a strict pattern first.
 Singleton {
     id: root
 
     readonly property var depths: [8, 10]
     readonly property string fileMarker: "Managed by Quickshell"
+    readonly property var insetEdges: ["top", "bottom", "left", "right"]
+
+    // Monitor → { top, bottom, left, right }, saved. The bars on that
+    // monitor move inward by these and windows stay clear of them, for a
+    // TV that crops the picture's edges. Nothing here touches the driver.
+    readonly property var insets: root.insetsFrom(Config.displayInsetsJson)
+    // The monitor whose guide frame shows while you adjust; not saved.
+    property string guideMonitor: ""
+
+    function insetNorm(value) {
+        const step = Theme.displayInsetStep
+        const n = Math.round(Number(value) / step) * step
+        return n >= 0 && n <= Theme.displayInsetMax ? n : 0
+    }
+
+    function insetsFrom(text) {
+        let raw = {}
+        try {
+            const t = String(text || "").trim()
+            raw = t.length ? JSON.parse(t) : {}
+        } catch (e) {
+            raw = {}
+        }
+        const out = {}
+        for (const name in raw) {
+            if (!root.outputOk(name) || !raw[name] || typeof raw[name] !== "object")
+                continue
+            const row = {}
+            let any = false
+            for (let i = 0; i < root.insetEdges.length; i++) {
+                const e = root.insetEdges[i]
+                row[e] = root.insetNorm(raw[name][e])
+                any = any || row[e] > 0
+            }
+            if (any)
+                out[name] = row
+        }
+        return out
+    }
+
+    // A monitor's insets; zeros when it has none.
+    function insetsFor(name) {
+        return root.insets[String(name || "")] || { top: 0, bottom: 0, left: 0, right: 0 }
+    }
+
+    function hasInsets(name) {
+        return root.insets[String(name || "")] !== undefined
+    }
+
+    // edge is one of insetEdges, or "all". Saves at once.
+    function setInset(name, edge, px) {
+        const key = String(name || "")
+        if (!root.outputOk(key))
+            return
+        const next = JSON.parse(JSON.stringify(root.insets))
+        const row = Object.assign({ top: 0, bottom: 0, left: 0, right: 0 }, next[key] || {})
+        const value = root.insetNorm(px)
+        if (edge === "all") {
+            for (let i = 0; i < root.insetEdges.length; i++)
+                row[root.insetEdges[i]] = value
+        } else if (root.insetEdges.indexOf(edge) >= 0) {
+            row[edge] = value
+        } else {
+            return
+        }
+        next[key] = row
+        const text = JSON.stringify(root.insetsFrom(JSON.stringify(next)))
+        if (Config.displayInsetsJson === text)
+            return
+        Config.saveFields(() => {
+            Config.displayInsetsJson = text
+        })
+    }
 
     function outputOk(name) {
         return /^[A-Za-z0-9._-]{1,32}$/.test(String(name || ""))

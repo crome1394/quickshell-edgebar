@@ -4,8 +4,8 @@ import qs.config
 import qs.services
 import "tests"
 
-// ScreenService: which monitors get bars, the main monitor, and which bar
-// owns a menu. Uses the monitors of the session it runs in.
+// ScreenService: which monitors get bars, the main monitor, which bar
+// owns a menu, and bars placed on a monitor of their own (M). Uses the monitors of the session it runs in.
 ShellRoot {
     Check { id: t }
 
@@ -28,6 +28,17 @@ ShellRoot {
             t.eq("unknown monitors are ignored", S.picked, [main])
             S.togglePicked(main)
             t.eq("unpicking", S.picked, [])
+
+            // A bar placed on its own monitor with M.
+            t.eq("edges follow bar monitors by default", S.edgeOn("top", main), true)
+            Config.barMonitorsJson = JSON.stringify({ right: main })
+            t.eq("a pinned edge shows on its monitor", S.edgeOn("right", main), true)
+            t.eq("and not on others", S.edgeOn("right", "OTHER-1"), false)
+            Config.barMonitorsJson = JSON.stringify({ right: "UNPLUGGED-9" })
+            t.eq("an unplugged pin falls back to main", S.edgeOn("right", main), true)
+            Config.barMonitorsJson = JSON.stringify({ right: "bad name;" })
+            t.eq("a bad name is dropped", BarSettings.monitorsSnapshot().right, "")
+            Config.barMonitorsJson = ""
             S.setMode("all")
             t.eq("all mode", S.barScreens.length, Quickshell.screens.length)
             S.setMain("NOT-CONNECTED")

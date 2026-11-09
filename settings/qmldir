@@ -77,3 +77,6 @@ NotificationPopupsTab 1.0 NotificationPopupsTab.qml
 OsdTab 1.0 OsdTab.qml
 OsdIconOptions 1.0 OsdIconOptions.qml
 OsdSoundOptions 1.0 OsdSoundOptions.qml
+WallpaperMonitorOptions 1.0 WallpaperMonitorOptions.qml
+WallpaperPickerOptions 1.0 WallpaperPickerOptions.qml
+DisplayInsetOptions 1.0 DisplayInsetOptions.qml

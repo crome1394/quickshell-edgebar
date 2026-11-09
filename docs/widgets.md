@@ -69,6 +69,7 @@ class, and title in a screen corner (Widgets → Active Window).
 
 - **Several monitors**: bars on the main monitor, every monitor, or the
   ones you pick (Widgets → Bars → Monitors). Each bar has the same widgets.
+  A single bar can go on a monitor of its own with its **M** button.
 
 - **Auto-hide** (the H chip on a bar in Widgets → Bars): the bar slides off
   its edge and gives the space back to windows. Touch the edge to bring it

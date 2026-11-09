@@ -28,6 +28,12 @@ ShellRoot {
         t.eq("normalize moves the top-left to 0,0", D.normalized({ A: { x: -1920, y: 300 }, B: { x: 0, y: 0 } }), { A: { x: 0, y: 300 }, B: { x: 1920, y: 0 } })
         t.eq("relation right", D.relation(main, { x: 2560, y: 0, w: 10, h: 10 }), "right of")
         t.eq("relation above", D.relation(main, { x: 0, y: -10, w: 10, h: 10 }), "above")
+        // Edge insets for a TV that crops its picture.
+        const ins = D.insetsFrom(JSON.stringify({ "HDMI-A-1": { top: 41, bottom: 999, left: -5, right: 20 }, "bad name;": { top: 10 }, "DP-1": { top: 0 } }))
+        t.eq("insets snap and clamp", ins["HDMI-A-1"], { top: 42, bottom: 0, left: 0, right: 20 })
+        t.eq("bad monitor names are dropped", ins["bad name;"], undefined)
+        t.eq("all-zero monitors are dropped", ins["DP-1"], undefined)
+        t.eq("a monitor with none reads zeros", D.insetsFor("NONE-1"), { top: 0, bottom: 0, left: 0, right: 0 })
         t.done()
     }
 }

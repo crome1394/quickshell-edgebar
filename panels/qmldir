@@ -16,3 +16,6 @@ CaffeineInhibitor 1.0 CaffeineInhibitor.qml
 ClipboardPanel 1.0 ClipboardPanel.qml
 OsdHost 1.0 OsdHost.qml
 OsdPanel 1.0 OsdPanel.qml
+WallpaperPicker 1.0 WallpaperPicker.qml
+ScreenInsets 1.0 ScreenInsets.qml
+InsetGuide 1.0 InsetGuide.qml

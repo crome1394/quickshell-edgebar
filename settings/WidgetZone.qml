@@ -1,5 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import QtQuick.Controls
+import Quickshell
 import qs.services
 import qs.theme
 
@@ -20,7 +22,15 @@ Column {
     readonly property var entries: WidgetService.zoneEntries(root.zone)
     readonly property int contentWidth: Math.max(1, root.width - Theme.space * 2)
     readonly property int accentWidth: Theme.dividerThickness + Theme.borderWidth
-    readonly property int alignChipsWidth: (3 * Theme.chip) + (2 * Theme.tabGap)
+    // M, then L C R.
+    readonly property int alignChipsWidth: (4 * Theme.chip) + (3 * Theme.tabGap)
+    readonly property string monitor: WidgetService.barMonitor(root.zone)
+    readonly property var monitorChoices: [{ id: "", label: "Every bar monitor", detail: "The monitors picked under Monitors below" }]
+        .concat(Quickshell.screens.map((s) => ({
+            id: String(s.name),
+            label: String(s.name),
+            detail: s.width + "×" + s.height + (String(s.name) === ScreenService.mainName ? " · main" : "")
+        })))
     readonly property bool alongHorizontal: root.zone === "top" || root.zone === "bottom"
     readonly property var alignChoices: root.alongHorizontal
         ? [
@@ -156,6 +166,121 @@ Column {
             anchors.horizontalCenter: parent.horizontalCenter
             y: (Theme.fieldHeight - Theme.chip) / 2
             spacing: Theme.tabGap
+
+            // M: which monitor this bar is on.
+            Rectangle {
+                id: monitorChip
+                readonly property bool selected: root.monitor.length > 0
+
+                width: Theme.chip
+                height: Theme.chip
+                radius: Theme.radiusSm
+                color: monitorChip.selected || monitorPopup.opened ? Theme.accentDim : Theme.fieldBg
+                border.width: Theme.borderWidth
+                border.color: monitorChip.selected || monitorPopup.opened ? Theme.accent : Theme.border
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "M"
+                    color: monitorChip.selected ? Theme.wsActiveText : Theme.subtext
+                    font.family: Theme.uiFont
+                    font.pixelSize: Theme.smallPx
+                    font.bold: monitorChip.selected
+                }
+
+                MouseArea {
+                    id: monitorMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: monitorPopup.opened ? monitorPopup.close() : monitorPopup.open()
+                }
+
+                HoverTip {
+                    message: "Monitor: " + (root.monitor.length ? root.monitor : "every bar monitor") + ". Apply saves it."
+                    show: monitorMouse.containsMouse && !monitorPopup.opened
+                }
+
+                Popup {
+                    id: monitorPopup
+                    y: monitorChip.height + Theme.tabGap
+                    x: Math.min(0, root.width / 2 - width / 2)
+                    width: Theme.fieldHeight * 8
+                    padding: Theme.tabGap
+                    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+                    background: Rectangle {
+                        radius: Theme.radiusSm
+                        color: Theme.pageBg
+                        border.width: Theme.borderWidth
+                        border.color: Theme.border
+                    }
+
+                    contentItem: Column {
+                        spacing: Theme.tabGap
+
+                        Text {
+                            width: parent.width
+                            text: root.title + " on"
+                            color: Theme.subtext
+                            font.family: Theme.uiFont
+                            font.pixelSize: Theme.smallPx
+                        }
+
+                        Repeater {
+                            model: root.monitorChoices
+                            delegate: Rectangle {
+                                id: option
+                                required property var modelData
+                                readonly property bool chosen: root.monitor === String(option.modelData.id)
+
+                                width: parent.width
+                                height: optionText.implicitHeight + Theme.space
+                                radius: Theme.radiusSm
+                                color: option.chosen ? Theme.accentDim : (optionMouse.containsMouse ? Theme.hover : Theme.pillBg)
+                                border.width: Theme.borderWidth
+                                border.color: option.chosen ? Theme.accent : "transparent"
+
+                                Column {
+                                    id: optionText
+                                    x: Theme.space
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    width: parent.width - Theme.space * 2
+
+                                    Text {
+                                        width: parent.width
+                                        elide: Text.ElideRight
+                                        text: (option.chosen ? "✓ " : "") + String(option.modelData.label)
+                                        color: option.chosen ? Theme.wsActiveText : Theme.text
+                                        font.family: Theme.uiFont
+                                        font.pixelSize: Theme.fontPx
+                                        font.bold: option.chosen
+                                    }
+
+                                    Text {
+                                        width: parent.width
+                                        elide: Text.ElideRight
+                                        text: String(option.modelData.detail)
+                                        color: Theme.subtext
+                                        font.family: Theme.uiFont
+                                        font.pixelSize: Theme.smallPx
+                                    }
+                                }
+
+                                MouseArea {
+                                    id: optionMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        WidgetService.setBarMonitor(root.zone, String(option.modelData.id))
+                                        monitorPopup.close()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             Repeater {
                 model: root.alignChoices

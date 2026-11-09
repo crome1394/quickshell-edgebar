@@ -91,6 +91,27 @@ Singleton {
     }
 
     // { top, bottom, left, right } → booleans, for the widget editor.
+    // { top, bottom, left, right }: a monitor name, or "" for every monitor
+    // that gets bars (Widgets → Bars → Monitors). Set with each bar's M.
+    function monitorsNorm(src) {
+        const raw = src && typeof src === "object" ? src : {}
+        const out = {}
+        for (let i = 0; i < root.edges.length; i++) {
+            const name = String(raw[root.edges[i]] || "")
+            out[root.edges[i]] = /^[A-Za-z0-9_.-]{1,64}$/.test(name) ? name : ""
+        }
+        return out
+    }
+
+    function monitorsSnapshot() {
+        try {
+            const text = String(Config.barMonitorsJson || "").trim()
+            return root.monitorsNorm(text.length ? JSON.parse(text) : {})
+        } catch (e) {
+            return root.monitorsNorm({})
+        }
+    }
+
     function autoHideSnapshot() {
         const out = {}
         for (let i = 0; i < root.edges.length; i++)
@@ -160,6 +181,7 @@ Singleton {
             Config.rightBarSpanFull = !!src.rightBarSpanFull
             Config.uiScaleManual = manual
             Config.flushWindowsToBar = !!src.flushWindowsToBar
+            Config.barMonitorsJson = JSON.stringify(root.monitorsNorm(src.barMonitors))
             const hides = src.autoHide || {}
             for (let e = 0; e < root.edges.length; e++)
                 Config[root.autoHideFields[root.edges[e]]] = !!hides[root.edges[e]]

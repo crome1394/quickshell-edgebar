@@ -28,7 +28,10 @@ Nothing on those pages is saved until Apply.
   its delays. **Monitors**: bars on the main monitor (the default), every
   monitor, or monitors you pick, and which monitor is the main one (the
   Active Window popup and menus opened from a keybind go there). A menu
-  opens on the monitor whose bar you clicked.
+  opens on the monitor whose bar you clicked. **M** (left of L/C/R on each
+  bar) puts that one bar on a monitor of its own, or back on every bar
+  monitor; while its monitor is unplugged it shows on the main monitor.
+  Apply saves it.
 - **Active Window**: show it, corner, width, and classes to exclude.
 - **System Stats**: one combined pill, or (with **Combine into one
   widget** off) CPU, Memory, GPU, and VRAM as separate widgets you turn on
@@ -46,8 +49,20 @@ Nothing on those pages is saved until Apply.
 
 - **Theme**: presets, colors, fonts and text size, saved themes, import
   and export. See [Themes](themes.md).
-- **Wallpaper**: a folder of images; click one to set it with hyprpaper.
-  Rename (pencil) or delete (✕) files, and change the preview size.
+- **Wallpaper** (kept apart from the theme; switching themes never
+  changes it):
+  - **Monitor**: pick a monitor, see its wallpaper, and set its fit
+    (Cover, Contain, Tile, Fill). Each monitor keeps its own wallpaper and
+    fit in `hyprpaper.conf`; setting one leaves the others alone.
+  - **Wallpaper**: a folder of images; click one to set it on the monitor
+    picked above. Rename (pencil) or delete (✕) files, and change the
+    preview size.
+  - **Picker**: the Ctrl+Super+Space strip (`qs ipc call wallpaper
+    toggle`) on the focused monitor. ← → move, type to filter, Enter or a
+    click sets it, Esc puts the old one back. **Live preview** shows each
+    image as you rest on it (after **Preview after**, in ms); only Enter
+    saves. Also **Thumbnail size**, **Close after setting**, and buttons for
+    Previous and Next.
 
 ## Applications
 
@@ -156,7 +171,18 @@ only while it shows; clicks pass through it.
   with one monitor). It shows the monitors to scale: drag one next to
   another and it snaps to the nearest side (left, right, above, below),
   edges lined up when close; Apply arrangement asks the same Keep or Go
-  back. In a narrow window the open Arrangement drops below. Saving for good needs the marker described in
+  back. A green line marks where two monitors touch, and the text below
+  says how long it is: the pointer can cross only there, so a shorter
+  monitor beside a taller one leaves part of the taller one's edge closed.
+- **Edges** (in Display, for the monitor picked at the top): for a TV that
+  crops the edges of the picture (overscan). Best fixed on the TV itself
+  (often Picture Size → Fit to Screen, or Just Scan, sometimes only with
+  the input set to PC). Otherwise set how much to keep clear, on all edges
+  or each one; **Show guide** draws a green frame on that monitor to match
+  against what the TV shows, and **None** uses the whole screen again. The
+  bars, popups, and windows on that monitor stay inside. It is plain
+  window placement (invisible layer-shell strips), so it works on any
+  computer and graphics card. Saves at once. In a narrow window the open Arrangement drops below. Saving for good needs the marker described in
   [Hyprland setup](hyprland.md#display).
 - **Transparency**: one opacity for every app, plus per-app overrides with
   focused and unfocused levels. Add an app from the open windows or by its

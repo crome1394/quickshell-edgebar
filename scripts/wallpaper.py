@@ -3,12 +3,18 @@
 
 Usage:
   wallpaper.py list <directory>
-  wallpaper.py apply <image>
+  wallpaper.py apply <image> [<monitor> [<fit>]]
+  wallpaper.py status
   wallpaper.py add <directory> <file...>
   wallpaper.py rename <directory> <old-name> <new-name>
   wallpaper.py delete <directory> <name>
 
 Prints one JSON object. Errors go to stderr and a non-zero status.
+
+apply sets the wallpaper on one monitor (the focused one unless named)
+and saves it in hyprpaper.conf next to every other monitor's entry, so
+each monitor keeps its own. fit is cover, contain, tile, or fill.
+status prints each monitor's saved path and fit from hyprpaper.conf.
 """
 
 import json
@@ -21,6 +27,7 @@ import tempfile
 
 EXTS = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".jxl"}
 MONITOR_OK = re.compile(r"^[A-Za-z0-9_.-]+$")
+FITS = ("cover", "contain", "tile", "fill")
 
 
 def fail(message, code=1):
@@ -151,9 +158,78 @@ def cmd_list(root):
     emit({"ok": True, "dir": root, "count": len(images), "images": images})
 
 
-def cmd_apply(path):
-    monitor = focused_monitor()
-    fit = "cover"
+def conf_path():
+    return os.environ.get("HYPR_WALLPAPER_CONF", os.path.expanduser("~/.config/hypr/hyprpaper.conf"))
+
+
+def read_conf(path):
+    """Other settings lines, and monitor -> {path, fit}, in file order.
+
+    Reads both the block form (wallpaper { monitor = … }) and the older
+    "wallpaper = monitor,path" lines; preload lines are dropped.
+    """
+    try:
+        with open(path, encoding="utf-8") as handle:
+            lines = handle.read().splitlines()
+    except OSError:
+        lines = []
+    other = []
+    monitors = {}
+    block = None
+    for line in lines:
+        text = line.strip()
+        if block is not None:
+            if text == "}":
+                name = block.get("monitor", "")
+                if MONITOR_OK.match(name) and block.get("path"):
+                    fit = block.get("fit_mode", "cover")
+                    monitors[name] = {"path": block["path"], "fit": fit if fit in FITS else "cover"}
+                block = None
+            elif "=" in text:
+                key, _, value = text.partition("=")
+                block[key.strip()] = value.strip()
+            continue
+        if re.match(r"^wallpaper\s*\{$", text):
+            block = {}
+            continue
+        key, _, value = text.partition("=")
+        key = key.strip()
+        if key == "preload":
+            continue
+        if key == "wallpaper" and "," in value:
+            name, _, img = value.strip().partition(",")
+            name = name.strip()
+            if MONITOR_OK.match(name) and name not in monitors:
+                monitors[name] = {"path": img.strip(), "fit": "cover"}
+            continue
+        other.append(line)
+    while other and not other[-1].strip():
+        other.pop()
+    return other, monitors
+
+
+def write_conf(path, other, monitors):
+    keep = [line for line in other if line.strip()]
+    if not any(line.strip().startswith("splash") for line in keep):
+        keep.append("splash = false")
+    if not any(line.strip().startswith("ipc") for line in keep):
+        keep.append("ipc = true")
+    body = "\n".join(keep) + "\n"
+    for name, row in monitors.items():
+        body += f"\nwallpaper {{\n\tmonitor = {name}\n\tpath = {row['path']}\n\tfit_mode = {row['fit']}\n}}\n"
+    atomic_write(path, body)
+
+
+def cmd_apply(path, monitor="", fit=""):
+    if monitor and not MONITOR_OK.match(monitor):
+        fail("refusing monitor name")
+    if fit and fit not in FITS:
+        fail("fit must be cover, contain, tile, or fill")
+    monitor = monitor or focused_monitor()
+    conf = conf_path()
+    other, monitors = read_conf(conf)
+    if not fit:
+        fit = monitors.get(monitor, {}).get("fit", "cover")
     first = subprocess.run(
         ["hyprctl", "hyprpaper", "wallpaper", f"{monitor},{path},{fit}"],
         check=False,
@@ -171,21 +247,14 @@ def cmd_apply(path):
         )
         if second.returncode != 0:
             fail("hyprpaper did not accept the image")
-    conf = os.environ.get("HYPR_WALLPAPER_CONF", os.path.expanduser("~/.config/hypr/hyprpaper.conf"))
-    body = (
-        f"preload = {path}\n"
-        f"wallpaper = {monitor},{path}\n"
-        "splash = false\n"
-        "ipc = true\n"
-        "\n"
-        "wallpaper {\n"
-        f"\tmonitor = {monitor}\n"
-        f"\tpath = {path}\n"
-        f"\tfit_mode = {fit}\n"
-        "}\n"
-    )
-    atomic_write(conf, body)
-    emit({"ok": True, "path": path, "monitor": monitor})
+    monitors[monitor] = {"path": path, "fit": fit}
+    write_conf(conf, other, monitors)
+    emit({"ok": True, "path": path, "monitor": monitor, "fit": fit})
+
+
+def cmd_status():
+    _, monitors = read_conf(conf_path())
+    emit({"ok": True, "monitors": monitors})
 
 
 def unique_dest(root, name):
@@ -251,8 +320,13 @@ def main():
     if command == "list" and len(sys.argv) == 3:
         cmd_list(directory(sys.argv[2], True))
         return 0
-    if command == "apply" and len(sys.argv) == 3:
-        cmd_apply(image_file(sys.argv[2]))
+    if command == "apply" and 3 <= len(sys.argv) <= 5:
+        monitor = sys.argv[3] if len(sys.argv) >= 4 else ""
+        fit = sys.argv[4] if len(sys.argv) == 5 else ""
+        cmd_apply(image_file(sys.argv[2]), monitor, fit)
+        return 0
+    if command == "status" and len(sys.argv) == 2:
+        cmd_status()
         return 0
     if command == "add" and len(sys.argv) >= 4:
         cmd_add(directory(sys.argv[2], True), sys.argv[3:])

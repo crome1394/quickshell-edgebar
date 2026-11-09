@@ -54,6 +54,7 @@ Singleton {
     property real editorUiScale: 0
     property bool editorFlush: false
     property var editorAutoHide: ({ top: false, bottom: false, left: false, right: false })
+    property var editorMonitors: ({ top: "", bottom: "", left: "", right: "" })
     property int editorHideDelay: 600
     property int editorRevealDelay: 150
     property bool editorReady: false
@@ -740,6 +741,27 @@ Singleton {
         root.editorDirty = true
     }
 
+    // The monitor one bar is on: a name, or "" for every bar monitor.
+    function barMonitor(edge) {
+        const key = String(edge || "")
+        const map = root.editorReady ? root.editorMonitors : BarSettings.monitorsSnapshot()
+        return String(map[key] || "")
+    }
+
+    function setBarMonitor(edge, name) {
+        const key = String(edge || "")
+        if (BarSettings.edges.indexOf(key) < 0)
+            return
+        root.ensureEditor()
+        const next = Object.assign({}, root.editorMonitors)
+        next[key] = String(name || "")
+        const clean = BarSettings.monitorsNorm(next)
+        if (clean[key] === root.editorMonitors[key])
+            return
+        root.editorMonitors = clean
+        root.editorDirty = true
+    }
+
     // Auto-hide per edge, and the shared delays (draft while editing).
     function barAutoHides(edge) {
         const key = String(edge || "")
@@ -1006,6 +1028,7 @@ Singleton {
             uiScaleManual: Number(Config.uiScaleManual) > 0 ? Number(Config.uiScaleManual) : 0,
             flushWindowsToBar: !!Config.flushWindowsToBar,
             autoHide: BarSettings.autoHideSnapshot(),
+            barMonitors: BarSettings.monitorsSnapshot(),
             hideDelayMs: BarSettings.hideDelayValue(),
             revealDelayMs: BarSettings.revealDelayValue()
         }
@@ -1031,6 +1054,7 @@ Singleton {
             uiScaleManual: Number(root.editorUiScale) > 0 ? Number(root.editorUiScale) : 0,
             flushWindowsToBar: !!root.editorFlush,
             autoHide: Object.assign({}, root.editorAutoHide),
+            barMonitors: Object.assign({}, root.editorMonitors),
             hideDelayMs: root.editorHideDelay,
             revealDelayMs: root.editorRevealDelay
         }
@@ -1055,6 +1079,7 @@ Singleton {
         root.editorUiScale = Number(Config.uiScaleManual) > 0 ? Number(Config.uiScaleManual) : 0
         root.editorFlush = !!Config.flushWindowsToBar
         root.editorAutoHide = BarSettings.autoHideSnapshot()
+        root.editorMonitors = BarSettings.monitorsSnapshot()
         root.editorHideDelay = BarSettings.hideDelayValue()
         root.editorRevealDelay = BarSettings.revealDelayValue()
         root.editorReady = true

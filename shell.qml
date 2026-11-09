@@ -33,6 +33,9 @@ ShellRoot {
     // Registers the clipboard IPC target and keeps the history watcher
     // (one wl-paste) running while history is on.
     property bool clipboardWatch: ClipboardService.recording
+    // Registers the wallpaper IPC target (picker, next, previous). Nothing
+    // runs until one is used.
+    property bool wallpaperWatch: WallpaperService.pickerOpen
 
     // The one tooltip window every bar widget shares (TipService).
     BarTipHost {}
@@ -42,12 +45,27 @@ ShellRoot {
     // only while a popup shows.
     OsdHost {}
 
-    // One set of edge bars per monitor that gets bars (Widgets → Bars →
-    // Monitors). An edge that is off is not created.
+    // Edge bars on each monitor that draws one (Widgets → Bars → Monitors,
+    // and each bar's M button). An edge that is off is not created.
     Variants {
-        model: ScreenService.barScreens
+        model: ScreenService.barHostScreens
         delegate: ScreenBars {
             onOpenSettings: settings.show()
+        }
+    }
+
+    // Space kept clear on the cropped edges of a TV (System → Display →
+    // Edges), only on monitors that have an inset.
+    Variants {
+        model: Quickshell.screens.filter((s) => DisplaySettings.hasInsets(String(s.name)))
+        delegate: ScreenInsets {}
+    }
+
+    // The frame shown while adjusting an inset.
+    Loader {
+        active: DisplaySettings.guideMonitor.length > 0
+        sourceComponent: Component {
+            InsetGuide {}
         }
     }
 
@@ -76,6 +94,14 @@ ShellRoot {
         active: BuiltinNotifications.enabled
         sourceComponent: Component {
             NotificationToasts {}
+        }
+    }
+
+    // The wallpaper picker exists only while open (Ctrl+Super+Space).
+    Loader {
+        active: WallpaperService.pickerOpen
+        sourceComponent: Component {
+            WallpaperPicker {}
         }
     }
 

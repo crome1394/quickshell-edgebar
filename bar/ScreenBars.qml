@@ -2,11 +2,13 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import qs.config
+import qs.services
 import qs.theme
 
 // The edge bars on one monitor. shell.qml makes one of these for each
-// monitor ScreenService.barScreens lists. An edge that is off is not
-// created, so its widgets do not load.
+// monitor that draws a bar (ScreenService.barHostScreens). An edge that is
+// off, or placed on another monitor with its M button, is not created, so
+// its widgets do not load.
 Scope {
     id: root
 
@@ -15,7 +17,7 @@ Scope {
     signal openSettings()
 
     Loader {
-        active: Config.ready && Config.showTopBar
+        active: Config.ready && Config.showTopBar && ScreenService.edgeOn("top", String(root.modelData.name))
         sourceComponent: Component {
             EdgeBar {
                 screen: root.modelData
@@ -28,7 +30,7 @@ Scope {
     }
 
     Loader {
-        active: Config.ready && Config.showBottomBar
+        active: Config.ready && Config.showBottomBar && ScreenService.edgeOn("bottom", String(root.modelData.name))
         sourceComponent: Component {
             EdgeBar {
                 screen: root.modelData
@@ -41,7 +43,7 @@ Scope {
     }
 
     Loader {
-        active: Config.ready && Config.showLeftBar
+        active: Config.ready && Config.showLeftBar && ScreenService.edgeOn("left", String(root.modelData.name))
         sourceComponent: Component {
             EdgeBar {
                 screen: root.modelData
@@ -54,7 +56,7 @@ Scope {
     }
 
     Loader {
-        active: Config.ready && Config.showRightBar
+        active: Config.ready && Config.showRightBar && ScreenService.edgeOn("right", String(root.modelData.name))
         sourceComponent: Component {
             EdgeBar {
                 screen: root.modelData

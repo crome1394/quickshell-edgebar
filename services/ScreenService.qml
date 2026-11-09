@@ -8,7 +8,9 @@ import qs.theme
 // Which monitors get bars, and which one is the main monitor.
 //
 // Bars on (Widgets → Bars → Monitors): "main" (the default), "all", or
-// "pick" (the monitors named in Config.barScreenNames). The main monitor
+// "pick" (the monitors named in Config.barScreenNames). One bar can also be
+// placed on a monitor of its own with its M button (Config.barMonitorsJson);
+// while that monitor is unplugged, the bar goes to the main monitor. The main monitor
 // is Config.mainScreen, or the first one Quickshell lists. Single-screen
 // things (the Active Window popup, menus opened over IPC) go to the main
 // monitor, or to the first monitor with bars when main has none.
@@ -85,6 +87,29 @@ Singleton {
         }
         return root.mainScreen ? [root.mainScreen] : []
     }
+
+    // Edge → its own monitor ("" follows barScreens), saved.
+    readonly property var pins: BarSettings.monitorsSnapshot()
+
+    // True when the `edge` bar belongs on the screen called `name`.
+    function edgeOn(edge, name) {
+        const pin = String(root.pins[edge] || "")
+        if (!pin.length)
+            return root.barScreens.some((s) => String(s.name) === name)
+        if (root.names.indexOf(pin) >= 0)
+            return name === pin
+        return name === root.mainName
+    }
+
+    function edgeEnabled(edge) {
+        return ({ top: Config.showTopBar, bottom: Config.showBottomBar, left: Config.showLeftBar, right: Config.showRightBar })[edge] === true
+    }
+
+    // Every screen that draws at least one bar.
+    readonly property var barHostScreens: root.screens.filter((s) => {
+        const name = String(s.name)
+        return BarSettings.edges.some((e) => root.edgeEnabled(e) && root.edgeOn(e, name))
+    })
 
     // Where a menu opened without a click (IPC) shows.
     readonly property string defaultName: {
