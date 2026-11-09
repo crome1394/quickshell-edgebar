@@ -128,9 +128,12 @@ Singleton {
     }
 
     // Drag a region; slurp prints WxH+X+Y, or nothing when cancelled.
+    // slurp reads preset boxes from stdin when stdin is not a terminal,
+    // and Process always gives it an open pipe, so it waited forever and
+    // never showed. An empty stdin (a fixed line, nothing added) fixes it.
     Process {
         id: slurp
-        command: ["slurp", "-f", "%wx%h+%x+%y"]
+        command: ["sh", "-c", "exec slurp -f '%wx%h+%x+%y' </dev/null"]
         stdout: StdioCollector {
             id: slurpOut
             waitForEnd: true

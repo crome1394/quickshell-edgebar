@@ -31,6 +31,7 @@ The old bar is at <~/Projects/qs-old-bar>
 - Every folder has a hand-written qmldir. When you add, rename, or delete a QML file, update that folder's qmldir in the same change (`Name 1.0 Name.qml`, or `singleton Name 1.0 Name.qml` for a file with `pragma Singleton`). An unlisted file fails at runtime with "X is not a type" or "X is not defined", even though qmllint may pass.
 - No component references an id from another file. Data flows down as required properties. Events flow up as signals.
 - Colors, sizes, fonts, and intervals come from the Theme and Config singletons. No hardcoded values in widgets.
+- BarSlot turns side-bar pills 90° clockwise. Every icon in a pill (glyph, image, or drawn mark) sets `rotation: WidgetService.iconTurn(root.edge)` so it stays upright on any bar; text that runs along the bar keeps the pill's turn.
 - Shell scripts are a last resort. Prefer Quickshell's native modules and D-Bus services. Any script must quote variables, validate input, write files atomically, and never build commands from untrusted text.
 
 ## Testing

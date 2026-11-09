@@ -46,6 +46,7 @@ Rectangle {
         spacing: 0
 
         Text {
+            rotation: WidgetService.iconTurn(root.edge)
             anchors.horizontalCenter: parent.horizontalCenter
             text: BatteryService.glyph()
             color: root.ink

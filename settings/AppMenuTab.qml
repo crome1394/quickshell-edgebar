@@ -138,7 +138,7 @@ Item {
             Text {
                 width: parent.width
                 wrapMode: Text.WordWrap
-                text: "The icon sits on the bar. A click runs the command. Apply saves this page. Turn the widget on under Widgets."
+                text: "The icon sits on the bar. A click opens the App Library or the launcher. Apply saves this page. Turn the widget on under Widgets."
                 color: Theme.subtext
                 font.family: Theme.uiFont
                 font.pixelSize: Theme.smallPx
@@ -545,8 +545,34 @@ Item {
 
             SectionHeader {
                 width: parent.width
+                title: "Click opens"
+                hint: "The App Library, or the launcher. Both are set up on their own pages under Applications."
+            }
+
+            Row {
+                x: Theme.sectionInset
+                spacing: Theme.space
+
+                Repeater {
+                    model: [{ id: "library", label: "App Library" }, { id: "search", label: "Launcher" }]
+                    delegate: ChipButton {
+                        required property var modelData
+                        label: modelData.label
+                        active: root.draft.action === modelData.id
+                        onClicked: MenuSettings.editor.set("action", modelData.id)
+                    }
+                }
+            }
+
+            Item {
+                width: parent.width
+                height: Theme.space
+            }
+
+            SectionHeader {
+                width: parent.width
                 title: "Command"
-                hint: "Program and arguments, separated by spaces. A shell is not used, and shell characters are rejected. Empty does nothing on click."
+                hint: "Runs in place of the App Library when the built-in one is off (Applications → App Library). Program and arguments, separated by spaces. A shell is not used, and shell characters are rejected."
             }
 
             Column {
@@ -611,9 +637,9 @@ Item {
         anchors.bottom: parent.bottom
         applyEnabled: MenuSettings.editor.dirty
         undoEnabled: MenuSettings.editor.canUndo
-        applyTip: "Save the icon and the command"
+        applyTip: "Save the icon, what a click opens, and the command"
         undoTip: "Drop an unsaved draft, or put back the last applied one"
-        resetTip: "Restore the nine-square symbol and clear the command. Apply saves it."
+        resetTip: "Restore the nine-square symbol, open the App Library, and clear the command. Apply saves it."
         onApplyClicked: root.applyPage()
         onUndoClicked: {
             MenuSettings.editor.undo()

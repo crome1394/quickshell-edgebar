@@ -100,6 +100,22 @@ Singleton {
     property alias clipboardHistory: data.clipboardHistory
     property alias clipboardMaxItems: data.clipboardMaxItems
     property alias clipboardImages: data.clipboardImages
+    property alias menuAction: data.menuAction
+    property alias searchBuiltIn: data.searchBuiltIn
+    property alias searchCommand: data.searchCommand
+    property alias searchPluginsJson: data.searchPluginsJson
+    property alias searchMaxResults: data.searchMaxResults
+    property alias searchPlace: data.searchPlace
+    property alias searchDim: data.searchDim
+    property alias searchTerminal: data.searchTerminal
+    property alias searchHistory: data.searchHistory
+    property alias searchWebRulesJson: data.searchWebRulesJson
+    property alias libraryBuiltIn: data.libraryBuiltIn
+    property alias libraryColumns: data.libraryColumns
+    property alias libraryIconPx: data.libraryIconPx
+    property alias libraryHideFoldered: data.libraryHideFoldered
+    property alias libraryShowNames: data.libraryShowNames
+    property alias libraryFoldersJson: data.libraryFoldersJson
     property alias showCaffeinePill: data.showCaffeinePill
     property alias showNightLightPill: data.showNightLightPill
     property alias showRecorderPill: data.showRecorderPill
@@ -198,7 +214,7 @@ Singleton {
     property alias opacityOverridesJson: data.opacityOverridesJson
     // Settings → Theme: saved themes (ThemeSettings).
     property alias themeLibraryJson: data.themeLibraryJson
-    // App Launcher page: Installed apps open (true) or folded.
+    // Quick Launch page: Installed apps open (true) or folded.
     property alias launcherAppsOpen: data.launcherAppsOpen
     // Settings window tabs: "" (index dividers) or "flat"; colors "" (rainbow) or "accent".
     property alias settingsTabStyle: data.settingsTabStyle
@@ -575,6 +591,26 @@ Singleton {
             property bool clipboardHistory: true
             property int clipboardMaxItems: 0
             property bool clipboardImages: true
+            // Application Menu click: "library" (App Library, or menuCommand
+            // when the built-in one is off) or "search" (the launcher).
+            property string menuAction: "library"
+            // Launcher (SearchSettings): built in, or a command run instead.
+            property bool searchBuiltIn: true
+            property string searchCommand: ""
+            property string searchPluginsJson: ""
+            property int searchMaxResults: 8
+            property string searchPlace: "top"
+            property bool searchDim: false
+            property string searchTerminal: ""
+            property bool searchHistory: true
+            property string searchWebRulesJson: ""
+            // App Library (LibrarySettings). Off, menuCommand runs instead.
+            property bool libraryBuiltIn: true
+            property int libraryColumns: 7
+            property int libraryIconPx: 64
+            property bool libraryHideFoldered: true
+            property bool libraryShowNames: true
+            property string libraryFoldersJson: ""
             property bool showCaffeinePill: false
             property bool showNightLightPill: false
             property bool showRecorderPill: false

@@ -42,6 +42,7 @@ Rectangle {
 
     Text {
         anchors.centerIn: parent
+        rotation: WidgetService.iconTurn(root.edge)
         text: root.on ? Theme.caffeineOnGlyph : Theme.caffeineOffGlyph
         color: root.lit ? root.theme.colAccent : root.theme.colFg
         font.family: root.theme.iconFont

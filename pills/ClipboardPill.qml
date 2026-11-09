@@ -42,6 +42,7 @@ Rectangle {
     Text {
         id: glyph
         anchors.centerIn: parent
+        rotation: WidgetService.iconTurn(root.edge)
         text: Theme.clipboardGlyph
         color: root.lit ? root.theme.colAccent : root.theme.colFg
         opacity: ClipboardService.recording ? 1 : Theme.widgetOffOpacity

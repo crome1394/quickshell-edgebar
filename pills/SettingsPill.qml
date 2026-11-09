@@ -40,6 +40,7 @@ Rectangle {
 
     SpannerIcon {
         anchors.centerIn: parent
+        rotation: WidgetService.iconTurn(root.edge)
         theme: root.theme
         pixelSize: Math.max(1, Math.round(root.theme.iconPx * root.ui))
     }

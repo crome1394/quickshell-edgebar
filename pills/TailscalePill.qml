@@ -112,6 +112,7 @@ Rectangle {
 
     TailscaleMark {
         anchors.centerIn: parent
+        rotation: WidgetService.iconTurn(root.edge)
         size: root.icon
         ink: root.markInk()
         on: TailscaleService.running

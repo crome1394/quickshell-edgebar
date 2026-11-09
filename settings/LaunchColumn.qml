@@ -20,8 +20,8 @@ Item {
     readonly property string title: {
         const count = LauncherSettings.draftSlots()
         if (count <= 1)
-            return "App Launcher"
-        return "App Launcher " + root.launcher
+            return "Quick Launch"
+        return "Quick Launch " + root.launcher
     }
     readonly property int dropIndex: {
         if (!root.visible || !root.dragging || root.dragKey.length === 0)

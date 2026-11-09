@@ -1,0 +1,8 @@
+module library
+LibraryLogic 1.0 LibraryLogic.js
+LibraryModel 1.0 LibraryModel.qml
+LibraryKeys 1.0 LibraryKeys.qml
+LibraryMenu 1.0 LibraryMenu.qml
+AppTile 1.0 AppTile.qml
+FolderTab 1.0 FolderTab.qml
+NameDialog 1.0 NameDialog.qml

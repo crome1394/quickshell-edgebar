@@ -44,6 +44,7 @@ Rectangle {
 
     Text {
         anchors.centerIn: parent
+        rotation: WidgetService.iconTurn(root.edge)
         text: Theme.nightGlyph
         color: root.lit ? root.theme.colAccent : root.theme.colFg
         font.family: root.theme.iconFont

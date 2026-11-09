@@ -83,12 +83,20 @@ Singleton {
         return "quickLaunch" + index
     }
 
+    // BarSlot turns a side-bar pill 90° clockwise so it lies along the bar.
+    // A pill's icon turns back by this much so it stays upright:
+    // rotation: WidgetService.iconTurn(root.edge). Text that runs along
+    // the bar keeps the pill's turn.
+    function iconTurn(edge) {
+        return edge === "left" || edge === "right" ? -90 : 0
+    }
+
     function launcherLabel(n) {
         const count = LauncherSettings.slots()
         const index = Math.round(Number(n))
         if (count <= 1)
-            return "App Launcher"
-        return "App Launcher " + index
+            return "Quick Launch"
+        return "Quick Launch " + index
     }
 
     function isLauncherId(id) {

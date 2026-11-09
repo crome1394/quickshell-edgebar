@@ -4,7 +4,8 @@ import Quickshell
 import qs.theme
 
 // Applications → Application Menu: the pill icon (a font symbol or an
-// SVG/PNG image), its look, and the command it runs. The command is split
+// SVG/PNG image), its look, what a click opens, and the command run in
+// place of the App Library when the built-in one is off. The command is split
 // on spaces and never run through a shell.
 Singleton {
     id: root
@@ -92,6 +93,16 @@ Singleton {
         return parts.join(" ")
     }
 
+    // What a click opens: "library" (the App Library, or the command when
+    // the built-in library is off) or "search" (the launcher).
+    function actionNorm(value) {
+        return String(value || "") === "search" ? "search" : "library"
+    }
+
+    function actionValue() {
+        return root.actionNorm(Config.menuAction)
+    }
+
     // The saved command as argv, for the pill.
     function savedArgv() {
         return root.argvFromLine(root.commandLine(Config.menuCommand))
@@ -112,7 +123,8 @@ Singleton {
             mode: root.modeNorm(src.mode),
             image: root.imagePathNorm(src.image),
             tint: !!src.tint,
-            command: command
+            command: command,
+            action: root.actionNorm(src.action)
         }
     }
 
@@ -134,7 +146,8 @@ Singleton {
             mode: Config.menuIconMode,
             image: Config.menuImagePath,
             tint: Config.menuImageTint,
-            command: root.commandLine(Config.menuCommand)
+            command: root.commandLine(Config.menuCommand),
+            action: Config.menuAction
         })
     }
 
@@ -149,7 +162,8 @@ Singleton {
             mode: "symbol",
             image: "",
             tint: false,
-            command: ""
+            command: "",
+            action: "library"
         }
     }
 
@@ -167,6 +181,7 @@ Singleton {
             Config.menuImagePath = clean.image
             Config.menuImageTint = clean.tint
             Config.menuCommand = JSON.stringify(argv)
+            Config.menuAction = clean.action
         })
     }
 

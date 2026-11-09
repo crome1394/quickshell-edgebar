@@ -39,6 +39,10 @@ ShellRoot {
     // Registers the display IPC target (turn a monitor off or on). Nothing
     // runs until it is used or the Display page opens.
     property bool displayWatch: DisplayService.busy
+    // Register the launcher and App Library IPC targets. Neither has a
+    // window until it opens.
+    property bool searchWatch: SearchService.open
+    property bool libraryWatch: LibraryService.open
 
     // The one tooltip window every bar widget shares (TipService).
     BarTipHost {}
@@ -113,6 +117,23 @@ ShellRoot {
         active: FreshRssService.open
         sourceComponent: Component {
             FreshRssPanel {}
+        }
+    }
+
+    // The launcher exists only while open (qs ipc call launcher toggle).
+    Loader {
+        active: SearchService.open
+        sourceComponent: Component {
+            SearchPanel {}
+        }
+    }
+
+    // The App Library exists only while open (Application Menu widget, or
+    // qs ipc call appLibrary toggle).
+    Loader {
+        active: LibraryService.open
+        sourceComponent: Component {
+            LibraryPanel {}
         }
     }
 

@@ -51,6 +51,7 @@ Rectangle {
         spacing: Math.round(Theme.tabGap * root.ui)
 
         Text {
+            rotation: WidgetService.iconTurn(root.edge)
             anchors.verticalCenter: parent.verticalCenter
             text: Theme.freshRssGlyph
             color: root.lit || root.count > 0 ? root.theme.colAccent : root.theme.colFg

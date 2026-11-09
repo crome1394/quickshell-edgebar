@@ -109,6 +109,7 @@ Rectangle {
     Text {
         id: bellIcon
         anchors.centerIn: parent
+        rotation: WidgetService.iconTurn(root.edge)
         text: root.bellGlyph
         color: root.dnd ? root.theme.colDanger : root.theme.colFg
         font.family: root.theme.fontFamily

@@ -1,6 +1,5 @@
 pragma ComponentBehavior: Bound
 import QtQuick
-import Quickshell
 import qs.components
 import qs.config
 import qs.services
@@ -22,7 +21,6 @@ Rectangle {
     property bool dockHot: dock.mag > 1.01 || Math.abs(dock.jumpY) > 0.5
 
     readonly property real ui: WidgetService.uiScale
-    readonly property bool side: root.edge === "left" || root.edge === "right"
     readonly property string symbol: MenuSettings.symbolValue(Config.menuSymbol)
     readonly property int symbolPx: Math.max(1, Math.round(MenuSettings.pxValue() * root.ui * root.widthFactor))
     readonly property string fontName: Config.menuFont.length ? Config.menuFont : root.theme.iconFont
@@ -32,11 +30,14 @@ Rectangle {
         ? Config.menuColor
         : (menuMouse.containsMouse ? root.theme.colAccent : root.theme.colFg)
 
+    // The App Library (which runs the Application Menu command instead
+    // when the built-in one is off) or the launcher, by Settings →
+    // Applications → Application Menu → Click opens.
     function launch() {
-        const command = MenuSettings.savedArgv()
-        if (!command || !command.length)
-            return
-        Quickshell.execDetached(command)
+        if (MenuSettings.actionValue() === "search")
+            SearchService.toggle()
+        else
+            LibraryService.toggle()
     }
 
     implicitWidth: Math.max(1, Math.round((Theme.barHeight - Theme.barPad) * root.widthFactor * root.ui))
@@ -66,7 +67,7 @@ Rectangle {
         anchors.centerIn: parent
         width: root.showImage ? root.symbolPx : glyph.implicitWidth
         height: root.showImage ? root.symbolPx : glyph.implicitHeight
-        rotation: root.side ? -90 : 0
+        rotation: WidgetService.iconTurn(root.edge)
         transformOrigin: Item.Center
 
         Loader {

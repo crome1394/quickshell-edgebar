@@ -142,6 +142,7 @@ Rectangle {
         spacing: root.pad
 
         Text {
+            rotation: WidgetService.iconTurn(root.edge)
             width: root.icon
             height: root.cell
             verticalAlignment: Text.AlignVCenter

@@ -29,7 +29,6 @@ Rectangle {
     readonly property int dot: Math.max(Theme.borderWidth * 2, Math.round(Theme.wsGap * root.ui))
     readonly property int icon: Math.max(1, Math.min(root.cell - root.dot, Math.round(root.theme.iconPx * root.ui * root.widthFactor)))
     readonly property int gap: Theme.wsGap
-    readonly property bool side: root.edge === "left" || root.edge === "right"
     readonly property var pins: root.boardPins()
     readonly property int pinCount: root.pins.length !== undefined ? root.pins.length : 0
     readonly property var runMarks: root.buildMarks()
@@ -254,7 +253,7 @@ Rectangle {
                     anchors.centerIn: parent
                     width: root.icon
                     height: root.icon
-                    rotation: root.side ? -90 : 0
+                    rotation: WidgetService.iconTurn(root.edge)
                     transformOrigin: Item.Center
 
                     Image {

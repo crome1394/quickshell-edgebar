@@ -233,6 +233,45 @@ Singleton {
     // Clipboard viewer: window size, list row height, preview pane share,
     // history sizes to pick from (cliphist's own default is 750), the
     // longest preview read per entry, and the pause before a preview loads.
+    // Launcher (Pop Launcher style): a search box with results under it.
+    // Recorder: how much the red lightens on hover (and darkens for its edge).
+    readonly property real recordingHoverLift: 1.15
+    readonly property int searchWidth: 640
+    readonly property int searchRowHeight: 52
+    readonly property int searchIconPx: 32
+    readonly property real searchTopShare: 0.18
+    readonly property int searchFieldHeight: 44
+    readonly property var searchMaxChoices: [6, 8, 10, 12]
+    readonly property int searchMaxDefault: 8
+    readonly property int searchDelayMs: 120
+    readonly property int searchFindMax: 40
+    readonly property int searchCalcLimitMs: 3000
+    readonly property int searchFilesMax: 60
+    readonly property int searchHistoryMax: 400
+    readonly property int searchSaveMs: 1500
+    readonly property int searchCommandMax: 240
+    readonly property int searchQueryMax: 400
+    readonly property string searchGlyph: "\u{f0349}"
+    // Shown when a result has no icon in the icon theme.
+    readonly property var searchGlyphs: ({
+        app: "\u{f08c6}", window: "\u{f05af}", folder: "\u{f024b}", file: "\u{f0214}", calc: "\u{f00ec}",
+        web: "\u{f059f}", help: "\u{f02d7}", run: "\u{f018d}", script: "\u{f018d}", none: "\u{f0349}"
+    })
+    readonly property string searchDefaultTerminal: "foot"
+    // App Library (Pop's application library): a grid with folders.
+    readonly property var libraryColumnChoices: [5, 6, 7, 8, 9]
+    readonly property int libraryColumnsDefault: 7
+    readonly property var libraryIconChoices: [48, 64, 80]
+    readonly property int libraryIconDefault: 64
+    readonly property int libraryTileExtra: 44
+    readonly property int libraryRowsShown: 4
+    readonly property int libraryFolderPx: 40
+    readonly property int libraryFolderNameMax: 32
+    readonly property int libraryFoldersMax: 24
+    readonly property int libraryFolderAppsMax: 400
+    readonly property string libraryFolderGlyph: "\u{f024b}"
+    readonly property string libraryHomeGlyph: "\u{f02dc}"
+    readonly property string libraryAddGlyph: "\u{f0257}"
     readonly property string clipboardGlyph: "\u{f0a38}"
     readonly property int clipboardWidth: 920
     readonly property int clipboardHeight: 560
@@ -412,7 +451,7 @@ Singleton {
     // The open Arrangement column's width range.
     readonly property int displayArrangeMin: 300
     readonly property int displayArrangeMax: 460
-    // Applications → App Launcher: the open Installed apps column, and the
+    // Applications → Quick Launch: the open Installed apps column, and the
     // narrowest a launcher column may get before they stack.
     readonly property int launcherAppsMin: 300
     readonly property int launcherAppsMax: 440

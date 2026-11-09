@@ -27,3 +27,5 @@ singleton RecorderSettings 1.0 RecorderSettings.qml
 singleton ClipboardSettings 1.0 ClipboardSettings.qml
 singleton StatStyle 1.0 StatStyle.qml
 singleton OsdSettings 1.0 OsdSettings.qml
+singleton SearchSettings 1.0 SearchSettings.qml
+singleton LibrarySettings 1.0 LibrarySettings.qml

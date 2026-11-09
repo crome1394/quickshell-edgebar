@@ -3,7 +3,7 @@ import QtQuick
 import Quickshell
 import qs.theme
 
-// Applications → App Launcher: how many launchers there are and the pins
+// Applications → Quick Launch: how many launchers there are and the pins
 // on each. Pins are desktop ids or argv commands, never shell lines.
 Singleton {
     id: root

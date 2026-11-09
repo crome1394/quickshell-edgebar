@@ -114,6 +114,7 @@ Rectangle {
 
     Text {
         anchors.centerIn: parent
+        rotation: WidgetService.iconTurn(root.edge)
         text: "󰐥"
         color: powerMouse.containsMouse || root.menuOpen ? root.theme.colAccent : root.theme.colFg
         font.family: root.theme.iconFont

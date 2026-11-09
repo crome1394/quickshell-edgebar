@@ -1,0 +1,11 @@
+module search
+SearchLogic 1.0 SearchLogic.js
+SearchModel 1.0 SearchModel.qml
+SearchKeys 1.0 SearchKeys.qml
+SearchRow 1.0 SearchRow.qml
+CalcSource 1.0 CalcSource.qml
+FindSource 1.0 FindSource.qml
+FilesSource 1.0 FilesSource.qml
+RecentSource 1.0 RecentSource.qml
+ScriptsSource 1.0 ScriptsSource.qml
+AppCatalog 1.0 AppCatalog.qml
