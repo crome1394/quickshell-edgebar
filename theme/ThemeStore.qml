@@ -3,8 +3,10 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// The active look, saved in state/theme.json: the theme (themeJson) and
-// the stat and audio threshold steps and colors (statsJson, audioJson).
+// The active look, saved in state/theme.json: the theme (themeJson), the
+// stat and audio threshold steps and colors (statsJson, audioJson), and the
+// bar and menu glass (glassJson, System → Transparency), which is kept
+// apart from the theme so switching themes never changes it.
 // Empty fields keep the defaults (Liquid amber, DefaultTheme.qml). Older
 // setups kept the thresholds in theme/theme.json; they are copied over once.
 //
@@ -15,6 +17,24 @@ Singleton {
 
     // The saved theme, cleaned. Liquid amber until one is applied.
     readonly property var activeTheme: ThemeBuilder.normalize(root.parsedObject(root.themeJson) || ThemePresets.defaultTheme())
+
+    // Bar and menu glass. Never saved yet: the glass the theme had, so an
+    // older setup looks the same until it is changed.
+    readonly property var glass: {
+        const saved = root.parsedObject(root.glassJson)
+        if (saved)
+            return ThemeBuilder.glassNorm(saved)
+        const t = root.activeTheme
+        const legacy = root.parsedObject(root.themeJson) || {}
+        return ThemeBuilder.glassNorm({ bar: t.glass, menu: t.menu, bars: legacy.barGlass })
+    }
+
+    function saveGlass(glass) {
+        root.themeApplying = true
+        root.glassJson = JSON.stringify(ThemeBuilder.glassNorm(glass))
+        root.themeApplying = false
+        root.queueThemeSave()
+    }
 
     function statUtilColor(util, metric, t1, t2, t3) {
         const kind = String(metric || "")
@@ -61,6 +81,7 @@ Singleton {
     property alias themeJson: themeStore.themeJson
     property alias statsJson: themeStore.statsJson
     property alias audioJson: themeStore.audioJson
+    property alias glassJson: themeStore.glassJson
 
     function colorHex(value) {
         const text = String(value === undefined || value === null ? "" : value)
@@ -324,6 +345,7 @@ Singleton {
             property string themeJson: ""
             property string statsJson: ""
             property string audioJson: ""
+            property string glassJson: ""
         }
     }
 

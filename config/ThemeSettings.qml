@@ -85,11 +85,12 @@ Singleton {
         root.editor.set("theme", next)
     }
 
-    // One simple edit to the drafted theme (accent, alert, tint, glass,
-    // menu). Switching tone drops the preset's text colors and picks a
-    // tint that suits the tone.
+    // One simple edit to the drafted theme (accent, alert, tint, tone,
+    // name). Switching tone drops the preset's text colors and picks a tint
+    // that suits the tone. Glass is not part of a theme: System →
+    // Transparency sets it (ThemeStore.glass).
     function setField(key, value) {
-        if (["accent", "alert", "tint", "glass", "menu", "tone", "name"].indexOf(key) < 0)
+        if (["accent", "alert", "tint", "tone", "name"].indexOf(key) < 0)
             return
         const next = Object.assign({}, root.editor.value.theme)
         if (key === "tone") {
@@ -97,9 +98,6 @@ Singleton {
                 return
             next.tone = value === "light" ? "light" : "dark"
             next.colors = {}
-            next.glass = next.tone === "light" ? 100 : 56
-            next.barGlass = ThemeBuilder.barGlassNorm({})
-            next.menu = next.tone === "light" ? 100 : 90
             const tint = ThemeBuilder.parse(next.tint)
             const isLight = tint && ThemeBuilder.luminance(tint) > 0.5
             if (isLight !== (next.tone === "light"))
@@ -109,16 +107,6 @@ Singleton {
         } else {
             next[key] = value
         }
-        root.editor.set("theme", next)
-    }
-
-    // One bar's own glass in the drafted theme; -1 follows Bar glass.
-    function setBarGlass(edge, value) {
-        if (ThemeBuilder.barEdges.indexOf(edge) < 0)
-            return
-        const next = Object.assign({}, root.editor.value.theme)
-        next.barGlass = Object.assign({}, ThemeBuilder.barGlassNorm(next.barGlass))
-        next.barGlass[edge] = Math.round(Number(value))
         root.editor.set("theme", next)
     }
 

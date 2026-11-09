@@ -192,7 +192,12 @@ only while it shows; clicks pass through it.
   window placement (invisible layer-shell strips), so it works on any
   computer and graphics card. Saves at once. In a narrow window the open Arrangement drops below. Saving for good needs the marker described in
   [Hyprland setup](hyprland.md#display).
-- **Transparency**: one opacity for every app, plus per-app overrides with
+- **Transparency**: the one place for everything see-through.
+  **Bar and menus**: **Bar glass** (All bars, or one bar with its own
+  value; pills are a little more solid) and **Menu glass** (menus,
+  Settings, the Inspector, readers, the clipboard viewer, the wallpaper
+  picker, and popups that follow menu glass). They are the same for every
+  theme. **Applications**: one opacity for every app, plus per-app overrides with
   focused and unfocused levels. Add an app from the open windows or by its
   class. The Settings and Inspector windows and Tack pins always stay
   solid. Needs one line in your Hyprland config; see

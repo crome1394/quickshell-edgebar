@@ -16,6 +16,15 @@ Item {
     property string addError: ""
 
     readonly property var draft: OpacitySettings.editor.value
+    // Which bar the Bar glass slider sets; "" is all bars.
+    property string glassEdge: ""
+    readonly property var glassChoices: [
+        { id: "", label: "All bars", tip: "Every bar without a glass of its own" },
+        { id: "top", label: "Top" + (Config.showTopBar ? "" : " (off)"), tip: "The top bar" },
+        { id: "bottom", label: "Bottom" + (Config.showBottomBar ? "" : " (off)"), tip: "The bottom bar" },
+        { id: "left", label: "Left" + (Config.showLeftBar ? "" : " (off)"), tip: "The left bar" },
+        { id: "right", label: "Right" + (Config.showRightBar ? "" : " (off)"), tip: "The right bar" }
+    ]
     readonly property var overrides: root.draft.overrides || []
     readonly property int scrollGutter: Theme.space + Theme.tabGap
 
@@ -80,6 +89,97 @@ Item {
 
             SectionHeader {
                 width: parent.width
+                title: "Bar and menus"
+                hint: "The bar's own glass and its menus, Settings, readers, and popups. 100% is solid. The same for every theme. Apply saves this page."
+            }
+
+            Column {
+                x: Theme.sectionInset
+                width: parent.width - Theme.sectionInset * 2
+                spacing: Theme.space
+
+                FormRow {
+                    width: parent.width
+                    label: "Bar glass"
+
+                    Column {
+                        width: parent.width
+                        spacing: Theme.tabGap
+
+                        // Grows while the list is open, so it pushes the page down.
+                        Row {
+                            width: parent.width
+                            height: barPicker.implicitHeight
+                            spacing: Theme.tabGap
+
+                            SelectBox {
+                                id: barPicker
+                                width: root.glassEdge.length ? parent.width - useAll.width - Theme.tabGap : parent.width
+                                choices: root.glassChoices
+                                currentId: root.glassEdge
+                                emptyLabel: "All bars"
+                                tip: "Which bar the slider sets. A bar with its own value keeps it when All bars changes."
+                                onPicked: (id) => root.glassEdge = id
+                            }
+
+                            ChipButton {
+                                id: useAll
+                                visible: root.glassEdge.length > 0
+                                label: "Use All"
+                                enabled: OpacitySettings.draftOwnGlass(root.glassEdge)
+                                opacity: enabled ? 1 : 0.5
+                                tip: "Drop this bar's own glass so it follows All bars"
+                                onClicked: OpacitySettings.setDraftGlass("bar", root.glassEdge, -1)
+                            }
+                        }
+
+                        IntSlider {
+                            width: parent.width
+                            from: 0
+                            to: 100
+                            step: Theme.themeGlassStep
+                            value: OpacitySettings.draftGlass("bar", root.glassEdge)
+                            readout: OpacitySettings.draftGlass("bar", root.glassEdge) + "%"
+                            tip: "How solid the bar is. Pills on it are a little more solid."
+                            onChanged: (value) => OpacitySettings.setDraftGlass("bar", root.glassEdge, value)
+                        }
+
+                        Text {
+                            visible: root.glassEdge.length > 0
+                            width: parent.width
+                            wrapMode: Text.WordWrap
+                            text: OpacitySettings.draftOwnGlass(root.glassEdge) ? "This bar has its own glass." : "Follows All bars. Move the slider to give this bar its own glass."
+                            color: Theme.subtext
+                            font.family: Theme.uiFont
+                            font.pixelSize: Theme.smallPx
+                        }
+                    }
+                }
+
+                FormRow {
+                    width: parent.width
+                    label: "Menu glass"
+
+                    IntSlider {
+                        width: parent.width
+                        from: Theme.themeMenuGlassMin
+                        to: 100
+                        step: Theme.themeGlassStep
+                        value: OpacitySettings.draftGlass("menu", "")
+                        readout: OpacitySettings.draftGlass("menu", "") + "%"
+                        tip: "Menus, Settings, the Inspector, readers, the clipboard viewer, the wallpaper picker, and popups that follow menu glass"
+                        onChanged: (value) => OpacitySettings.setDraftGlass("menu", "", value)
+                    }
+                }
+            }
+
+            Item {
+                width: parent.width
+                height: Theme.space
+            }
+
+            SectionHeader {
+                width: parent.width
                 title: "All applications"
                 hint: "One opacity for every window. 100% is solid. Overrides below win over this level. Apply saves this page."
             }
@@ -108,7 +208,7 @@ Item {
                 Text {
                     width: parent.width
                     wrapMode: Text.WordWrap
-                    text: "Always solid: the Settings and Inspector windows, Tack pins, and fullscreen windows."
+                    text: "Always solid: the Settings and Inspector windows and Tack pins. Fullscreen windows are solid too, unless their override keeps its level."
                     color: Theme.subtext
                     font.family: Theme.uiFont
                     font.pixelSize: Theme.smallPx
@@ -349,9 +449,9 @@ Item {
         anchors.bottom: parent.bottom
         applyEnabled: OpacitySettings.editor.dirty
         undoEnabled: OpacitySettings.editor.canUndo
-        applyTip: "Save and apply the levels"
+        applyTip: "Save and apply the bar, menu, and application levels"
         undoTip: "Drop an unsaved draft, or put back the last applied one"
-        resetTip: "All applications to the theme default and only the Tack override (screenshots stay solid). Apply saves it."
+        resetTip: "Everything solid: bar and menu glass and every application at 100%, with only the Tack override. Apply saves it."
         onApplyClicked: OpacitySettings.editor.apply()
         onUndoClicked: OpacitySettings.editor.undo()
         onResetClicked: OpacitySettings.editor.reset()

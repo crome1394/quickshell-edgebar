@@ -49,7 +49,7 @@ Singleton {
             image: Config.stepped(s.image, 32, 128, 8, Theme.notificationToastImage),
             lines: Config.stepped(s.lines, 0, 10, 1, Theme.notificationToastBodyLines),
             margin: Config.stepped(s.margin, 0, 64, 4, Theme.notificationToastMargin),
-            // 0 follows the theme's menu glass.
+            // 0 follows menu glass (System → Transparency).
             glass: glass === 0 ? 0 : Config.stepped(glass, 40, 100, 2, 0),
             stripe: s.stripe !== false,
             group: s.group !== false,

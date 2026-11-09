@@ -8,22 +8,21 @@ Singleton {
     // The object bar modules receive: the active theme's palette
     // (Settings → Theme). Changes the moment a theme is applied.
     readonly property ThemePalette palette: ThemePalette {
-        colors: ThemeBuilder.build(ThemeStore.activeTheme)
+        colors: ThemeBuilder.build(ThemeBuilder.withGlass(ThemeStore.activeTheme, ThemeStore.glass, ""))
         temp: ThemeStore.activeTheme.temp
         fonts: ThemeStore.activeTheme.fonts
     }
 
-    // A bar with its own glass (Theme → Bar glass → one bar) gets its own
+    // A bar with its own glass (Transparency → Bar glass → one bar) gets its own
     // palette, so the bar and its pills follow that value. Only colBar and
     // colSurface differ; menus keep Menu glass. A bar that follows bar
     // glass gets the main palette, and its palette below builds nothing.
     function ownGlass(edge) {
-        const bars = ThemeStore.activeTheme.barGlass
-        return bars ? Number(bars[edge]) >= 0 : false
+        return Number(ThemeStore.glass.bars[edge]) >= 0
     }
 
     function edgeColors(edge) {
-        return root.ownGlass(edge) ? ThemeBuilder.build(ThemeBuilder.forEdge(ThemeStore.activeTheme, edge)) : root.palette.colors
+        return root.ownGlass(edge) ? ThemeBuilder.build(ThemeBuilder.withGlass(ThemeStore.activeTheme, ThemeStore.glass, edge)) : root.palette.colors
     }
 
     function barPalette(edge) {

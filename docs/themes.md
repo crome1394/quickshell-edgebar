@@ -22,12 +22,8 @@ colors only; your fonts and stat and audio thresholds stay.
 - **Tone**: Dark or Light
 - **Colors**: accent (hovers, borders, active workspace), alert (errors,
   hot temperatures, weekdays), and tint (the glass color)
-- **Bar glass** and **Menu glass**: how solid they are. Bar glass has a
-  list: All bars, or one bar (Top, Bottom, Left, Right) with its own value;
-  that bar's pills follow it, a little more solid as usual. **Use All**
-  drops a bar's own value. Per-bar values are saved with the theme, so
-  switching themes or picking a preset changes them, and switching Tone
-  clears them. Menus keep Menu glass.
+- **Glass** is not part of a theme: bar and menu glass are set in
+  System → Transparency and stay the same whichever theme you pick.
 - **CPU warm at / hot at**: the temperature steps in System Stats
 - **UI font** and **Bar font** (Default uses Inter and MesloLGS Nerd Font)
 - **Text size**: 80 to 130%, for text and icons everywhere
@@ -79,7 +75,6 @@ qs ipc call theme current                # the applied one
   "tint": "#1a1e26",
   "glass": 62,
   "menu": 92,
-  "barGlass": { "top": 40, "bottom": -1, "left": -1, "right": -1 },
   "colors": { "colWeekday": "#b48ead" },
   "temp": { "warmAt": 70, "hotAt": 85 },
   "fonts": { "ui": "Inter", "bar": "", "size": 100 },
@@ -89,6 +84,7 @@ qs ipc call theme current                # the applied one
 ```
 
 Only `accent`, `alert`, and `tint` matter for a basic theme; everything
-else has a default (`barGlass` -1 follows `glass`). Colors are `#rrggbb` or `#rrggbbaa` (alpha last).
+else has a default. `glass` and `menu` are read from older files but not
+used: glass is set in System → Transparency. Colors are `#rrggbb` or `#rrggbbaa` (alpha last).
 `colors` can override any single palette entry (see
 `theme/ThemeBuilder.qml` for the names).

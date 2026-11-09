@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- **One place for transparency**: System → Transparency now sets the bar's own glass (Bar glass, with the per-bar list) and Menu glass (menus, Settings, readers, popups) beside the application levels, and the Transparency widget has Bar and Menus sliders. Glass is no longer part of a theme: it is saved apart (`glassJson` in `state/theme.json`), so switching themes never changes it, and theme cards preview with it. Reset makes everything solid. An older setup keeps its theme's glass until changed.
+
 - Cleanup: removed six unused Theme values, five unused functions (`DisplaySettings.isRejected`, `modeOk`; `WidgetService.setZone`, `zoneActive`, `barShown`), and the unused `widgetLayoutClassicJson` field. Shared helpers instead of copies: `Config.stepped()`, `ScreenService.screenNamed()`, `IconService.fileUrl()`, and `DisplaySettings.outputOk()` for monitor names. ARCHITECTURE.md covers the on-screen display, wallpaper picker, display power and edges, and the full IPC list.
 
 - Workspaces: with numbers shown, the hidden (special) workspace is numbered **0**, in front of workspace 1.

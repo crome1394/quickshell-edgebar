@@ -16,7 +16,8 @@ Rectangle {
     signal chosen()
     signal removeRequested()
 
-    readonly property var p: ThemeBuilder.build(root.theme)
+    // Previewed with the glass set in System → Transparency, as it would look.
+    readonly property var p: ThemeBuilder.build(ThemeBuilder.withGlass(root.theme, ThemeStore.glass, ""))
 
     implicitHeight: Theme.themeCardHeight
     radius: Theme.radius

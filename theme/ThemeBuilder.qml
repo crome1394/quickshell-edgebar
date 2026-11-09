@@ -5,8 +5,9 @@ import Quickshell
 // Turns a theme into the full palette the bar draws with.
 //
 // A theme is a few choices: tone (dark or light), accent, alert, tint (the
-// glass color), bar glass and menu glass (opacity percents), per-bar
-// glass (`barGlass`: top, bottom, left, right; -1 follows bar glass), and optional
+// glass color), bar glass and menu glass (opacity percents; older theme
+// files carry them, but the palette takes them from glassNorm() instead,
+// set in System → Transparency), and optional
 // `colors` that replace single palette entries. build() derives every
 // other color from those, so a theme stays small and one edit (a new
 // accent) restyles hovers, borders, and the active workspace together.
@@ -108,6 +109,26 @@ Singleton {
 
     readonly property var barEdges: ["top", "bottom", "left", "right"]
 
+    // System → Transparency's glass, kept apart from the theme:
+    // { bar, menu, bars: { top, bottom, left, right } }. Solid by default;
+    // a bar's own value of -1 follows bar.
+    function glassNorm(src) {
+        const s = src && typeof src === "object" ? src : {}
+        return {
+            bar: root.percent(s.bar, 100, 0),
+            menu: root.percent(s.menu, 100, 50),
+            bars: root.barGlassNorm(s.bars)
+        }
+    }
+
+    // A theme drawn with these glass levels (and one bar's own, if edge
+    // names a bar that has one).
+    function withGlass(theme, glass, edge) {
+        const g = root.glassNorm(glass)
+        const own = edge ? Number(g.bars[edge]) : -1
+        return Object.assign({}, theme || {}, { glass: own >= 0 ? own : g.bar, menu: g.menu })
+    }
+
     // { top, bottom, left, right }: a percent, or -1 to follow bar glass.
     function barGlassNorm(src) {
         const raw = src && typeof src === "object" ? src : {}
@@ -117,15 +138,6 @@ Singleton {
             out[edge] = root.percent(raw[edge], -1, 0)
         }
         return out
-    }
-
-    // The theme one bar draws with: its own glass when it has one.
-    function forEdge(theme, edge) {
-        const t = theme || {}
-        const own = t.barGlass ? Number(t.barGlass[edge]) : -1
-        if (!(own >= 0))
-            return t
-        return Object.assign({}, t, { glass: own })
     }
 
     function labelNorm(value) {
@@ -177,7 +189,6 @@ Singleton {
             tint: root.rgbText(root.parse(s.tint)) || (light ? root.lightTint : root.darkTint),
             glass: root.percent(s.glass, light ? 100 : 56, 0),
             menu: root.percent(s.menu, light ? 100 : 90, 50),
-            barGlass: root.barGlassNorm(s.barGlass),
             colors: colors,
             temp: { warmAt: warm, hotAt: hot },
             fonts: root.fontsNorm(s.fonts)

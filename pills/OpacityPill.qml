@@ -175,6 +175,44 @@ Rectangle {
                     font.bold: true
                 }
 
+                // The bar's own glass and its menus, saved at once.
+                Repeater {
+                    model: [
+                        { key: "bar", label: "Bar", from: 0, tip: "How solid the bar is (every bar without its own glass). 100 is solid." },
+                        { key: "menu", label: "Menus", from: Theme.themeMenuGlassMin, tip: "Menus, Settings, readers, and popups. 100 is solid." }
+                    ]
+                    delegate: Row {
+                        id: glassRow
+                        required property var modelData
+                        readonly property int value: glassRow.modelData.key === "menu" ? ThemeStore.glass.menu : ThemeStore.glass.bar
+                        width: menuCol.width
+                        spacing: Theme.space
+
+                        Text {
+                            id: glassLabel
+                            width: Theme.fieldHeight * 2.2
+                            height: Theme.fieldHeight
+                            verticalAlignment: Text.AlignVCenter
+                            text: String(glassRow.modelData.label)
+                            color: root.theme.colFg
+                            font.family: root.theme.uiFont
+                            font.pixelSize: root.theme.fontPx
+                            font.bold: true
+                        }
+
+                        IntSlider {
+                            width: parent.width - glassLabel.width - parent.spacing
+                            from: Number(glassRow.modelData.from)
+                            to: 100
+                            step: Theme.themeGlassStep
+                            value: glassRow.value
+                            readout: glassRow.value + "%"
+                            tip: String(glassRow.modelData.tip)
+                            onChanged: (value) => OpacitySettings.setGlassLive(String(glassRow.modelData.key), value)
+                        }
+                    }
+                }
+
                 Text {
                     width: parent.width
                     text: "All applications"

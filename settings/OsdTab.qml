@@ -265,7 +265,7 @@ Item {
                             id: menuGlass
                             label: "Menu glass"
                             active: root.draft.glass === 0
-                            tip: "Follow the theme's Menu glass"
+                            tip: "Follow Menu glass (System → Transparency)"
                             onClicked: OsdSettings.editor.set("glass", root.draft.glass === 0 ? 90 : 0)
                         }
 

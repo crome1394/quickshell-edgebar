@@ -52,15 +52,18 @@ ShellRoot {
             t.ok("preset builds: " + ThemePresets.list[k].name, B.colorKeys.every((c) => pal[c] !== undefined))
         }
 
-        // Per-bar glass: -1 follows Bar glass; a bar's own value replaces it.
-        t.eq("bars follow by default", B.normalize({}).barGlass, { top: -1, bottom: -1, left: -1, right: -1 })
-        t.eq("bad bar glass follows", B.normalize({ barGlass: { top: 400, left: "x", right: 30 } }).barGlass, { top: -1, bottom: -1, left: -1, right: 30 })
-        const own = B.normalize({ glass: 56, barGlass: { top: 20 } })
-        t.eq("own glass for that bar", B.forEdge(own, "top").glass, 20)
-        t.eq("others keep bar glass", B.forEdge(own, "bottom").glass, 56)
-        t.ok("its bar and pills get thinner", B.build(B.forEdge(own, "top")).colBar.a < B.build(own).colBar.a
-            && B.build(B.forEdge(own, "top")).colSurface.a < B.build(own).colSurface.a)
-        t.eq("menus keep menu glass", B.build(B.forEdge(own, "top")).colBg, B.build(own).colBg)
+        // Glass lives apart from the theme (System → Transparency).
+        t.eq("solid by default", B.glassNorm({}), { bar: 100, menu: 100, bars: { top: -1, bottom: -1, left: -1, right: -1 } })
+        t.eq("bad values fall back", B.glassNorm({ bar: 400, menu: 10, bars: { top: "x", right: 30 } }), { bar: 100, menu: 100, bars: { top: -1, bottom: -1, left: -1, right: 30 } })
+        const dark = B.normalize({ tone: "dark", glass: 40 })
+        const g = { bar: 56, menu: 90, bars: { top: 20 } }
+        t.eq("the theme's own glass is not used", B.withGlass(dark, g, "").glass, 56)
+        t.eq("a bar's own glass", B.withGlass(dark, g, "top").glass, 20)
+        t.eq("other bars follow bar glass", B.withGlass(dark, g, "bottom").glass, 56)
+        t.ok("its bar and pills get thinner", B.build(B.withGlass(dark, g, "top")).colBar.a < B.build(B.withGlass(dark, g, "")).colBar.a
+            && B.build(B.withGlass(dark, g, "top")).colSurface.a < B.build(B.withGlass(dark, g, "")).colSurface.a)
+        t.eq("menus keep menu glass", B.build(B.withGlass(dark, g, "top")).colBg, B.build(B.withGlass(dark, g, "")).colBg)
+        t.eq("solid glass is solid", [B.build(B.withGlass(dark, {}, "")).colBar.a, B.build(B.withGlass(dark, {}, "")).colBg.a], [1, 1])
         t.done()
     }
 }

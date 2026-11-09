@@ -93,18 +93,22 @@ Singleton {
     }
 
     // ── Draft for Settings → System → Transparency ──────────────────────
+    // glass: the bar and menu glass ({ bar, menu, bars }), saved apart from
+    // the theme by ThemeStore so switching themes never changes it.
     function normalize(src) {
-        return { all: root.clamp(src.all), overrides: root.overridesNorm(src.overrides) }
+        return { all: root.clamp(src.all), overrides: root.overridesNorm(src.overrides), glass: ThemeBuilder.glassNorm(src.glass) }
     }
 
     function snapshot() {
-        return root.normalize({ all: root.allValue(), overrides: root.savedOverrides() })
+        return root.normalize({ all: root.allValue(), overrides: root.savedOverrides(), glass: ThemeStore.glass })
     }
 
+    // Everything solid.
     function defaults() {
         return root.normalize({
             all: DefaultTheme.opacityQuickshell,
-            overrides: [{ cls: "io.github.crome1394.Tack", label: "Tack", active: DefaultTheme.opacitySatty, inactive: DefaultTheme.opacitySatty, on: true }]
+            overrides: [{ cls: "io.github.crome1394.Tack", label: "Tack", active: DefaultTheme.opacitySatty, inactive: DefaultTheme.opacitySatty, on: true }],
+            glass: {}
         })
     }
 
@@ -114,6 +118,43 @@ Singleton {
             Config.opacityQuickshell = clean.all
             Config.opacityOverridesJson = JSON.stringify(clean.overrides)
         })
+        ThemeStore.saveGlass(clean.glass)
+    }
+
+    // Draft glass for the page. edge "" is all bars; an edge with no glass
+    // of its own reads as all bars. key is "bar" or "menu".
+    function draftGlass(key, edge) {
+        const g = root.editor.value.glass
+        if (key === "menu")
+            return g.menu
+        const own = edge ? Number(g.bars[edge]) : -1
+        return own >= 0 ? own : g.bar
+    }
+
+    function draftOwnGlass(edge) {
+        return edge ? Number(root.editor.value.glass.bars[edge]) >= 0 : false
+    }
+
+    // value -1 on a bar drops its own glass, so it follows all bars.
+    function setDraftGlass(key, edge, value) {
+        const g = JSON.parse(JSON.stringify(root.editor.value.glass))
+        if (key === "menu")
+            g.menu = value
+        else if (edge)
+            g.bars[edge] = value
+        else
+            g.bar = value
+        root.editor.set("glass", g)
+    }
+
+    // The Transparency pill's sliders, saved at once.
+    function setGlassLive(key, value) {
+        const g = JSON.parse(JSON.stringify(ThemeStore.glass))
+        if (key === "menu")
+            g.menu = value
+        else
+            g.bar = value
+        ThemeStore.saveGlass(g)
     }
 
     function indexOf(list, cls) {

@@ -92,7 +92,7 @@ Singleton {
             timeout: Config.stepped(s.timeout, 500, 6000, 100, Theme.osdTimeoutMs),
             width: Config.stepped(s.width, 200, 640, 20, Theme.osdWidth),
             textSize: Config.stepped(s.textSize, 80, 160, 10, 100),
-            // 0 follows the theme's menu glass.
+            // 0 follows menu glass (System → Transparency).
             glass: glass === 0 ? 0 : Config.stepped(glass, 40, 100, 2, 0),
             accent: root.colorNorm(s.accent === undefined ? "auto" : s.accent),
             text: root.colorNorm(s.text === undefined ? "auto" : s.text),

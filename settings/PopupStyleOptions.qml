@@ -200,7 +200,7 @@ Column {
                 id: menuGlass
                 label: "Like menus"
                 active: root.popup.glass === 0
-                tip: "Use the theme's menu glass"
+                tip: "Use Menu glass (System → Transparency)"
                 onClicked: root.set("glass", 0)
             }
 
