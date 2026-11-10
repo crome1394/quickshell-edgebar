@@ -6,8 +6,9 @@ import qs.config
 
 // Shared Bluetooth actions for the pill, its menu, and the settings tab.
 // - Scans always stop on their own after the saved scan length.
-// - Pairing stops the scan first, then trusts and connects the device once
-//   it is paired, so headsets and speakers reconnect on their own later.
+// - Pairing stops the scan and makes the adapter pairable first, then trusts
+//   and connects the device once it is paired, so headsets and speakers
+//   reconnect on their own later.
 // Nothing runs while idle: one stopped timer and one idle Connections.
 Singleton {
     id: root
@@ -84,10 +85,15 @@ Singleton {
     }
 
     // Scanning while pairing or connecting makes many adapters fail or stall.
+    // BlueZ boots with the adapter not pairable. Pairing still "works" then,
+    // but the link key is not saved (bonded stays false), so the device drops
+    // back to unpaired on its next disconnect. Make the adapter pairable first.
     function pair(device) {
         if (!device || device.pairing)
             return
         root.stopScan()
+        if (root.adapter && !root.adapter.pairable)
+            root.adapter.pairable = true
         root.pairTarget = device
         device.pair()
     }
