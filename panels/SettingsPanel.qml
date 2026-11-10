@@ -76,7 +76,7 @@ FloatingWindow {
         bar: ["workspaces", "overview", "dock"],
         widgets: ["bars", "activewindow", "stats"],
         appearance: ["theme", "wallpaper"],
-        applications: ["search", "library", "launcher", "menu", "freshrss"],
+        applications: ["search", "library", "launcher", "menu", "defaults", "freshrss"],
         connectivity: ["network", "bluetooth"],
         audio: [],
         notifications: ["notifications", "osd"],

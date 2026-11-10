@@ -33,6 +33,7 @@ Item {
             { tab: "applications", section: "library", title: "Applications · App Library", keys: "app library drawer grid folder pop applications menu" },
             { tab: "applications", section: "launcher", title: "Applications · Quick Launch", keys: "pin quick launch launcher application command" },
             { tab: "applications", section: "freshrss", title: "Applications · FreshRSS", keys: "freshrss rss feed reader news articles server api password unread" },
+            { tab: "applications", section: "defaults", title: "Applications · Default Apps", keys: "default apps applications mime type file association open with xdg-open browser email mail pdf video music image editor mimeapps" },
             { tab: "applications", section: "menu", title: "Applications · Application Menu", keys: "menu symbol glyph command font click opens library launcher" },
             { tab: "connectivity", section: "network", title: "Connectivity · Network", keys: "network ip address wifi octet device" },
             { tab: "connectivity", section: "bluetooth", title: "Connectivity · Bluetooth", keys: "bluetooth scan paired adapter" },

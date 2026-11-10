@@ -10,7 +10,7 @@ Item {
 
     function applyReveal() {
         const id = root.revealSection
-        if (id === "search" || id === "library" || id === "launcher" || id === "menu" || id === "freshrss")
+        if (id === "search" || id === "library" || id === "launcher" || id === "menu" || id === "freshrss" || id === "defaults")
             root.section = id
     }
 
@@ -27,6 +27,7 @@ Item {
             { id: "library", label: "App Library" },
             { id: "launcher", label: "Quick Launch" },
             { id: "menu", label: "Application Menu" },
+            { id: "defaults", label: "Default Apps" },
             { id: "freshrss", label: "FreshRSS" }
         ]
         currentId: root.section
@@ -86,5 +87,16 @@ Item {
         anchors.topMargin: Theme.space
         active: root.section === "freshrss"
         source: freshRssPage.active ? Qt.resolvedUrl("FreshRssTab.qml") : ""
+    }
+
+    Loader {
+        id: defaultsPage
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: sections.bottom
+        anchors.bottom: parent.bottom
+        anchors.topMargin: Theme.space
+        active: root.section === "defaults"
+        source: defaultsPage.active ? Qt.resolvedUrl("DefaultAppsTab.qml") : ""
     }
 }

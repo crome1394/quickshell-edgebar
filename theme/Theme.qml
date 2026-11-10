@@ -417,6 +417,12 @@ Singleton {
     readonly property int launcherMax: 4
     readonly property int launcherPinMax: 24
     readonly property int launcherListMax: 80
+    // Default Apps: rows shown before the app picker scrolls, and the
+    // label column of the common-tasks rows.
+    readonly property int defaultAppsPickerRows: 8
+    readonly property int defaultAppsLabelWidth: 150
+    // How long Test a file waits for xdg-mime to start before saying it is missing.
+    readonly property int defaultAppsProbeStartMs: 1500
     // nf-md-apps, one glyph: a square of nine squares.
     readonly property string menuSymbolDefault: "󰀻"
     // Inspector pill: nf-md-text-search, a page with a magnifier.

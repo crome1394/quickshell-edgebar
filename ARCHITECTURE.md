@@ -24,6 +24,7 @@ it follows (lint-clean, one component per file, no shell injection) are in
 | `settings/` | Settings pages and the controls they share (`IntSlider`, `ChipButton`, `DraftFooter`, …). | `Tab` |
 | `inspector/` | The Inspector's two views. | `View` |
 | `freshrss/` | The FreshRSS reader's model (filters, rows, cursor) and its views. | `Reader…` |
+| `defaultapps/` | `DefaultAppsLogic.js`: reading and rewriting `mimeapps.list`, the common-task groups, type families, which app opens a type, each app's types, and the problems check. Pure, tested. | |
 | `components/` | Small drawing pieces shared by pills (`BarTip`, `DockFace`, `LevelMeter`, …). | |
 | `services/` | Runtime singletons: talk to Hyprland, PipeWire, BlueZ, NetworkManager, D-Bus, files, and the few processes the bar runs. | `Service` |
 | `config/` | Saved settings: `Config` (the store) and one `<Feature>Settings` singleton per feature. | `Settings` |
@@ -212,6 +213,16 @@ ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `them
   The credentials file is read as shell-style text without running it and
   written by a fixed script (path as an argument, text on stdin) with mode
   600. The reader window (`panels/FreshRssPanel`) exists only while open.
+- **Default apps**: `services/DefaultAppsService` reads `~/.config/mimeapps.list`,
+  the system's `mimeapps.list` files, every `mimeinfo.cache` (which apps
+  declare which types), and shared-mime-info's aliases, parents, and type
+  list, only while Settings → Applications → Default Apps is open. Apply
+  rewrites only the lines that changed (comments, other sections, and
+  their order stay), after copying the file to `mimeapps.list.bak`. The
+  saved store is that file, not `bar-layout.json`: `DefaultAppsSettings`
+  holds the Draft and a mirror of the file, and asks the service to write
+  (`writeRequested`). Test a file runs `xdg-mime query filetype <path>`
+  once per click; nothing else runs a process.
 - **Files are written atomically** (FileView `atomicWrites`, or write-then-
   rename in scripts). Programs are run with argument lists, never through a
   shell with user text in it.
@@ -234,7 +245,7 @@ calls are listed in a comment beside the handler.
 (bars off) and fails if Quickshell cannot load it, which catches errors
 lint misses. Then it runs the logic tests: the theme builder and import, the
 FreshRSS env reader and HTML cleaning, the reader's grouping and cursor,
-the settings Draft, and the tooltip service. Each `tests/*Test.qml` is a
+the settings Draft, default apps (`DefaultAppsLogicTest`), and the tooltip service. Each `tests/*Test.qml` is a
 small Quickshell config run against a temporary copy of the bar with a
 throwaway HOME, printing PASS/FAIL lines (`tests/Check.qml`). Add a test
 when you change logic that has no UI.

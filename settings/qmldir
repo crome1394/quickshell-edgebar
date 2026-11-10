@@ -84,3 +84,14 @@ SearchTab 1.0 SearchTab.qml
 LibraryTab 1.0 LibraryTab.qml
 WebRuleRow 1.0 WebRuleRow.qml
 CodeAidTab 1.0 CodeAidTab.qml
+DefaultAppsTab 1.0 DefaultAppsTab.qml
+DefaultAppsRow 1.0 DefaultAppsRow.qml
+DefaultAppsProblem 1.0 DefaultAppsProblem.qml
+DefaultAppPicker 1.0 DefaultAppPicker.qml
+MimeComment 1.0 MimeComment.qml
+DefaultAppsAllTypes 1.0 DefaultAppsAllTypes.qml
+DefaultAppsTypeRow 1.0 DefaultAppsTypeRow.qml
+DefaultAppsFamilyHeader 1.0 DefaultAppsFamilyHeader.qml
+DefaultAppsByApp 1.0 DefaultAppsByApp.qml
+DefaultAppsAppRow 1.0 DefaultAppsAppRow.qml
+DefaultAppsAppType 1.0 DefaultAppsAppType.qml

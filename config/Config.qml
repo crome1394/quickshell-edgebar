@@ -121,6 +121,7 @@ Singleton {
     property alias libraryHideFoldered: data.libraryHideFoldered
     property alias libraryShowNames: data.libraryShowNames
     property alias libraryFoldersJson: data.libraryFoldersJson
+    property alias defaultAppsKeptJson: data.defaultAppsKeptJson
     property alias showCaffeinePill: data.showCaffeinePill
     property alias showNightLightPill: data.showNightLightPill
     property alias showRecorderPill: data.showRecorderPill
@@ -623,6 +624,8 @@ Singleton {
             property bool libraryHideFoldered: true
             property bool libraryShowNames: true
             property string libraryFoldersJson: ""
+            // Default Apps (DefaultAppsSettings): problem keys you chose to keep.
+            property string defaultAppsKeptJson: ""
             property bool showCaffeinePill: false
             property bool showNightLightPill: false
             property bool showRecorderPill: false

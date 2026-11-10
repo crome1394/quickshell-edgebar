@@ -30,3 +30,4 @@ singleton OsdSettings 1.0 OsdSettings.qml
 singleton SearchSettings 1.0 SearchSettings.qml
 singleton LibrarySettings 1.0 LibrarySettings.qml
 singleton CodeAidSettings 1.0 CodeAidSettings.qml
+singleton DefaultAppsSettings 1.0 DefaultAppsSettings.qml

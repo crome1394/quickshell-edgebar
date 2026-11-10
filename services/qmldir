@@ -40,3 +40,4 @@ singleton OsdService 1.0 OsdService.qml
 singleton SearchService 1.0 SearchService.qml
 singleton LibraryService 1.0 LibraryService.qml
 singleton CodeAidService 1.0 CodeAidService.qml
+singleton DefaultAppsService 1.0 DefaultAppsService.qml
