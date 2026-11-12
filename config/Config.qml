@@ -209,6 +209,8 @@ Singleton {
     property alias activeWindowPillWidth: data.activeWindowPillWidth
     property alias activeWindowShowPid: data.activeWindowShowPid
     property alias activeWindowLayoutJson: data.activeWindowLayoutJson
+    // Pattern for the corner pill. Empty means the layout list and the PID switch.
+    property alias activeWindowFormat: data.activeWindowFormat
     property alias activeWindowExcludesJson: data.activeWindowExcludesJson
     property alias clockFormat: data.clockFormat
     property alias clockFont: data.clockFont
@@ -718,6 +720,8 @@ Singleton {
             property bool activeWindowShowPid: false
             // Left to right on the popup: icon, class, title, pid.
             property string activeWindowLayoutJson: "[\"icon\",\"class\",\"title\",\"pid\"]"
+            // Empty until a pattern is saved. Empty keeps the layout list and the PID switch.
+            property string activeWindowFormat: ""
             property string activeWindowExcludesJson: "[\"hypr-screensaver\"]"
             property string clockFormat: "dddd, MM·dd·yyyy | HH:mm:ss"
             property string clockFont: ""

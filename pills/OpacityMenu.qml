@@ -32,8 +32,21 @@ Item {
     function togglePicker() {
         root.picking = !root.picking
         root.addError = ""
-        if (root.picking)
+        if (root.picking) {
             OpacityService.listWindows()
+            Qt.callLater(root.scrollToPicker)
+        }
+    }
+
+    // Bring the open-window list into view. Called again when that list grows.
+    function scrollToPicker() {
+        if (!root.picking)
+            return
+        const pos = pickerAnchor.mapToItem(column, 0, 0)
+        const maxY = Math.max(0, flick.contentHeight - flick.height)
+        const y = Math.max(0, Math.min(pos.y, maxY))
+        if (y > flick.contentY)
+            flick.contentY = y
     }
 
     function addPicked(cls, label) {
@@ -59,6 +72,18 @@ Item {
     Keys.onEscapePressed: (event) => {
         event.accepted = true
         root.closeRequested()
+    }
+
+    Connections {
+        target: OpacityService
+        function onWindowsChanged() {
+            if (root.picking)
+                Qt.callLater(root.scrollToPicker)
+        }
+        function onListingChanged() {
+            if (root.picking && !OpacityService.listing)
+                Qt.callLater(root.scrollToPicker)
+        }
     }
 
     Shortcut {
@@ -372,6 +397,12 @@ Item {
                                 onChanged: (value) => OpacitySettings.setOverrideLive(overrideRow.modelData.cls, value)
                             }
                         }
+                    }
+
+                    Item {
+                        id: pickerAnchor
+                        width: parent.width
+                        height: root.picking ? 1 : 0
                     }
 
                     Note {

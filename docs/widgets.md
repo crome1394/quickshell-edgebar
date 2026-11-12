@@ -35,11 +35,14 @@ idle check also asks the bar, so it works even though the screensaver
 ignores other apps' inhibitors (so tab video does not block it). Caffeine
 wins over "Always start after idle" too.
 
-**Active Window** is not a bar pill: it shows the focused window's icon,
-class, and title in a screen corner (Widgets → Active Window). **Show PID**
-adds the window's process id. **Layout** sets the left-to-right order of
-the icon, class, title, and PID (Move up moves a part left, Move down
-moves it right). A part with nothing to show is skipped.
+**Active Window** is not a bar pill: it shows the focused window in a screen
+corner (Widgets → Active Window). **Other** and **Layout** sit side by side,
+and **Overrides** are below them. The pattern uses the words `icon`, `class`,
+`title`, and `pid`. Marks around a word are drawn around that part, such as
+`icon [class] title (pid)`. Set keeps the pattern, and the preview under it
+shows the focused window, or a sample when nothing is focused. Each layout
+row has a switch. Drag a row by || to reorder it. The first row is the
+leftmost. A part that is off, or that has nothing to show, is skipped.
 
 ## Menus
 
@@ -63,7 +66,8 @@ moves it right). A part with nothing to show is skipped.
   a slider per override with ✕ to remove it. The list scrolls when it is
   taller than the screen. Along the bottom, **Use theme** sets every app
   back to the theme default, and **Add override** (to its right) picks an
-  open window. Changes save at once. Unfocused levels stay in Settings.
+  open window. The menu scrolls to the windows that do not have an override
+  yet. Changes save at once. Unfocused levels stay in Settings.
   See [Settings → Transparency](settings.md#system).
 - **Notifications**: the history list beside the bar, with copy, dismiss,
   and clear.

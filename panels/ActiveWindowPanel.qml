@@ -8,7 +8,7 @@ import qs.services
 import qs.theme
 
 // Focused-window pill in a screen corner. It is not a bar-zone widget.
-// Show, corner, PID, layout, and excludes are the Widgets → Active Window settings.
+// Show, corner, pattern, and excludes are the Widgets → Active Window settings.
 // qmllint disable uncreatable-type
 PanelWindow {
 // qmllint enable uncreatable-type
@@ -31,72 +31,158 @@ PanelWindow {
     readonly property int textGap: Math.max(1, Math.round(Theme.space * root.ui))
     readonly property int pillMax: Math.max(1, Math.round(ActiveWindowSettings.widthValue() * root.ui))
     readonly property bool showTitle: root.winTitle.length > 0 && root.winTitle !== root.classLabel
-    // Room left for the title after padding and every other part that shows.
-    readonly property int titleLimit: {
-        if (!root.showTitle)
-            return 0
-        let others = 0
-        let used = root.hPad * 2
-        if (root.iconSource.length > 0) {
-            used += root.iconPx
-            others += 1
-        }
-        const classW = Math.ceil(classMetrics.width)
-        if (classW > 0) {
-            used += classW
-            others += 1
-        }
-        if (root.pidShown) {
-            used += Math.ceil(pidMetrics.width)
-            others += 1
-        }
-        if (others > 0)
-            used += root.textGap * others
-        return Math.max(0, root.pillMax - used)
-    }
+    // Room left for the title after padding, marks, and every other part that shows.
+    // This does not read the drawn segments. Those depend on whether the title fits.
+    readonly property int titleLimit: root.titleRoom()
     readonly property int titleNatural: Math.ceil(titleMetrics.width)
     // A title shorter than one word of room stays hidden so the class is never squeezed.
     readonly property bool titleVisible: root.showTitle && root.titleNatural > 0
         && (root.titleNatural <= root.titleLimit || root.titleLimit >= root.fontPx * 2)
     readonly property bool clipTitle: root.titleVisible && root.titleNatural > root.titleLimit
-    // Parts that have something to draw, in the saved left-to-right order.
-    readonly property var shownParts: {
-        const order = ActiveWindowSettings.layoutValue()
-        const out = []
-        for (let i = 0; i < order.length; i++) {
-            const id = String(order[i] || "")
-            if (id === "icon" && root.iconSource.length > 0)
-                out.push(id)
-            else if (id === "class" && root.classLabel.length > 0)
-                out.push(id)
-            else if (id === "title" && root.titleVisible)
-                out.push(id)
-            else if (id === "pid" && root.pidShown)
-                out.push(id)
-        }
-        return out
-    }
-
-    function partWidth(id) {
-        if (id === "icon")
-            return root.iconPx
-        if (id === "class")
-            return Math.ceil(classMetrics.width)
-        if (id === "title")
-            return root.clipTitle ? root.titleLimit : root.titleNatural
-        if (id === "pid")
-            return Math.ceil(pidMetrics.width)
-        return 0
-    }
-
+    readonly property var shownSegments: root.segments()
     readonly property int contentWidth: {
-        const parts = root.shownParts
+        const parts = root.shownSegments
         let w = 0
         for (let i = 0; i < parts.length; i++)
-            w += root.partWidth(parts[i])
-        if (parts.length > 1)
-            w += root.textGap * (parts.length - 1)
+            w += root.segmentWidth(parts[i])
         return Math.max(0, w)
+    }
+
+    function gapWidth(gap) {
+        const text = String(gap || "")
+        if (!text.length)
+            return 0
+        if (text === " ")
+            return root.textGap
+        return Math.ceil(plainMetrics.advanceWidth(text))
+    }
+
+    function litWidth(text) {
+        const s = String(text || "")
+        if (!s.length)
+            return 0
+        return Math.ceil(plainMetrics.advanceWidth(s))
+    }
+
+    function titleRoom() {
+        if (!root.showTitle)
+            return 0
+        const model = ActiveWindowSettings.formatValue()
+        let used = root.hPad * 2
+        let shown = 0
+        let titleOn = false
+        for (let i = 0; i < model.length; i++) {
+            const part = model[i]
+            if (!part || !part.on)
+                continue
+            const id = String(part.id || "")
+            let body = 0
+            let draws = false
+            if (id === "title") {
+                draws = true
+                titleOn = true
+            } else if (id === "icon") {
+                draws = root.iconSource.length > 0
+                body = root.iconPx
+            } else if (id === "class") {
+                draws = root.classLabel.length > 0
+                body = Math.ceil(classMetrics.width)
+            } else if (id === "pid") {
+                draws = root.winPid.length > 0
+                body = Math.ceil(pidMetrics.width)
+            }
+            if (!draws)
+                continue
+            const gap = String(part.gap || "")
+            const gapW = shown === 0 && gap.trim() === "" ? 0 : root.gapWidth(gap)
+            used += gapW + root.litWidth(part.open) + body + root.litWidth(part.close) + root.litWidth(part.tail)
+            shown++
+        }
+        if (!titleOn)
+            return 0
+        return Math.max(0, root.pillMax - used)
+    }
+
+    function segmentWidth(seg) {
+        const kind = seg ? String(seg.kind || "") : ""
+        if (kind === "gap")
+            return root.textGap
+        if (kind === "icon")
+            return root.iconPx
+        if (kind === "class")
+            return Math.ceil(classMetrics.width)
+        if (kind === "title")
+            return root.clipTitle ? root.titleLimit : root.titleNatural
+        if (kind === "pid")
+            return Math.ceil(pidMetrics.width)
+        return root.litWidth(seg ? seg.text : "")
+    }
+
+    function segmentColor(seg) {
+        const kind = seg ? String(seg.kind || "") : ""
+        const tone = seg ? String(seg.tone || "") : ""
+        const which = kind === "lit" ? tone : kind
+        if (which === "class")
+            return root.theme.colAccent
+        if (which === "pid" || which === "")
+            return root.theme.colFgMuted
+        return root.theme.colFg
+    }
+
+    // One drawn piece per gap, mark, or part. A single space is the usual gap.
+    function segments() {
+        const model = ActiveWindowSettings.formatValue()
+        const out = []
+        let shown = 0
+        for (let i = 0; i < model.length; i++) {
+            const part = model[i]
+            if (!part || !part.on)
+                continue
+            const id = String(part.id || "")
+            let kind = ""
+            let text = ""
+            if (id === "icon") {
+                if (!root.iconSource.length)
+                    continue
+                kind = "icon"
+            } else if (id === "class") {
+                if (!root.classLabel.length)
+                    continue
+                kind = "class"
+                text = root.classLabel
+            } else if (id === "title") {
+                if (!root.titleVisible)
+                    continue
+                kind = "title"
+                text = root.winTitle
+            } else if (id === "pid") {
+                if (!root.winPid.length)
+                    continue
+                kind = "pid"
+                text = root.winPid
+            } else {
+                continue
+            }
+            const gap = String(part.gap || "")
+            if (!(shown === 0 && gap.trim() === "")) {
+                if (gap === " ")
+                    out.push({ kind: "gap", text: "" })
+                else if (gap.length)
+                    out.push({ kind: "lit", text: gap, tone: "" })
+            }
+            const open = String(part.open || "")
+            const close = String(part.close || "")
+            const tail = String(part.tail || "")
+            if (open.length)
+                out.push({ kind: "lit", text: open, tone: id })
+            out.push({ kind: kind, text: text })
+            if (close.length)
+                out.push({ kind: "lit", text: close, tone: id })
+            if (tail.length)
+                out.push({ kind: "lit", text: tail, tone: "" })
+            shown++
+        }
+        return out
     }
     readonly property bool edgeBarShown: root.atTop ? Config.showTopBar : Config.showBottomBar
     readonly property int edgeInset: {
@@ -104,8 +190,6 @@ PanelWindow {
             return Math.round((root.thickness - root.pillHeight) / 2)
         return root.pad
     }
-
-    property bool hasFocusedWindow: Hyprland.activeToplevel !== null
 
     function patternMatches(pattern, value) {
         const text = String(value || "")
@@ -151,8 +235,47 @@ PanelWindow {
         Hyprland.refreshToplevels()
     }
 
-    readonly property var toplevel: Hyprland.activeToplevel
-    readonly property var waylandToplevel: root.toplevel ? root.toplevel.wayland : null
+    // Hyprland.activeToplevel is often still null just after the bar starts.
+    // focusTick re-reads the lists until a focused window shows up.
+    property int focusTick: 0
+    readonly property var hyprFocused: {
+        void root.focusTick
+        const active = Hyprland.activeToplevel
+        if (active)
+            return active
+        // qmllint disable missing-property
+        const values = Hyprland.toplevels ? Hyprland.toplevels.values : []
+        // qmllint enable missing-property
+        const list = values || []
+        for (let i = 0; i < list.length; i++) {
+            const top = list[i]
+            if (top && top.activated)
+                return top
+        }
+        return null
+    }
+    readonly property var waylandFocused: {
+        void root.focusTick
+        const active = ToplevelManager.activeToplevel
+        if (active)
+            return active
+        // qmllint disable missing-property
+        const values = ToplevelManager.toplevels ? ToplevelManager.toplevels.values : []
+        // qmllint enable missing-property
+        const list = values || []
+        for (let i = 0; i < list.length; i++) {
+            const top = list[i]
+            if (top && top.activated)
+                return top
+        }
+        return null
+    }
+    readonly property var toplevel: root.hyprFocused
+    readonly property var waylandToplevel: {
+        if (root.hyprFocused && root.hyprFocused.wayland)
+            return root.hyprFocused.wayland
+        return root.waylandFocused
+    }
     readonly property string ipcClass: root.field(root.toplevel ? root.toplevel.lastIpcObject : null, "class")
     readonly property string ipcInitialClass: root.field(root.toplevel ? root.toplevel.lastIpcObject : null, "initialClass")
     readonly property string waylandAppId: root.waylandToplevel ? String(root.waylandToplevel.appId || "") : ""
@@ -179,7 +302,6 @@ PanelWindow {
             return ""
         return n
     }
-    readonly property bool pidShown: ActiveWindowSettings.showPidValue() && root.winPid.length > 0
     readonly property string classLabel: {
         if (root.steamGame && root.winTitle.length)
             return root.winTitle
@@ -219,16 +341,21 @@ PanelWindow {
     // this flag, and reading screen while that binding runs loops back into it.
     readonly property var hostScreen: ScreenService.mainScreen
     readonly property bool onThisMonitor: {
-        const focused = Hyprland.focusedMonitor
         const host = root.hostScreen
-        if (!host || !focused)
+        if (!host)
+            return false
+        // One screen is always the main one. Hyprland's monitor name can
+        // arrive late and disagree for a moment after startup.
+        if (Quickshell.screens.length <= 1)
+            return true
+        const focused = Hyprland.focusedMonitor
+        if (!focused)
             return false
         const mine = Hyprland.monitorFor(host)
         return mine !== null && mine.name === focused.name
     }
 
-    function noteFocus(hasWindow) {
-        root.hasFocusedWindow = hasWindow
+    function noteFocus() {
         if (!Config.showActiveWindowPill)
             return
         root.refreshClasses()
@@ -239,12 +366,11 @@ PanelWindow {
     color: "transparent"
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
+    // Create the layer while the feature is on. Starting hidden and turning
+    // visible later does not map the surface after a cold start.
+    readonly property bool pillShown: root.classLabel.length > 0 && root.onThisMonitor && !root.excluded
+        && root.shownSegments.length > 0
     visible: Config.showActiveWindowPill
-        && root.hasFocusedWindow
-        && root.toplevel !== null
-        && root.classLabel.length > 0
-        && root.onThisMonitor
-        && !root.excluded
 
     anchors.top: root.atTop
     anchors.bottom: !root.atTop
@@ -257,22 +383,19 @@ PanelWindow {
     margins.right: root.atLeft ? 0 : root.sideGap
     // qmllint enable missing-property
 
-    implicitWidth: root.contentWidth + root.hPad * 2
-    implicitHeight: root.pillHeight
+    implicitWidth: root.pillShown ? root.contentWidth + root.hPad * 2 : 0
+    implicitHeight: root.pillShown ? root.pillHeight : 0
 
     Connections {
         target: Hyprland
         function onActiveToplevelChanged() {
-            root.noteFocus(Hyprland.activeToplevel !== null)
+            root.noteFocus()
         }
         function onRawEvent(event) {
-            if (event.name === "activewindowv2")
-                root.noteFocus(String(event.data || "").trim().length > 0)
-            else if (event.name === "activewindow") {
-                const data = String(event.data || "")
-                const comma = data.indexOf(",")
-                root.noteFocus(comma > 0 && data.slice(0, comma).trim().length > 0)
-            }
+            const name = event ? String(event.name || "") : ""
+            if (name === "activewindow" || name === "activewindowv2"
+                    || name === "openwindow" || name === "closewindow")
+                root.noteFocus()
         }
     }
 
@@ -283,7 +406,19 @@ PanelWindow {
         onTriggered: root.refreshClasses()
     }
 
-    Component.onCompleted: root.noteFocus(Hyprland.activeToplevel !== null)
+    // The focused window can arrive after the first read. Stop once it shows.
+    Timer {
+        id: focusWait
+        interval: Theme.activeWindowClassMs
+        repeat: true
+        running: Config.showActiveWindowPill && root.hyprFocused === null && root.focusTick < 12
+        onTriggered: {
+            root.focusTick++
+            root.refreshClasses()
+        }
+    }
+
+    Component.onCompleted: root.noteFocus()
 
     TextMetrics {
         id: classMetrics
@@ -307,8 +442,15 @@ PanelWindow {
         text: root.winPid
     }
 
+    FontMetrics {
+        id: plainMetrics
+        font.family: root.theme.fontFamily
+        font.pixelSize: root.fontPx
+    }
+
     Rectangle {
         id: pill
+        visible: root.pillShown
         anchors.fill: parent
         radius: Theme.radius
         color: root.theme.colBg
@@ -321,36 +463,38 @@ PanelWindow {
             anchors.leftMargin: root.hPad
             anchors.verticalCenter: parent.verticalCenter
             width: root.contentWidth
-            spacing: root.textGap
+            // Gaps are their own segments. A second spacing would double them.
+            spacing: 0
 
             Repeater {
-                model: root.shownParts
+                model: root.shownSegments
                 delegate: Item {
                     id: slot
-                    required property string modelData
-                    width: root.partWidth(slot.modelData)
+                    required property var modelData
+                    readonly property string kind: String(slot.modelData.kind || "")
+                    width: root.segmentWidth(slot.modelData)
                     height: root.pillHeight
 
                     Image {
-                        visible: slot.modelData === "icon"
+                        visible: slot.kind === "icon"
                         anchors.fill: parent
-                        source: slot.modelData === "icon" ? root.iconSource : ""
+                        source: slot.kind === "icon" ? root.iconSource : ""
                         sourceSize.width: root.iconPx
                         sourceSize.height: root.iconPx
                         fillMode: Image.PreserveAspectFit
                     }
 
                     Text {
-                        visible: slot.modelData !== "icon"
-                        width: slot.modelData === "title" ? parent.width : implicitWidth
+                        visible: slot.kind !== "icon" && slot.kind !== "gap"
+                        width: slot.kind === "title" ? parent.width : implicitWidth
                         height: parent.height
                         verticalAlignment: Text.AlignVCenter
-                        elide: slot.modelData === "title" && root.clipTitle ? Text.ElideRight : Text.ElideNone
-                        text: slot.modelData === "class" ? root.classLabel : (slot.modelData === "pid" ? root.winPid : root.winTitle)
-                        color: slot.modelData === "class" ? root.theme.colAccent : (slot.modelData === "pid" ? root.theme.colFgMuted : root.theme.colFg)
+                        elide: slot.kind === "title" && root.clipTitle ? Text.ElideRight : Text.ElideNone
+                        text: String(slot.modelData.text || "")
+                        color: root.segmentColor(slot.modelData)
                         font.family: root.theme.fontFamily
                         font.pixelSize: root.fontPx
-                        font.bold: slot.modelData === "class"
+                        font.bold: slot.kind === "class"
                     }
                 }
             }

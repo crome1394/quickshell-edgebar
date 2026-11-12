@@ -25,7 +25,7 @@ Item {
             { tab: "bar", section: "dock", title: "Bar · Dock", keys: "dock magnify jump hover icon launcher tray running dot" },
             { tab: "widgets", section: "bars", title: "Widgets · Bars", keys: "bar edge widget placement show" },
             { tab: "widgets", section: "bars", title: "Widgets · Bars · Monitors", keys: "monitor monitors screen screens display multi multiple main primary every all" },
-            { tab: "widgets", section: "activewindow", title: "Widgets · Active Window", keys: "active window corner width exclude title class pid process layout order icon move" },
+            { tab: "widgets", section: "activewindow", title: "Widgets · Active Window", keys: "active window corner width exclude title class pid process layout order icon drag format pattern brackets parentheses preview toggle" },
             { tab: "widgets", section: "stats", title: "Widgets · System Stats", keys: "cpu memory gpu vram combine separate text style font bold italic size color label percent value threshold click terminal btop" },
             { tab: "appearance", section: "wallpaper", title: "Appearance · Wallpaper", keys: "wallpaper image awww swww folder fit" },
             { tab: "appearance", section: "theme", title: "Appearance · Theme", keys: "theme preset color colour accent alert tint glass light dark import export save palette look font size" },

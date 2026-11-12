@@ -2,11 +2,9 @@
 
 ## Unreleased
 
-- Active Window → **Layout**: reorder Icon, Class, Title, and PID. Move up moves a part left on the popup; Move down moves it right. Show PID still turns the process id on or off. A part with nothing to show is skipped.
-
-- Active Window: a **Layout** section (Widgets → Active Window) for how the popup's parts are arranged.
-
-- Active Window: **Show PID** (Widgets → Active Window) adds the focused window's process id after the title. Off by default.
+- Active Window shows again after a reload. The focused window is taken from Hyprland's active toplevel, or from the activated toplevel, or from the Wayland toplevel, so a reload no longer leaves the corner empty until focus changes.
+- Active Window (Widgets → Active Window): **Other** and **Layout** sit side by side, and **Overrides** are below them. Each layout row has a switch, and the rows drag by ||. A pattern field, with Set and a preview, wraps parts, such as `icon [class] title (pid)`. The PID switch on its row replaces Show PID. A part that is off is not drawn.
+- Transparency menu: **Add override** scrolls the menu to the open windows that do not have an override yet.
 
 - Firewall menu: a rule shows its UFW comment when it has one (the hex comment on the rule line, decoded).
 
