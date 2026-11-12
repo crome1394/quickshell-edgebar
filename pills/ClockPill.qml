@@ -27,42 +27,9 @@ Rectangle {
     }
     readonly property int hPad: Math.max(1, Math.round(Theme.wsInnerPad * root.ui))
 
-    // The popup anchors to the outer edge of the bar window, beside the clock.
-    function placeCalendar() {
-        const content = root.Window.contentItem
-        if (!content)
-            return
-        const bounds = root.mapToItem(content, 0, 0, root.width, root.height)
-        const cx = Math.round(bounds.x + bounds.width / 2)
-        const cy = Math.round(bounds.y + bounds.height / 2)
-        let x = cx
-        // Closer to the bar than the window's outer edge (Theme.popupGapCut).
-        const inset = WidgetService.popupInset(content, root.edge)
-        let y = Math.round(content.height) - inset
-        let edgeFlags = Edges.Bottom
-        let grow = Edges.Bottom
-        if (root.edge === "bottom") {
-            y = inset
-            edgeFlags = Edges.Top
-            grow = Edges.Top
-        } else if (root.edge === "left") {
-            x = Math.round(content.width) - inset
-            y = cy
-            edgeFlags = Edges.Right
-            grow = Edges.Right
-        } else if (root.edge === "right") {
-            x = inset
-            y = cy
-            edgeFlags = Edges.Left
-            grow = Edges.Left
-        }
-        const anchor = calendarPopup.anchor
-        // qmllint disable missing-property
-        anchor.edges = edgeFlags
-        anchor.gravity = grow
-        anchor.rect = Qt.rect(x + 3, y + 3, 1, 1)
-        anchor.rect = Qt.rect(x, y, 1, 1)
-        // qmllint enable missing-property
+    // Side bars center the calendar on the bar. Top and bottom keep it over the clock.
+    function placeCalendar(nudge) {
+        WidgetService.placePopup(root, calendarPopup.anchor, root.edge, nudge)
     }
 
     implicitWidth: Math.max(1, clockLabel.implicitWidth + root.hPad * 2)
@@ -135,6 +102,7 @@ Rectangle {
         implicitWidth: calendarLoader.item ? calendarLoader.item.implicitWidth : Theme.chip * 8
         implicitHeight: calendarLoader.item ? calendarLoader.item.implicitHeight : Theme.chip * 8
         // qmllint enable missing-property
+        onVisibleChanged: if (visible) root.placeCalendar(true)
         onClosed: root.calendarOpen = false
         // qmllint disable missing-property
         anchor.item: root
@@ -159,7 +127,7 @@ Rectangle {
         target: calendarPopup.anchor
         // qmllint enable incompatible-type
         function onAnchoring() {
-            root.placeCalendar()
+            root.placeCalendar(false)
         }
     }
 }

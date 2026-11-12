@@ -95,6 +95,56 @@ Singleton {
         return Math.round(Math.max(0, across - thick) * Theme.popupGapCut)
     }
 
+    // Put a bar menu on the screen side of its bar. A top or bottom bar keeps
+    // the menu over the widget. A side bar centers it on the bar, not on the
+    // icon, so a tall menu is not cut off when the widget sits low.
+    // The anchor rect is in the widget's own coordinates (a side bar turns
+    // the pill). nudge shifts it once so a just-opened menu repositions.
+    function placePopup(item, anchor, edge, nudge) {
+        const content = item && item.Window ? item.Window.contentItem : null
+        if (!content || !anchor)
+            return
+        const inset = root.popupInset(content, edge)
+        let x = 0
+        let y = Math.round(content.height) - inset
+        let edgeFlags = Edges.Bottom
+        let grow = Edges.Bottom
+        if (edge === "bottom") {
+            const bounds = item.mapToItem(content, 0, 0, item.width, item.height)
+            x = Math.round(bounds.x + bounds.width / 2)
+            y = inset
+            edgeFlags = Edges.Top
+            grow = Edges.Top
+        } else if (edge === "left") {
+            x = Math.round(content.width) - inset
+            y = Math.round(content.height / 2)
+            edgeFlags = Edges.Right
+            grow = Edges.Right
+        } else if (edge === "right") {
+            x = inset
+            y = Math.round(content.height / 2)
+            edgeFlags = Edges.Left
+            grow = Edges.Left
+        } else {
+            const bounds = item.mapToItem(content, 0, 0, item.width, item.height)
+            x = Math.round(bounds.x + bounds.width / 2)
+        }
+        const local = item.mapFromItem(content, x, y, 1, 1)
+        const lx = Math.round(local.x)
+        const ly = Math.round(local.y)
+        // qmllint disable missing-property
+        if (anchor.edges !== edgeFlags)
+            anchor.edges = edgeFlags
+        if (anchor.gravity !== grow)
+            anchor.gravity = grow
+        if (nudge)
+            anchor.rect = Qt.rect(lx + 3, ly + 3, 1, 1)
+        const r = anchor.rect
+        if (nudge || !r || r.x !== lx || r.y !== ly || r.width !== 1 || r.height !== 1)
+            anchor.rect = Qt.rect(lx, ly, 1, 1)
+        // qmllint enable missing-property
+    }
+
     // BarSlot turns a side-bar pill 90° clockwise so it lies along the bar.
     // A pill's icon turns back by this much so it stays upright:
     // rotation: WidgetService.iconTurn(root.edge). Text that runs along

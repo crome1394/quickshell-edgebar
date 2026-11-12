@@ -36,56 +36,9 @@ Rectangle {
         return head + dnd + " · Left: history" + middle + " · Right: DND"
     }
 
-    // Sit outside the bar: under a top bar, over a bottom bar, and beside a side bar.
-    // nudge forces a reposition on open. From onAnchoring it must stay off and
-    // only write changed values, or each write re-polishes the popup forever.
+    // Sit outside the bar. nudge is only for open: onAnchoring must pass false.
     function placeHistory(nudge) {
-        const content = root.Window.contentItem
-        if (!content)
-            return
-        const bounds = root.mapToItem(content, 0, 0, root.width, root.height)
-        const cx = Math.round(bounds.x + bounds.width / 2)
-        const cy = Math.round(bounds.y + bounds.height / 2)
-        let x = cx
-        // Closer to the bar than the window's outer edge (Theme.popupGapCut).
-        const inset = WidgetService.popupInset(content, root.edge)
-        let y = Math.round(content.height) - inset
-        let edgeFlags = Edges.Bottom
-        let grow = Edges.Bottom
-        if (root.edge === "bottom") {
-            y = inset
-            edgeFlags = Edges.Top
-            grow = Edges.Top
-        } else if (root.edge === "left") {
-            x = Math.round(content.width) - inset
-            y = cy
-            edgeFlags = Edges.Right
-            grow = Edges.Right
-        } else if (root.edge === "right") {
-            x = inset
-            y = cy
-            edgeFlags = Edges.Left
-            grow = Edges.Left
-        }
-        const anchor = historyPopup.anchor
-        // qmllint disable missing-property
-        if (anchor.edges !== edgeFlags)
-            anchor.edges = edgeFlags
-        if (anchor.gravity !== grow)
-            anchor.gravity = grow
-        // The anchor reads rect in this pill's own coordinates (through a
-        // side bar's turn), so hand it the window point mapped back into
-        // the pill. Window coordinates put the popup off by the pill's
-        // position once rewrites stop.
-        const local = root.mapFromItem(content, x, y, 1, 1)
-        const lx = Math.round(local.x)
-        const ly = Math.round(local.y)
-        if (nudge)
-            anchor.rect = Qt.rect(lx + 3, ly + 3, 1, 1)
-        const r = anchor.rect
-        if (nudge || r.x !== lx || r.y !== ly || r.width !== 1 || r.height !== 1)
-            anchor.rect = Qt.rect(lx, ly, 1, 1)
-        // qmllint enable missing-property
+        WidgetService.placePopup(root, historyPopup.anchor, root.edge, nudge)
     }
 
     implicitWidth: root.cell
@@ -216,7 +169,7 @@ Rectangle {
         target: historyPopup.anchor
         // qmllint enable incompatible-type
         function onAnchoring() {
-            root.placeHistory()
+            root.placeHistory(false)
         }
     }
 }

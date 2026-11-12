@@ -193,7 +193,9 @@ only while it shows; clicks pass through it.
   window placement (invisible layer-shell strips), so it works on any
   computer and graphics card. Saves at once. In a narrow window the open Arrangement drops below. Saving for good needs the marker described in
   [Hyprland setup](hyprland.md#display).
-- **Transparency**: the one place for everything see-through.
+- **Transparency**: the one place for everything see-through. The bar's
+  Transparency menu sets the same bar glass, menu glass, all-applications
+  level, and overrides, and saves at once. Unfocused levels are edited here.
   **Bar and menus**: **Bar glass** (All bars, or one bar with its own
   value; pills are a little more solid) and **Menu glass** (menus,
   Settings, the Inspector, readers, the clipboard viewer, the wallpaper

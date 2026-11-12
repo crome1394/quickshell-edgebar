@@ -10,6 +10,7 @@ MenuPill 1.0 MenuPill.qml
 NetworkMenu 1.0 NetworkMenu.qml
 NetworkPill 1.0 NetworkPill.qml
 OpacityPill 1.0 OpacityPill.qml
+OpacityMenu 1.0 OpacityMenu.qml
 PowerPill 1.0 PowerPill.qml
 SettingsPill 1.0 SettingsPill.qml
 StatGroup 1.0 StatGroup.qml

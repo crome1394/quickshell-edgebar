@@ -339,8 +339,6 @@ Singleton {
     readonly property int themeTempMin: 40
     readonly property int themeTempMax: 110
     readonly property int themeTempStep: 5
-    // Tallest the Transparency menu's open-window list grows before it scrolls.
-    readonly property int opacityPickMaxHeight: 220
     readonly property int volumeMax: 150
     readonly property int volumeStep: 5
     // On-screen display (Settings → Notifications → On-Screen Display).
@@ -406,6 +404,11 @@ Singleton {
     readonly property int wallpaperPickDelay: 250
     readonly property int wallpaperPickGap: 12
     readonly property int popupWidth: 280
+    // Transparency menu, the same size family as the Tailscale menu.
+    readonly property int opacityPopupWidth: 440
+    readonly property int opacityPopupMaxHeight: 640
+    // nf-md-circle-opacity
+    readonly property string opacityGlyph: "󱡓"
     // Bar popups close this share of the gap the dock's band leaves (WidgetService.popupInset).
     readonly property real popupGapCut: 0.8
     readonly property int networkPopupWidth: 460

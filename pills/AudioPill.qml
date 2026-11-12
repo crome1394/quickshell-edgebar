@@ -251,41 +251,9 @@ Rectangle {
         show: (outMouse.containsMouse || inMouse.containsMouse) && !root.menuOpen
     }
 
-    function placeMenu() {
-        const content = root.Window.contentItem
-        if (!content)
-            return
-        const bounds = root.mapToItem(content, 0, 0, root.width, root.height)
-        const cx = Math.round(bounds.x + bounds.width / 2)
-        const cy = Math.round(bounds.y + bounds.height / 2)
-        let x = cx
-        // Closer to the bar than the window's outer edge (Theme.popupGapCut).
-        const inset = WidgetService.popupInset(content, root.edge)
-        let y = Math.round(content.height) - inset
-        let edgeFlags = Edges.Bottom
-        let grow = Edges.Bottom
-        if (root.edge === "bottom") {
-            y = inset
-            edgeFlags = Edges.Top
-            grow = Edges.Top
-        } else if (root.edge === "left") {
-            x = Math.round(content.width) - inset
-            y = cy
-            edgeFlags = Edges.Right
-            grow = Edges.Right
-        } else if (root.edge === "right") {
-            x = inset
-            y = cy
-            edgeFlags = Edges.Left
-            grow = Edges.Left
-        }
-        const anchor = menuPopup.anchor
-        // qmllint disable missing-property
-        anchor.edges = edgeFlags
-        anchor.gravity = grow
-        anchor.rect = Qt.rect(x + 3, y + 3, 1, 1)
-        anchor.rect = Qt.rect(x, y, 1, 1)
-        // qmllint enable missing-property
+    // Side bars center the menu on the bar. Top and bottom keep it over this icon.
+    function placeMenu(nudge) {
+        WidgetService.placePopup(root, menuPopup.anchor, root.edge, nudge)
     }
 
     // qmllint disable uncreatable-type
@@ -301,6 +269,7 @@ Rectangle {
         anchor.item: root
         anchor.adjustment: PopupAdjustment.Slide
         // qmllint enable missing-property
+        onVisibleChanged: if (visible) root.placeMenu(true)
         onClosed: AudioMenuService.hide()
 
         Rectangle {
@@ -325,7 +294,7 @@ Rectangle {
         target: menuPopup.anchor
         // qmllint enable incompatible-type
         function onAnchoring() {
-            root.placeMenu()
+            root.placeMenu(false)
         }
     }
 }
