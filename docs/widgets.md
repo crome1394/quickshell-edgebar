@@ -50,12 +50,16 @@ leftmost. A part that is off, or that has nothing to show, is skipped.
 
 - **Audio**: an **Audio** header, then Active Streams (each app's volume,
   mute, and level) in its own bubble. Playback and Recording sit side by
-  side, each in its own bubble (device, sound profile, volume, left/right
-  levels). pw-top and Restart Audio sit at the bottom. Playback and
-  Recording collapse to one line. Optional volume limit of 100%.
+  side, each in its own bubble of the same height (device, sound profile,
+  volume, left/right levels). The scrollbar stays off while the list fits.
+  pw-top and Restart Audio sit at the bottom. Playback and Recording
+  collapse to one line. Optional volume limit of 100%.
 - **Network**: the connected Wi-Fi network on top, then the rest; Connection
   editor, Refresh IP, and Flush DNS at the bottom.
-- **Bluetooth**: devices, Scan, Discoverable, and power. Pairing trusts and
+- **Bluetooth**: Connected devices sit in their own bubble when any are
+  connected. Paired and Available sit side by side, each in its own bubble
+  of the same height. Scan, Discoverable, and power sit at the bottom.
+  Opening the menu starts a scan; **Scanning** stops it. Pairing trusts and
   connects the device, so headsets reconnect on their own.
 - **Night Light**: on/off, warmth (2500–6500 K, with − and +), and a schedule
   (from – to; crossing midnight is fine; a left click holds until the next
@@ -66,11 +70,13 @@ leftmost. A part that is off, or that has nothing to show, is skipped.
   the machines on the tailnet with Taildrop send. Checks every 30 seconds,
   every 3 while the menu is open.
 - **Transparency**: glass (Bar and Menus), one slider for every app, and
-  a slider per override with ✕ to remove it. The list scrolls when it is
-  taller than the screen. Along the bottom, **Use theme** sets every app
-  back to the theme default, and **Add override** (to its right) picks an
-  open window. The menu scrolls to the windows that do not have an override
-  yet. Changes save at once. Unfocused levels stay in Settings.
+  a slider per override with ✕ to remove it. The header, the bubbles, and
+  the footer sit in from both window edges by the same gap as a settings
+  section. The list scrolls when it is taller than the screen. Along the
+  bottom, **Use theme** sets every app back to the theme default, and
+  **Add override** (to its right) picks an open window. The menu scrolls
+  to the windows that do not have an override yet. Changes save at once.
+  Unfocused levels stay in Settings.
   See [Settings → Transparency](settings.md#system).
 - **Notifications**: the history list beside the bar, with copy, dismiss,
   and clear.

@@ -19,6 +19,10 @@ Singleton {
 
     // The device we asked to pair, until pairing finishes.
     property var pairTarget: null
+    // Our own scan. BlueZ Discovering stays true while any program is
+    // scanning, and StopDiscovery only stops a scan this process started,
+    // so the button follows this flag instead of the adapter property.
+    property bool scanning: false
 
     function deviceValues() {
         const adapter = root.adapter
@@ -67,18 +71,20 @@ Singleton {
     function startScan() {
         if (!root.adapter || !root.adapter.enabled)
             return
+        root.scanning = true
         root.adapter.discovering = true
         scanTimer.restart()
     }
 
     function stopScan() {
+        root.scanning = false
         scanTimer.stop()
         if (root.adapter && root.adapter.discovering)
             root.adapter.discovering = false
     }
 
     function toggleScan() {
-        if (root.adapter && root.adapter.discovering)
+        if (root.scanning)
             root.stopScan()
         else
             root.startScan()

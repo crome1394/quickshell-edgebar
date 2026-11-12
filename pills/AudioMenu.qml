@@ -165,7 +165,9 @@ Item {
 
         ScrollBar.vertical: ScrollBar {
             id: scrollBar
-            policy: ScrollBar.AsNeeded
+            // The custom handle stays painted for AsNeeded even when the
+            // content fits, so only turn it on once there is something to scroll.
+            policy: flick.contentHeight > flick.height + 1 ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
             width: Theme.scrollBarWidth
             padding: 0
             background: Item {}
@@ -289,15 +291,19 @@ Item {
                 }
             }
 
+            // Share one height. A meter or an extra device on one side
+            // would otherwise leave the other bubble short.
             Row {
+                id: deviceRow
                 width: parent.width
                 spacing: Theme.space
-                height: Math.max(playbackBubble.height, recordingBubble.height)
+                readonly property real bubbleHeight: Math.max(playbackSection.implicitHeight, recordingSection.implicitHeight) + Theme.space * 2
+                height: deviceRow.bubbleHeight
 
                 Rectangle {
                     id: playbackBubble
                     width: (parent.width - Theme.space) / 2
-                    height: playbackSection.implicitHeight + Theme.space * 2
+                    height: deviceRow.bubbleHeight
                     radius: Theme.radiusSm
                     color: root.theme.colSurface
                     border.width: Theme.borderWidth
@@ -323,7 +329,7 @@ Item {
                 Rectangle {
                     id: recordingBubble
                     width: (parent.width - Theme.space) / 2
-                    height: recordingSection.implicitHeight + Theme.space * 2
+                    height: deviceRow.bubbleHeight
                     radius: Theme.radiusSm
                     color: root.theme.colSurface
                     border.width: Theme.borderWidth

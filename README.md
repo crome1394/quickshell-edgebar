@@ -35,14 +35,16 @@ Then click the spanner on the bar to open **Settings** and turn on widgets.
 
 ## Learn more
 
-[Widgets](docs/widgets.md) ·
-[Settings](docs/settings.md) ·
-[Themes](docs/themes.md) ·
-[FreshRSS](docs/freshrss.md) ·
-[Inspector](docs/inspector.md) ·
-[IPC calls](docs/ipc.md) ·
-[Hyprland setup](docs/hyprland.md) ·
-[Architecture](ARCHITECTURE.md) ·
-[Changelog](CHANGELOG.md)
+| Guide | Covers |
+|---|---|
+| [Widgets](docs/widgets.md) | What each widget shows, and what a click does |
+| [Settings](docs/settings.md) | Every settings page |
+| [Themes](docs/themes.md) | Presets, colors, and the settings window |
+| [FreshRSS](docs/freshrss.md) | The reader, and how to connect a server |
+| [Inspector](docs/inspector.md) | Keybinds and system info |
+| [IPC calls](docs/ipc.md) | Open menus and windows from a keybind |
+| [Hyprland setup](docs/hyprland.md) | What to add to your Hyprland config |
+| [Architecture](ARCHITECTURE.md) | How the bar is put together |
+| [Changelog](CHANGELOG.md) | What changed |
 
 MIT licensed ([LICENSE](LICENSE)).

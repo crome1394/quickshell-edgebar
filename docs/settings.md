@@ -90,7 +90,8 @@ Nothing on those pages is saved until Apply.
 - **Network**: what the pill shows (full IPv4, last octet, or adapter
   name) and the active connections.
 - **Bluetooth**: scan length, adapter power, new devices, and paired
-  devices.
+  devices. Discover devices starts a scan and stops it when turned off;
+  the scan also stops after the scan length.
 
 ## Audio
 

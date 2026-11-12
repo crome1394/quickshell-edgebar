@@ -114,7 +114,12 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: footerRow.top
-        anchors.margins: Theme.space
+        anchors.topMargin: Theme.space
+        // Settings section bodies sit barSideGap from the window. The column
+        // keeps a scrollbar gutter, so the right margin gives that back and
+        // the bubbles stay the same distance from both edges.
+        anchors.leftMargin: Theme.barSideGap
+        anchors.rightMargin: Math.max(0, Theme.barSideGap - root.scrollGutter)
         anchors.bottomMargin: Theme.tabGap
         clip: true
         boundsBehavior: Flickable.StopAtBounds
@@ -124,7 +129,9 @@ Item {
 
         ScrollBar.vertical: ScrollBar {
             id: scrollBar
-            policy: ScrollBar.AsNeeded
+            // The custom handle stays painted for AsNeeded even when the
+            // content fits, so only turn it on once there is something to scroll.
+            policy: flick.contentHeight > flick.height + 1 ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
             width: Theme.scrollBarWidth
             padding: 0
             background: Item {}
@@ -441,7 +448,9 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.margins: Theme.space
+        anchors.bottomMargin: Theme.space
+        anchors.leftMargin: Theme.barSideGap
+        anchors.rightMargin: Theme.barSideGap
         spacing: Theme.tabGap
         height: Theme.chip
 

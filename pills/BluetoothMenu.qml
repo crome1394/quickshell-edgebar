@@ -16,7 +16,9 @@ Item {
 
     signal closeRequested()
 
-    property var rows: []
+    property var connected: []
+    property var paired: []
+    property var available: []
     property string rowKey: ""
     property string forgetAddress: ""
     property string renameAddress: ""
@@ -35,6 +37,8 @@ Item {
     }
 
     function subtitle(device) {
+        if (!device)
+            return ""
         const parts = []
         if (device.pairing)
             parts.push("Pairing…")
@@ -139,29 +143,143 @@ Item {
         connected.sort(byName)
         paired.sort(byName)
         available.sort(byName)
-        const buckets = [
-            { title: "Connected", devices: connected },
-            { title: "Paired", devices: paired },
-            { title: "Available", devices: available }
-        ]
-        const out = []
-        let key = ""
-        for (let s = 0; s < buckets.length; s++) {
-            const devices = buckets[s].devices
-            if (!devices.length)
-                continue
-            key += "h:" + buckets[s].title + "\n"
-            out.push({ header: true, title: buckets[s].title, address: "h-" + buckets[s].title })
-            for (let i = 0; i < devices.length; i++) {
-                const address = String(devices[i].address || i)
-                key += "d:" + address + "\n"
-                out.push({ header: false, title: "", device: devices[i], address: address })
-            }
-        }
+        let key = "c:"
+        for (let i = 0; i < connected.length; i++)
+            key += String(connected[i].address || i) + "\n"
+        key += "p:"
+        for (let i = 0; i < paired.length; i++)
+            key += String(paired[i].address || i) + "\n"
+        key += "a:"
+        for (let i = 0; i < available.length; i++)
+            key += String(available[i].address || i) + "\n"
         if (key === root.rowKey)
             return
         root.rowKey = key
-        root.rows = out
+        root.connected = connected
+        root.paired = paired
+        root.available = available
+    }
+
+    component SectionTitle: Text {
+        width: parent ? parent.width : 0
+        color: root.theme.colAccent
+        font.family: root.theme.uiFont
+        font.pixelSize: root.theme.fontPx
+        font.bold: true
+    }
+
+    // One device on a section bubble. colBg reads against the colSurface bubble.
+    component DeviceCard: Rectangle {
+        id: card
+        required property var device
+        width: parent ? parent.width : 0
+        implicitHeight: deviceCol.implicitHeight + Theme.space
+        radius: Theme.radiusSm
+        color: root.theme.colBg
+        border.width: Theme.borderWidth
+        border.color: card.device && card.device.connected ? root.theme.colOk : root.theme.colBorder
+
+        Column {
+            id: deviceCol
+            x: Theme.space
+            y: Theme.tabGap
+            width: parent.width - Theme.space * 2
+            spacing: Theme.tabGap
+
+            Text {
+                width: parent.width
+                elide: Text.ElideRight
+                text: BluetoothService.deviceName(card.device)
+                color: root.theme.colFg
+                font.family: root.theme.uiFont
+                font.pixelSize: root.theme.fontPx
+                font.bold: true
+            }
+
+            Text {
+                visible: text.length > 0
+                width: parent.width
+                elide: Text.ElideRight
+                text: root.subtitle(card.device)
+                color: root.theme.colFgMuted
+                font.family: root.theme.uiFont
+                font.pixelSize: root.theme.smallPx
+            }
+
+            TextField {
+                id: renameField
+                visible: !!card.device && root.renameAddress === String(card.device.address || "")
+                width: parent.width
+                height: Theme.fieldHeight
+                verticalAlignment: Text.AlignVCenter
+                selectByMouse: true
+                leftPadding: Theme.space
+                color: root.theme.colFg
+                font.family: root.theme.uiFont
+                font.pixelSize: root.theme.fontPx
+                background: Rectangle {
+                    radius: Theme.radiusSm
+                    color: renameField.activeFocus ? root.theme.colHover : root.theme.colSurface
+                    border.width: Theme.borderWidth
+                    border.color: renameField.activeFocus ? root.theme.colAccent : root.theme.colBorder
+                }
+                onVisibleChanged: {
+                    if (visible) {
+                        text = root.renameText
+                        forceActiveFocus()
+                    }
+                }
+                onActiveFocusChanged: activeFocus ? root.focusCount += 1 : (root.focusCount = Math.max(0, root.focusCount - 1))
+                onAccepted: root.saveRename(card.device, text)
+                Keys.onEscapePressed: (event) => {
+                    event.accepted = true
+                    root.renameAddress = ""
+                }
+            }
+
+            Flow {
+                width: parent.width
+                spacing: Theme.tabGap
+
+                Repeater {
+                    model: root.actionsFor(card.device)
+                    delegate: Rectangle {
+                        id: action
+                        required property var modelData
+                        required property int index
+                        width: actionLabel.implicitWidth + Theme.space * 2
+                        height: Theme.fieldHeight
+                        radius: Theme.radiusSm
+                        color: actionMouse.containsMouse ? root.theme.colHover : root.theme.colSurface
+                        border.width: Theme.borderWidth
+                        border.color: root.theme.colBorder
+
+                        Text {
+                            id: actionLabel
+                            anchors.centerIn: parent
+                            text: String(action.modelData.label || "")
+                            color: root.theme.colFg
+                            font.family: root.theme.uiFont
+                            font.pixelSize: root.theme.smallPx
+                            font.bold: true
+                        }
+
+                        MouseArea {
+                            id: actionMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: root.runAction(action.modelData.device, String(action.modelData.id || ""))
+
+                            HoverTip {
+                                message: String(action.modelData.label || "")
+                                show: actionMouse.containsMouse
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     readonly property int scrollGutter: Theme.space + Theme.tabGap
@@ -172,6 +290,7 @@ Item {
             root.wasOpen = true
             root.rebuild()
             root.forceActiveFocus()
+            BluetoothService.startScan()
             return
         }
         root.focusCount = 0
@@ -212,7 +331,7 @@ Item {
 
         ScrollBar.vertical: ScrollBar {
             id: btScroll
-            policy: ScrollBar.AsNeeded
+            policy: flick.contentHeight > flick.height + 1 ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
             width: Theme.scrollBarWidth
             padding: 0
             background: Item {}
@@ -263,139 +382,123 @@ Item {
             font.pixelSize: root.theme.fontPx
         }
 
-        Repeater {
-            model: root.adapter && root.adapter.enabled ? root.rows : []
-            delegate: Column {
-                id: card
-                required property var modelData
-                required property int index
-                width: column.width
+        Rectangle {
+            id: connectedBubble
+            visible: !!root.adapter && root.adapter.enabled && root.connected.length > 0
+            width: parent.width
+            implicitHeight: connectedCol.implicitHeight + Theme.space * 2
+            radius: Theme.radiusSm
+            color: root.theme.colSurface
+            border.width: Theme.borderWidth
+            border.color: root.theme.colBorder
+
+            Column {
+                id: connectedCol
+                x: Theme.space
+                y: Theme.space
+                width: parent.width - Theme.space * 2
                 spacing: Theme.tabGap
 
-                Text {
-                    visible: card.modelData.header
-                    width: parent.width
-                    text: String(card.modelData.title || "")
-                    color: root.theme.colAccent
-                    font.family: root.theme.uiFont
-                    font.pixelSize: root.theme.fontPx
-                    font.bold: true
+                SectionTitle {
+                    text: "Connected"
                 }
 
-                Rectangle {
-                    visible: !card.modelData.header
-                    width: parent.width
-                    implicitHeight: deviceCol.implicitHeight + Theme.space
-                    radius: Theme.radiusSm
-                    color: root.theme.colSurface
-                    border.width: Theme.borderWidth
-                    border.color: card.modelData.device && card.modelData.device.connected ? root.theme.colOk : root.theme.colBorder
+                Repeater {
+                    model: root.connected
+                    delegate: DeviceCard {
+                        required property var modelData
+                        width: connectedCol.width
+                        device: modelData
+                    }
+                }
+            }
+        }
 
-                    Column {
-                        id: deviceCol
-                        x: Theme.space
-                        y: Theme.tabGap
-                        width: parent.width - Theme.space * 2
-                        spacing: Theme.tabGap
+        Row {
+            id: deviceRow
+            visible: !!root.adapter && root.adapter.enabled
+            width: parent.width
+            spacing: Theme.space
+            readonly property real bubbleHeight: Math.max(pairedCol.implicitHeight, availCol.implicitHeight) + Theme.space * 2
+            height: deviceRow.visible ? deviceRow.bubbleHeight : 0
 
-                        Text {
-                            width: parent.width
-                            elide: Text.ElideRight
-                            text: {
-                                const device = card.modelData.device
-                                if (!device)
-                                    return "Device"
-                                return String(device.name || device.deviceName || device.address || "Device")
-                            }
-                            color: root.theme.colFg
-                            font.family: root.theme.uiFont
-                            font.pixelSize: root.theme.fontPx
-                            font.bold: true
+            Rectangle {
+                id: pairedBubble
+                width: (parent.width - Theme.space) / 2
+                height: deviceRow.bubbleHeight
+                radius: Theme.radiusSm
+                color: root.theme.colSurface
+                border.width: Theme.borderWidth
+                border.color: root.theme.colBorder
+
+                Column {
+                    id: pairedCol
+                    x: Theme.space
+                    y: Theme.space
+                    width: parent.width - Theme.space * 2
+                    spacing: Theme.tabGap
+
+                    SectionTitle {
+                        text: "Paired"
+                    }
+
+                    Text {
+                        visible: root.paired.length === 0
+                        width: parent.width
+                        wrapMode: Text.WordWrap
+                        text: "No paired devices."
+                        color: root.theme.colFgMuted
+                        font.family: root.theme.uiFont
+                        font.pixelSize: root.theme.fontPx
+                    }
+
+                    Repeater {
+                        model: root.paired
+                        delegate: DeviceCard {
+                            required property var modelData
+                            width: pairedCol.width
+                            device: modelData
                         }
+                    }
+                }
+            }
 
-                        Text {
-                            visible: text.length > 0
-                            width: parent.width
-                            elide: Text.ElideRight
-                            text: card.modelData.device ? root.subtitle(card.modelData.device) : ""
-                            color: root.theme.colFgMuted
-                            font.family: root.theme.uiFont
-                            font.pixelSize: root.theme.smallPx
-                        }
+            Rectangle {
+                id: availBubble
+                width: (parent.width - Theme.space) / 2
+                height: deviceRow.bubbleHeight
+                radius: Theme.radiusSm
+                color: root.theme.colSurface
+                border.width: Theme.borderWidth
+                border.color: root.theme.colBorder
 
-                        TextField {
-                            id: renameField
-                            visible: !card.modelData.header && card.modelData.device && root.renameAddress === String(card.modelData.device.address || "")
-                            width: parent.width
-                            height: Theme.fieldHeight
-                            verticalAlignment: Text.AlignVCenter
-                            selectByMouse: true
-                            leftPadding: Theme.space
-                            color: root.theme.colFg
-                            font.family: root.theme.uiFont
-                            font.pixelSize: root.theme.fontPx
-                            background: Rectangle {
-                                radius: Theme.radiusSm
-                                color: renameField.activeFocus ? root.theme.colHover : root.theme.colBg
-                                border.width: Theme.borderWidth
-                                border.color: renameField.activeFocus ? root.theme.colAccent : root.theme.colBorder
-                            }
-                            onVisibleChanged: {
-                                if (visible) {
-                                    text = root.renameText
-                                    forceActiveFocus()
-                                }
-                            }
-                            onActiveFocusChanged: activeFocus ? root.focusCount += 1 : (root.focusCount = Math.max(0, root.focusCount - 1))
-                            onAccepted: root.saveRename(card.modelData.device, text)
-                            Keys.onEscapePressed: (event) => {
-                                event.accepted = true
-                                root.renameAddress = ""
-                            }
-                        }
+                Column {
+                    id: availCol
+                    x: Theme.space
+                    y: Theme.space
+                    width: parent.width - Theme.space * 2
+                    spacing: Theme.tabGap
 
-                        Flow {
-                            visible: !card.modelData.header
-                            width: parent.width
-                            spacing: Theme.tabGap
+                    SectionTitle {
+                        text: "Available"
+                    }
 
-                            Repeater {
-                                model: card.modelData.device ? root.actionsFor(card.modelData.device) : []
-                                delegate: Rectangle {
-                                    id: action
-                                    required property var modelData
-                                    required property int index
-                                    width: actionLabel.implicitWidth + Theme.space * 2
-                                    height: Theme.fieldHeight
-                                    radius: Theme.radiusSm
-                                    color: actionMouse.containsMouse ? root.theme.colHover : root.theme.colBg
-                                    border.width: Theme.borderWidth
-                                    border.color: root.theme.colBorder
+                    Text {
+                        visible: root.available.length === 0
+                        width: parent.width
+                        wrapMode: Text.WordWrap
+                        text: "No devices nearby."
+                        color: root.theme.colFgMuted
+                        font.family: root.theme.uiFont
+                        font.pixelSize: root.theme.fontPx
+                    }
 
-                                    Text {
-                                        id: actionLabel
-                                        anchors.centerIn: parent
-                                        text: String(action.modelData.label || "")
-                                        color: root.theme.colFg
-                                        font.family: root.theme.uiFont
-                                        font.pixelSize: root.theme.smallPx
-                                        font.bold: true
-                                    }
-
-                                    MouseArea {
-                                        id: actionMouse
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: root.runAction(action.modelData.device, String(action.modelData.id || ""))
-
-                                        HoverTip {
-                                            message: String(action.modelData.label || "")
-                                            show: actionMouse.containsMouse
-                                        }
-                                    }
-                                }
-                            }
+                    Repeater {
+                        model: root.available
+                        delegate: DeviceCard {
+                            required property var modelData
+                            width: availCol.width
+                            device: modelData
                         }
                     }
                 }
@@ -433,7 +536,7 @@ Item {
             radius: Theme.radiusSm
             color: scanMouse.containsMouse ? root.theme.colHover : root.theme.colSurface
             border.width: Theme.borderWidth
-            border.color: root.adapter && root.adapter.discovering ? root.theme.colOk : root.theme.colBorder
+            border.color: BluetoothService.scanning ? root.theme.colOk : root.theme.colBorder
             opacity: root.adapter && root.adapter.enabled ? 1 : 0.55
 
             Text {
@@ -441,7 +544,7 @@ Item {
                 width: parent.width - Theme.space
                 horizontalAlignment: Text.AlignHCenter
                 elide: Text.ElideRight
-                text: root.adapter && root.adapter.discovering ? "Scanning" : "Scan"
+                text: BluetoothService.scanning ? "Scanning" : "Scan"
                 color: root.theme.colFg
                 font.family: root.theme.uiFont
                 font.pixelSize: root.theme.smallPx
@@ -456,7 +559,7 @@ Item {
                 onClicked: BluetoothService.toggleScan()
 
                 HoverTip {
-                    message: "Scan for nearby devices. Stops after " + Config.bluetoothScanSeconds + " seconds."
+                    message: BluetoothService.scanning ? "Stop scanning" : "Scan for nearby devices. Stops after " + Config.bluetoothScanSeconds + " seconds."
                     show: scanMouse.containsMouse
                 }
             }

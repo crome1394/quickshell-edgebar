@@ -145,9 +145,9 @@ Item {
                         visible: !!root.adapter
                         width: parent.width
                         title: "Discover devices"
-                        detail: root.adapter && root.adapter.discovering ? "Scanning" : "Idle"
-                        tip: "Scan for nearby devices. Stops after " + Config.bluetoothScanSeconds + " seconds."
-                        checked: !!(root.adapter && root.adapter.discovering)
+                        detail: BluetoothService.scanning ? "Scanning" : "Idle"
+                        tip: "Scan for nearby devices. Stops after " + Config.bluetoothScanSeconds + " seconds, or when this is turned off."
+                        checked: BluetoothService.scanning
                         onToggled: BluetoothService.toggleScan()
                     }
 

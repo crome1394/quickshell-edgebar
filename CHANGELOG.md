@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Audio menu: Playback and Recording bubbles are the same height. The menu is a tenth taller, and the scrollbar stays off while the list fits.
+- Bluetooth menu: wider and taller. Connected devices sit in their own bubble when any are connected. Paired and Available sit side by side, each in its own bubble of the same height. Opening the menu starts a scan; **Scanning** stops it. `qs ipc call bluetoothMenu open` · `close`.
+- Transparency menu: the header, the bubbles, and the footer sit in from both window edges by the same gap as a settings section.
 - Audio menu: an **Audio** header, then Active Streams in its own bubble. Playback and Recording sit side by side, each in its own bubble. The menu is wider.
 - Bar menus on a top or bottom bar open centered on that bar, the same way a side-bar menu centers on its bar. A wide menu stays on the monitor when its widget sits at one end of the bar.
 - The firewall menu is a quarter wider.

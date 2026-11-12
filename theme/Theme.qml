@@ -413,8 +413,8 @@ Singleton {
     readonly property real popupGapCut: 0.8
     readonly property int networkPopupWidth: 460
     readonly property int networkPopupMaxHeight: 560
-    readonly property int bluetoothPopupWidth: 380
-    readonly property int bluetoothPopupMaxHeight: 480
+    readonly property int bluetoothPopupWidth: 532
+    readonly property int bluetoothPopupMaxHeight: 552
     readonly property int bluetoothScanMin: 5
     readonly property int bluetoothScanMax: 120
     readonly property int bluetoothScanDefault: 45
@@ -535,7 +535,7 @@ Singleton {
     readonly property int tailscaleSearchMin: 8
     readonly property int dependencyTimeoutMs: 5000
     readonly property int audioPopupWidth: 745
-    readonly property int audioPopupMaxHeight: 720
+    readonly property int audioPopupMaxHeight: 792
     readonly property int audioMeterHeight: 4
     // Audio menu: Active Streams shows this many rows, then scrolls.
     readonly property int audioStreamRowsMax: 5

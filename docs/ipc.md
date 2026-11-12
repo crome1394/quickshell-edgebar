@@ -48,6 +48,7 @@ Opened from a keybind, a menu appears on the main monitor (see
 | Call | Does |
 |---|---|
 | `audioMenu toggle` · `open` · `close` | Audio menu |
+| `bluetoothMenu open` · `close` | Bluetooth menu |
 | `opacityMenu toggle` · `open` · `close` | Transparency menu |
 | `notificationBell toggleHistory` · `showHistory` · `hideHistory` | Notification history |
 | `notificationBell toggleDoNotDisturb` | Do not disturb (built-in, SwayNC, dunst, or mako) |

@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Bluetooth
+import Quickshell.Io
 import qs.components
 import qs.services
 import qs.theme
@@ -34,7 +35,7 @@ Rectangle {
         const adapter = root.adapter
         if (!adapter || !adapter.enabled)
             return "󰂲"
-        if (adapter.discovering)
+        if (BluetoothService.scanning)
             return "󰂰"
         if (root.connectedCount() > 0)
             return "󰂱"
@@ -57,7 +58,7 @@ Rectangle {
             return "No Bluetooth adapter"
         if (!adapter.enabled)
             return "Bluetooth is off"
-        if (adapter.discovering)
+        if (BluetoothService.scanning)
             return "Scanning"
         const count = root.connectedCount()
         if (count < 1)
@@ -72,6 +73,18 @@ Rectangle {
         if (!root.adapter)
             return
         root.adapter.enabled = !root.adapter.enabled
+    }
+
+    // Left click and IPC both go through setMenu.
+    //   qs ipc call bluetoothMenu open | close
+    function setMenu(open) {
+        root.menuOpen = !!open
+    }
+
+    IpcHandler {
+        target: "bluetoothMenu"
+        function open(): void { root.setMenu(true) }
+        function close(): void { root.setMenu(false) }
     }
 
     // Center the menu on the bar, not on this icon.
@@ -141,7 +154,7 @@ Rectangle {
                 root.togglePower()
                 return
             }
-            root.menuOpen = !root.menuOpen
+            root.setMenu(!root.menuOpen)
         }
 
         BarTip {
