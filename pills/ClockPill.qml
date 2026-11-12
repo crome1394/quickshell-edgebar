@@ -27,7 +27,7 @@ Rectangle {
     }
     readonly property int hPad: Math.max(1, Math.round(Theme.wsInnerPad * root.ui))
 
-    // Side bars center the calendar on the bar. Top and bottom keep it over the clock.
+    // Center the calendar on the bar, not on the clock.
     function placeCalendar(nudge) {
         WidgetService.placePopup(root, calendarPopup.anchor, root.edge, nudge)
     }

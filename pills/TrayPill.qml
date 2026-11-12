@@ -42,7 +42,7 @@ Rectangle {
         return String(item.title || item.id || "Tray")
     }
 
-    // Side bars center the menu on the bar. Top and bottom keep it over this icon.
+    // Center the menu on the bar, not on this icon.
     function placeMenu(nudge) {
         WidgetService.placePopup(root, menuPopup.anchor, root.edge, nudge)
     }

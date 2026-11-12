@@ -63,10 +63,10 @@ shell.qml
   it asks `TipService` for the one shared tooltip, which `BarTipHost` (in
   `shell.qml`) draws outside the bar. No pill owns a window for its tip.
 - **Popup placement**: `WidgetService.placePopup()` puts a menu on the
-  screen side of its bar. A top or bottom bar keeps the menu over the
-  widget. A side bar centers it on the bar, so a tall menu stays on the
-  monitor when the widget sits low. The anchor rect is in the pill's own
-  coordinates. Tooltips stay next to the icon.
+  screen side of its bar and centers it on the bar, not on the icon. A
+  side bar centers it vertically, so a tall menu stays on the monitor when
+  the widget sits low. A top or bottom bar centers it horizontally. The
+  anchor rect is in the pill's own coordinates. Tooltips stay next to the icon.
 - **Monitors**: `ScreenService` decides which monitors get bars and which
   is main; a bar with its own monitor (the M button) is placed by
   `edgeOn()`, and `barHostScreens` lists the monitors that draw any bar. Menus with shared state (Audio, Transparency, notification

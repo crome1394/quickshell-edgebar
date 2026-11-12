@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Bar menus on a top or bottom bar open centered on that bar, the same way a side-bar menu centers on its bar. A wide menu stays on the monitor when its widget sits at one end of the bar.
+- The firewall menu is a quarter wider.
+- Active Window settings: the show switch and corner, the width, the pattern, and the layout each sit in their own bubble. Overrides sit in a bubble too. The show switch is on the right of its row.
+
 - Active Window shows again after a reload. The focused window is taken from Hyprland's active toplevel, or from the activated toplevel, or from the Wayland toplevel, so a reload no longer leaves the corner empty until focus changes.
 - Active Window (Widgets → Active Window): **Other** and **Layout** sit side by side, and **Overrides** are below them. Each layout row has a switch, and the rows drag by ||. A pattern field, with Set and a preview, wraps parts, such as `icon [class] title (pid)`. The PID switch on its row replaces Show PID. A part that is off is not drawn.
 - Transparency menu: **Add override** scrolls the menu to the open windows that do not have an override yet.
@@ -10,7 +14,7 @@
 
 - Transparency menu: **Add override** sits to the right of **Use theme** along the bottom.
 
-- **Transparency menu** uses the same layout as the Tailscale menu: glass (Bar and Menus), all applications, and overrides, with the list scrolling when it grows. **Bar menus** on a side bar open on the screen side of the bar, centered on the bar, so a tall menu is not cut off when its widget sits low. Top and bottom bars still open over the widget. New: `pills/OpacityMenu.qml`. Placement is `WidgetService.placePopup()`.
+- **Transparency menu** uses the same layout as the Tailscale menu: glass (Bar and Menus), all applications, and overrides, with the list scrolling when it grows. **Bar menus** on a side bar open on the screen side of the bar, centered on the bar, so a tall menu is not cut off when its widget sits low. Top and bottom bars opened over the widget. New: `pills/OpacityMenu.qml`. Placement is `WidgetService.placePopup()`.
 
 - **Night Light menu**: right-click the moon for on/off, the warmth slider (− and +), and the schedule (from – to). Same settings as Tools → Night Light, saved at once. Left click still toggles; the wheel still changes warmth. New: `pills/NightLightMenu.qml`.
 

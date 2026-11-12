@@ -37,7 +37,9 @@ wins over "Always start after idle" too.
 
 **Active Window** is not a bar pill: it shows the focused window in a screen
 corner (Widgets → Active Window). **Other** and **Layout** sit side by side,
-and **Overrides** are below them. The pattern uses the words `icon`, `class`,
+and **Overrides** are below them. The show switch and corner, the width, the
+pattern, and the layout rows each sit in their own bubble, and Overrides sit
+in one too. The pattern uses the words `icon`, `class`,
 `title`, and `pid`. Marks around a word are drawn around that part, such as
 `icon [class] title (pid)`. Set keeps the pattern, and the preview under it
 shows the focused window, or a sample when nothing is focused. Each layout
@@ -92,9 +94,9 @@ leftmost. A part that is off, or that has nothing to show, is skipped.
 - **Dock hover** (Bar → Dock): Mac-style magnify, jump, or both, on the app
   launchers or every icon widget.
 - **Side bars** turn launcher icons 90° so they stay upright. A menu on a
-  side bar opens on the screen side of the bar and is centered on the bar,
-  so a tall menu stays on the monitor when its widget sits low. A menu on
-  a top or bottom bar stays over its widget. Tooltips stay next to the icon.
+  bar opens on the screen side of that bar and is centered on the bar, so
+  it stays on the monitor when its widget sits at the end of the bar.
+  Tooltips stay next to the icon.
 - **Overview**: a workspace overview overlay, opened with
   `qs ipc call overview toggle` (see [IPC calls](ipc.md)). Set up under
   Bar → Overview.

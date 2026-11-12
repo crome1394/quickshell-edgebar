@@ -160,7 +160,7 @@ Item {
         root.sceneY = y
         root.dragging = true
         const local = layoutCol.mapFromItem(null, x, y)
-        const row = Theme.fieldHeight + Theme.tabGap
+        const row = Theme.dividerRowHeight + Theme.tabGap
         let at = row > 0 ? Math.floor(local.y / row) : 0
         const last = ActiveWindowSettings.draftModel().length - 1
         if (at < 0)
@@ -235,91 +235,80 @@ Item {
 
                     Item {
                         width: parent.width
-                        height: otherCard.implicitHeight
+                        height: activeCard.implicitHeight
 
                         Rectangle {
-                            id: otherCard
+                            id: activeCard
+                            readonly property bool shown: ActiveWindowSettings.editor.value.show
+                            readonly property string corner: ActiveWindowSettings.editor.value.corner
+
                             x: Theme.sectionInset
                             width: parent.width - Theme.sectionInset * 2
-                            implicitHeight: otherInner.implicitHeight + Theme.space * 2
+                            implicitHeight: activeInner.implicitHeight + Theme.space * 2
                             radius: Theme.radius
                             color: Theme.fieldBg
                             border.width: Theme.borderWidth
                             border.color: Theme.border
+                            opacity: activeCard.shown ? 1 : Theme.widgetOffOpacity
 
                             Column {
-                                id: otherInner
+                                id: activeInner
                                 x: Theme.space
                                 y: Theme.space
                                 width: parent.width - Theme.space * 2
-                                spacing: Theme.space
+                                spacing: Theme.space + Theme.tabGap
 
-                                Rectangle {
-                                    id: activeCard
-                                    readonly property bool shown: ActiveWindowSettings.editor.value.show
-                                    readonly property string corner: ActiveWindowSettings.editor.value.corner
-
+                                Item {
+                                    id: activeRow
                                     width: parent.width
-                                    implicitHeight: activeInner.implicitHeight + Theme.space
-                                    radius: Theme.radiusSm
-                                    color: Theme.pillBg
-                                    border.width: Theme.borderWidth
-                                    border.color: Theme.border
-                                    opacity: activeCard.shown ? 1 : Theme.widgetOffOpacity
+                                    height: Theme.chip
 
-                                    Column {
-                                        id: activeInner
-                                        x: Theme.space
-                                        y: Theme.space / 2
-                                        width: parent.width - Theme.space * 2
-                                        spacing: Theme.tabGap
+                                    Text {
+                                        anchors.left: parent.left
+                                        anchors.right: activeSwitch.left
+                                        anchors.rightMargin: Theme.space
+                                        height: Theme.chip
+                                        verticalAlignment: Text.AlignVCenter
+                                        elide: Text.ElideRight
+                                        text: "Active Window"
+                                        color: Theme.text
+                                        font.family: Theme.uiFont
+                                        font.pixelSize: Theme.smallPx
+                                    }
 
-                                        Row {
-                                            id: activeRow
-                                            width: parent.width
-                                            spacing: Theme.space
+                                    Rectangle {
+                                        id: activeSwitch
+                                        anchors.right: parent.right
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        width: Theme.toggleWidth
+                                        height: Theme.chip
+                                        radius: Theme.radiusSm
+                                        color: activeToggle.containsMouse ? Theme.hover : "transparent"
+                                        border.width: Theme.borderWidth
+                                        border.color: activeCard.shown ? Theme.ok : Theme.danger
 
-                                            Rectangle {
-                                                width: Theme.toggleWidth
-                                                height: Theme.chip
-                                                radius: Theme.radiusSm
-                                                color: activeToggle.containsMouse ? Theme.hover : "transparent"
-                                                border.width: Theme.borderWidth
-                                                border.color: activeCard.shown ? Theme.ok : Theme.danger
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: activeCard.shown ? "✓" : "✕"
+                                            color: activeCard.shown ? Theme.ok : Theme.danger
+                                            font.pixelSize: Theme.fontPx
+                                            font.bold: true
+                                        }
 
-                                                Text {
-                                                    anchors.centerIn: parent
-                                                    text: activeCard.shown ? "✓" : "✕"
-                                                    color: activeCard.shown ? Theme.ok : Theme.danger
-                                                    font.pixelSize: Theme.fontPx
-                                                    font.bold: true
-                                                }
+                                        MouseArea {
+                                            id: activeToggle
+                                            anchors.fill: parent
+                                            hoverEnabled: true
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: ActiveWindowSettings.editor.set("show", !ActiveWindowSettings.editor.value.show)
 
-                                                MouseArea {
-                                                    id: activeToggle
-                                                    anchors.fill: parent
-                                                    hoverEnabled: true
-                                                    cursorShape: Qt.PointingHandCursor
-                                                    onClicked: ActiveWindowSettings.editor.set("show", !ActiveWindowSettings.editor.value.show)
-
-                                                    HoverTip {
-                                                        message: "Show the focused window in the chosen corner"
-                                                        show: activeToggle.containsMouse
-                                                    }
-                                                }
-                                            }
-
-                                            Text {
-                                                width: Math.max(Theme.tabMinWidth, activeRow.width - Theme.toggleWidth - Theme.space)
-                                                height: Theme.chip
-                                                verticalAlignment: Text.AlignVCenter
-                                                elide: Text.ElideRight
-                                                text: "Active Window"
-                                                color: Theme.text
-                                                font.family: Theme.uiFont
-                                                font.pixelSize: Theme.smallPx
+                                            HoverTip {
+                                                message: "Show the focused window in the chosen corner"
+                                                show: activeToggle.containsMouse
                                             }
                                         }
+                                    }
+                                }
 
                                         Flow {
                                             id: cornerRow
@@ -368,11 +357,28 @@ Item {
                                         }
                                     }
                                 }
+                            }
 
-                                Column {
-                                    id: widthBlock
-                                    width: parent.width
-                                    spacing: Theme.tabGap
+                    Item {
+                        width: parent.width
+                        height: widthCard.implicitHeight
+
+                        Rectangle {
+                            id: widthCard
+                            x: Theme.sectionInset
+                            width: parent.width - Theme.sectionInset * 2
+                            implicitHeight: widthBlock.implicitHeight + Theme.space * 2
+                            radius: Theme.radius
+                            color: Theme.fieldBg
+                            border.width: Theme.borderWidth
+                            border.color: Theme.border
+
+                            Column {
+                                id: widthBlock
+                                x: Theme.space
+                                y: Theme.space
+                                width: parent.width - Theme.space * 2
+                                spacing: Theme.tabGap
 
                                     HoverHandler {
                                         id: widthHover
@@ -412,11 +418,29 @@ Item {
                                         onChanged: (value) => ActiveWindowSettings.editor.set("width", value)
                                     }
                                 }
+                            }
+                        }
 
-                                Column {
-                                    id: patternBlock
-                                    width: parent.width
-                                    spacing: Theme.space
+                    Item {
+                        width: parent.width
+                        height: patternCard.implicitHeight
+
+                        Rectangle {
+                            id: patternCard
+                            x: Theme.sectionInset
+                            width: parent.width - Theme.sectionInset * 2
+                            implicitHeight: patternBlock.implicitHeight + Theme.space * 2
+                            radius: Theme.radius
+                            color: Theme.fieldBg
+                            border.width: Theme.borderWidth
+                            border.color: Theme.border
+
+                            Column {
+                                id: patternBlock
+                                x: Theme.space
+                                y: Theme.space
+                                width: parent.width - Theme.space * 2
+                                spacing: Theme.space
 
                                     Text {
                                         width: parent.width
@@ -552,7 +576,6 @@ Item {
                             }
                         }
                     }
-                }
 
                 Column {
                     id: layoutSide
@@ -567,13 +590,24 @@ Item {
 
                     Item {
                         width: parent.width
-                        height: layoutCol.implicitHeight
+                        height: layoutCard.implicitHeight
 
-                        Column {
-                            id: layoutCol
+                        Rectangle {
+                            id: layoutCard
                             x: Theme.sectionInset
                             width: parent.width - Theme.sectionInset * 2
-                            spacing: Theme.tabGap
+                            implicitHeight: layoutCol.implicitHeight + Theme.space * 2
+                            radius: Theme.radius
+                            color: Theme.fieldBg
+                            border.width: Theme.borderWidth
+                            border.color: root.dragging && root.dropIndex >= 0 ? Theme.accent : Theme.border
+
+                            Column {
+                                id: layoutCol
+                                x: Theme.space
+                                y: Theme.space
+                                width: parent.width - Theme.space * 2
+                                spacing: Theme.tabGap
 
                             Repeater {
                                 model: ActiveWindowSettings.draftModel()
@@ -585,7 +619,7 @@ Item {
                                     readonly property bool partOn: !!partRow.modelData.on
 
                                     width: layoutCol.width
-                                    height: Theme.fieldHeight
+                                    height: Theme.dividerRowHeight
                                     radius: Theme.radiusSm
                                     color: Theme.pillBg
                                     border.width: Theme.borderWidth
@@ -716,10 +750,11 @@ Item {
                     }
                 }
             }
+        }
 
             Item {
                 width: 1
-                height: Theme.fieldHeight
+                height: Theme.tabGap
             }
 
             SectionHeader {
@@ -730,13 +765,24 @@ Item {
 
             Item {
                 width: parent.width
-                height: overrideCol.implicitHeight
+                height: overrideCard.implicitHeight
 
-                Column {
-                    id: overrideCol
+                Rectangle {
+                    id: overrideCard
                     x: Theme.sectionInset
                     width: parent.width - Theme.sectionInset * 2
-                    spacing: Theme.space
+                    implicitHeight: overrideCol.implicitHeight + Theme.space * 2
+                    radius: Theme.radius
+                    color: Theme.fieldBg
+                    border.width: Theme.borderWidth
+                    border.color: Theme.border
+
+                    Column {
+                        id: overrideCol
+                        x: Theme.space
+                        y: Theme.space
+                        width: parent.width - Theme.space * 2
+                        spacing: Theme.space
 
                     Text {
                         width: parent.width
@@ -765,7 +811,7 @@ Item {
                             font.pixelSize: Theme.fontPx
                             background: Rectangle {
                                 radius: Theme.radiusSm
-                                color: excludeField.activeFocus ? Theme.hover : Theme.fieldBg
+                                color: excludeField.activeFocus ? Theme.hover : Theme.pageBg
                                 border.width: Theme.borderWidth
                                 border.color: excludeField.activeFocus ? Theme.accent : Theme.border
                             }
@@ -1006,6 +1052,7 @@ Item {
                     }
                 }
             }
+        }
         }
     }
 

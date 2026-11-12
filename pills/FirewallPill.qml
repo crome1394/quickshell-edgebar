@@ -22,7 +22,7 @@ Rectangle {
     readonly property bool hot: fwMouse.containsMouse || root.menuOpen
     readonly property bool on: FirewallService.enabled
 
-    // Side bars center the menu on the bar. Top and bottom keep it over this icon.
+    // Center the menu on the bar, not on this icon.
     function placeMenu(nudge) {
         WidgetService.placePopup(root, menuPopup.anchor, root.edge, nudge)
     }

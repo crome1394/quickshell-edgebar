@@ -34,6 +34,9 @@ Nothing on those pages is saved until Apply.
   Apply saves it.
 - **Active Window**: show it, corner, width, and classes to exclude.
   **Other** and **Layout** sit side by side. **Overrides** are below them.
+  The show switch and corner, the width, the pattern, and the layout
+  rows each sit in their own bubble. Overrides sit in a bubble too. The
+  show switch is on the right of its row.
   The pattern uses the words `icon`, `class`, `title`, and `pid`, with
   marks around a word drawn around that part (`icon [class] title (pid)`).
   Set keeps the pattern, and a preview shows it. Each layout row has a

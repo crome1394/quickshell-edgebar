@@ -22,7 +22,7 @@ Rectangle {
     readonly property int cell: Math.max(1, Math.round((Theme.barHeight - Theme.barPad) * root.ui))
     readonly property int icon: Math.max(1, Math.round(root.theme.iconPx * root.ui * root.widthFactor))
 
-    // Side bars center the menu on the bar. Top and bottom keep it over this icon.
+    // Center the menu on the bar, not on this icon.
     function placeMenu(nudge) {
         WidgetService.placePopup(root, menuPopup.anchor, root.edge, nudge)
     }

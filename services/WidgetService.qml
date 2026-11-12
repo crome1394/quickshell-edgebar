@@ -95,23 +95,23 @@ Singleton {
         return Math.round(Math.max(0, across - thick) * Theme.popupGapCut)
     }
 
-    // Put a bar menu on the screen side of its bar. A top or bottom bar keeps
-    // the menu over the widget. A side bar centers it on the bar, not on the
-    // icon, so a tall menu is not cut off when the widget sits low.
-    // The anchor rect is in the widget's own coordinates (a side bar turns
-    // the pill). nudge shifts it once so a just-opened menu repositions.
+    // Put a bar menu on the screen side of its bar, centered on the bar
+    // rather than on the icon. A side bar centers it vertically, so a tall
+    // menu stays on the monitor when the widget sits low. A top or bottom
+    // bar centers it horizontally, so a wide menu stays on the monitor when
+    // the widget sits at one end. The anchor rect is in the widget's own
+    // coordinates (a side bar turns the pill). nudge shifts it once so a
+    // just-opened menu repositions.
     function placePopup(item, anchor, edge, nudge) {
         const content = item && item.Window ? item.Window.contentItem : null
         if (!content || !anchor)
             return
         const inset = root.popupInset(content, edge)
-        let x = 0
+        let x = Math.round(content.width / 2)
         let y = Math.round(content.height) - inset
         let edgeFlags = Edges.Bottom
         let grow = Edges.Bottom
         if (edge === "bottom") {
-            const bounds = item.mapToItem(content, 0, 0, item.width, item.height)
-            x = Math.round(bounds.x + bounds.width / 2)
             y = inset
             edgeFlags = Edges.Top
             grow = Edges.Top
@@ -125,9 +125,6 @@ Singleton {
             y = Math.round(content.height / 2)
             edgeFlags = Edges.Left
             grow = Edges.Left
-        } else {
-            const bounds = item.mapToItem(content, 0, 0, item.width, item.height)
-            x = Math.round(bounds.x + bounds.width / 2)
         }
         const local = item.mapFromItem(content, x, y, 1, 1)
         const lx = Math.round(local.x)
