@@ -1,5 +1,9 @@
 # Quickshell bar
 
+[![Hyprland](https://img.shields.io/badge/Hyprland-0.57+-59d6c4?style=flat&logo=hyprland&logoColor=white)](https://hyprland.org/)
+[![Quickshell](https://img.shields.io/badge/Quickshell-0.3.2+-89b4fa?style=flat)](https://quickshell.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-3b82f6?style=flat)](LICENSE)
+
 A light, themeable Hyprland bar. Pick your widgets, put them on any screen
 edge, done. Widgets you turn off use nothing.
 

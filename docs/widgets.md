@@ -49,10 +49,10 @@ leftmost. A part that is off, or that has nothing to show, is skipped.
 ## Menus
 
 - **Audio**: an **Audio** header, then Active Streams (each app's volume,
-  mute, and level), Playback, and Recording (device, sound profile, volume,
-  left/right levels), each in its own bubble. pw-top and Restart Audio sit
-  at the bottom. Playback and Recording collapse to one line. Optional
-  volume limit of 100%.
+  mute, and level) in its own bubble. Playback and Recording sit side by
+  side, each in its own bubble (device, sound profile, volume, left/right
+  levels). pw-top and Restart Audio sit at the bottom. Playback and
+  Recording collapse to one line. Optional volume limit of 100%.
 - **Network**: the connected Wi-Fi network on top, then the rest; Connection
   editor, Refresh IP, and Flush DNS at the bottom.
 - **Bluetooth**: devices, Scan, Discoverable, and power. Pairing trusts and

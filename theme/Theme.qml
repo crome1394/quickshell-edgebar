@@ -534,7 +534,7 @@ Singleton {
     readonly property string firewallOffGlyph: "\u{f099e}"
     readonly property int tailscaleSearchMin: 8
     readonly property int dependencyTimeoutMs: 5000
-    readonly property int audioPopupWidth: 552
+    readonly property int audioPopupWidth: 745
     readonly property int audioPopupMaxHeight: 720
     readonly property int audioMeterHeight: 4
     // Audio menu: Active Streams shows this many rows, then scrolls.

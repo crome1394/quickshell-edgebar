@@ -8,9 +8,9 @@ import qs.config
 import qs.services
 import qs.theme
 
-// Left-click menu for the audio pill. An Audio header, then Active Streams,
-// Playback, and Recording, each in its own bubble. pw-top and Restart Audio
-// stay pinned along the bottom.
+// Left-click menu for the audio pill. An Audio header, then Active Streams.
+// Playback and Recording sit side by side, each in its own bubble. pw-top
+// and Restart Audio stay pinned along the bottom.
 Item {
     id: root
 
@@ -289,53 +289,61 @@ Item {
                 }
             }
 
-            Rectangle {
+            Row {
                 width: parent.width
-                implicitHeight: playbackSection.implicitHeight + Theme.space * 2
-                radius: Theme.radiusSm
-                color: root.theme.colSurface
-                border.width: Theme.borderWidth
-                border.color: root.theme.colBorder
+                spacing: Theme.space
+                height: Math.max(playbackBubble.height, recordingBubble.height)
 
-                AudioDeviceSection {
-                    id: playbackSection
-                    x: Theme.space
-                    y: Theme.space
-                    width: parent.width - Theme.space * 2
-                    theme: root.theme
-                    title: "Playback"
-                    sink: true
-                    devices: root.sinks
-                    current: root.currentSink
-                    live: root.open
-                    expanded: Config.audioPlaybackOpen
-                    meter: Config.audioMeterDevices
-                    onToggleRequested: AudioSettings.setSectionOpen(true, !Config.audioPlaybackOpen)
+                Rectangle {
+                    id: playbackBubble
+                    width: (parent.width - Theme.space) / 2
+                    height: playbackSection.implicitHeight + Theme.space * 2
+                    radius: Theme.radiusSm
+                    color: root.theme.colSurface
+                    border.width: Theme.borderWidth
+                    border.color: root.theme.colBorder
+
+                    AudioDeviceSection {
+                        id: playbackSection
+                        x: Theme.space
+                        y: Theme.space
+                        width: parent.width - Theme.space * 2
+                        theme: root.theme
+                        title: "Playback"
+                        sink: true
+                        devices: root.sinks
+                        current: root.currentSink
+                        live: root.open
+                        expanded: Config.audioPlaybackOpen
+                        meter: Config.audioMeterDevices
+                        onToggleRequested: AudioSettings.setSectionOpen(true, !Config.audioPlaybackOpen)
+                    }
                 }
-            }
 
-            Rectangle {
-                width: parent.width
-                implicitHeight: recordingSection.implicitHeight + Theme.space * 2
-                radius: Theme.radiusSm
-                color: root.theme.colSurface
-                border.width: Theme.borderWidth
-                border.color: root.theme.colBorder
+                Rectangle {
+                    id: recordingBubble
+                    width: (parent.width - Theme.space) / 2
+                    height: recordingSection.implicitHeight + Theme.space * 2
+                    radius: Theme.radiusSm
+                    color: root.theme.colSurface
+                    border.width: Theme.borderWidth
+                    border.color: root.theme.colBorder
 
-                AudioDeviceSection {
-                    id: recordingSection
-                    x: Theme.space
-                    y: Theme.space
-                    width: parent.width - Theme.space * 2
-                    theme: root.theme
-                    title: "Recording"
-                    sink: false
-                    devices: root.sources
-                    current: root.currentSource
-                    live: root.open
-                    expanded: Config.audioRecordingOpen
-                    meter: Config.audioMeterDevices
-                    onToggleRequested: AudioSettings.setSectionOpen(false, !Config.audioRecordingOpen)
+                    AudioDeviceSection {
+                        id: recordingSection
+                        x: Theme.space
+                        y: Theme.space
+                        width: parent.width - Theme.space * 2
+                        theme: root.theme
+                        title: "Recording"
+                        sink: false
+                        devices: root.sources
+                        current: root.currentSource
+                        live: root.open
+                        expanded: Config.audioRecordingOpen
+                        meter: Config.audioMeterDevices
+                        onToggleRequested: AudioSettings.setSectionOpen(false, !Config.audioRecordingOpen)
+                    }
                 }
             }
 
