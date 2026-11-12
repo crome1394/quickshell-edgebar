@@ -13,6 +13,11 @@ Rectangle {
     required property var rule
 
     readonly property bool allowing: root.rule.action === "allow"
+    readonly property string comment: String(root.rule.comment || "")
+    readonly property string summary: FirewallService.describePort(root.rule)
+        + (root.rule.direction === "out" ? " · out" : "")
+        + "  ·  from " + (FirewallService.anyAddr(root.rule.from) ? "anywhere" : root.rule.from)
+        + (root.comment.length ? "  ·  " + root.comment : "")
 
     implicitHeight: Theme.fieldHeight
     radius: Theme.radiusSm
@@ -22,6 +27,11 @@ Rectangle {
         id: rowMouse
         anchors.fill: parent
         hoverEnabled: true
+
+        HoverTip {
+            message: root.comment
+            show: rowMouse.containsMouse && root.comment.length > 0
+        }
     }
 
     Rectangle {
@@ -51,9 +61,7 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         elide: Text.ElideRight
         textFormat: Text.PlainText
-        text: FirewallService.describePort(root.rule)
-            + (root.rule.direction === "out" ? " · out" : "")
-            + "  ·  from " + (FirewallService.anyAddr(root.rule.from) ? "anywhere" : root.rule.from)
+        text: root.summary
         color: root.theme.colFg
         font.family: root.theme.uiFont
         font.pixelSize: root.theme.smallPx

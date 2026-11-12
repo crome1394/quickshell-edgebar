@@ -17,7 +17,10 @@ ShellRoot {
         const rules = F.mergeRules(F.parseTuples(v4, false), F.parseTuples(v6, true))
         t.eq("three rules (22 merged across v4/v6)", rules.length, 3)
         t.eq("ssh rule", [rules[0].action, rules[0].port, rules[0].proto, rules[0].families], ["allow", "22", "tcp", ["v4", "v6"]])
-        t.eq("source kept, comment dropped", [rules[1].action, rules[1].from], ["deny", "192.168.1.0/24"])
+        t.eq("source kept, comment decoded", [rules[1].action, rules[1].from, rules[1].comment], ["deny", "192.168.1.0/24", "mdns"])
+        t.eq("no comment stays empty", rules[0].comment, "")
+        t.eq("bad comment ignored", [F.decodeComment("zz"), F.decodeComment("abc")], ["", ""])
+        t.eq("utf-8 comment", F.decodeComment("636166c3a9"), "café")
         t.eq("_log suffix stripped", rules[2].action, "limit")
         t.eq("describe port", [F.describePort(rules[0]), F.describePort({ port: "any", proto: "any" })], ["22/tcp", "any port"])
 

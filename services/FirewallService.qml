@@ -44,7 +44,27 @@ Singleton {
         root.policy = { input: word("INPUT"), output: word("OUTPUT"), forward: word("FORWARD") }
     }
 
-    // UFW writes one "### tuple ###" comment per rule:
+    // UFW stores a rule comment as hex of its UTF-8 bytes (comment=6d646e73).
+    function decodeComment(hex) {
+        const h = String(hex || "").trim()
+        if (!h.length || h.length > 400 || h.length % 2 !== 0 || !/^[0-9a-fA-F]+$/.test(h))
+            return ""
+        let pct = ""
+        for (let i = 0; i < h.length; i += 2)
+            pct += "%" + h.slice(i, i + 2)
+        let text = ""
+        try {
+            text = decodeURIComponent(pct)
+        } catch (e) {
+            return ""
+        }
+        text = text.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim()
+        if (text.length > 200)
+            text = text.slice(0, 200)
+        return text
+    }
+
+    // UFW writes one "### tuple ###" line per rule:
     //   ### tuple ### allow tcp 22 0.0.0.0/0 any 192.168.1.0/24 in
     // action proto dport dst sport src [app names] direction [comment=hex]
     function parseTuples(text, v6) {
@@ -54,7 +74,15 @@ Singleton {
             const m = /^### tuple ### (.+)$/.exec(lines[i].trim())
             if (!m)
                 continue
-            const t = m[1].split(/\s+/).filter((x) => !x.startsWith("comment="))
+            const raw = m[1].split(/\s+/)
+            let comment = ""
+            for (let c = raw.length - 1; c >= 0; c--) {
+                if (raw[c].startsWith("comment=")) {
+                    comment = root.decodeComment(raw[c].slice(8))
+                    break
+                }
+            }
+            const t = raw.filter((x) => !x.startsWith("comment="))
             if (t.length < 7 || root.actions.indexOf(t[0].replace(/_(log|log-all)$/, "")) < 0)
                 continue
             const direction = t.indexOf("out") > 5 ? "out" : "in"
@@ -66,6 +94,7 @@ Singleton {
                 fromPort: t[4],
                 from: t[5],
                 direction: direction,
+                comment: comment,
                 v6: !!v6
             })
         }
@@ -78,9 +107,11 @@ Singleton {
         const out = v4.map((r) => Object.assign({}, r, { families: ["v4"] }))
         for (let i = 0; i < v6.length; i++) {
             const twin = out.find((r) => key(r) === key(v6[i]))
-            if (twin)
+            if (twin) {
                 twin.families = ["v4", "v6"]
-            else
+                if (!twin.comment && v6[i].comment)
+                    twin.comment = v6[i].comment
+            } else
                 out.push(Object.assign({}, v6[i], { families: ["v6"] }))
         }
         return out

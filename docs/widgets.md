@@ -65,7 +65,8 @@ class, and title in a screen corner (Widgets → Active Window).
 - **Notifications**: the history list beside the bar, with copy, dismiss,
   and clear.
 - **Firewall** (UFW): on or off with a switch; the incoming, outgoing, and
-  routed defaults; the rules (IPv4 and IPv6 copies shown once) with ✕ to
+  routed defaults; the rules (IPv4 and IPv6 copies shown once, with the
+  rule's comment when it has one) with ✕ to
   delete; and Add a rule: Allow, Deny, or Limit (blocks an address that
   connects 6 times in 30 seconds, for SSH), TCP, UDP, or both, a port or
   range, and optionally where from. Reading needs no password (UFW's files

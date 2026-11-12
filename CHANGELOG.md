@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Firewall menu: a rule shows its UFW comment when it has one (the hex comment on the rule line, decoded).
+
 - Transparency menu: **Add override** sits to the right of **Use theme** along the bottom.
 
 - **Transparency menu** uses the same layout as the Tailscale menu: glass (Bar and Menus), all applications, and overrides, with the list scrolling when it grows. **Bar menus** on a side bar open on the screen side of the bar, centered on the bar, so a tall menu is not cut off when its widget sits low. Top and bottom bars still open over the widget. New: `pills/OpacityMenu.qml`. Placement is `WidgetService.placePopup()`.
