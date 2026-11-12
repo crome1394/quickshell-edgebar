@@ -207,6 +207,7 @@ Singleton {
     property alias showActiveWindowPill: data.showActiveWindowPill
     property alias activeWindowPillCorner: data.activeWindowPillCorner
     property alias activeWindowPillWidth: data.activeWindowPillWidth
+    property alias activeWindowShowPid: data.activeWindowShowPid
     property alias activeWindowExcludesJson: data.activeWindowExcludesJson
     property alias clockFormat: data.clockFormat
     property alias clockFont: data.clockFont
@@ -713,6 +714,7 @@ Singleton {
             property bool showActiveWindowPill: true
             property string activeWindowPillCorner: "topLeft"
             property int activeWindowPillWidth: 640
+            property bool activeWindowShowPid: false
             property string activeWindowExcludesJson: "[\"hypr-screensaver\"]"
             property string clockFormat: "dddd, MM·dd·yyyy | HH:mm:ss"
             property string clockFont: ""

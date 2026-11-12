@@ -382,7 +382,7 @@ Item {
             SectionHeader {
                 width: parent.width
                 title: "Other"
-                hint: "Show the focused window's icon, class, and title in a screen corner. Apply saves the switch, the corner, the width, and the excludes."
+                hint: "Show the focused window's icon, class, and title in a screen corner. Show PID adds the process id after the title. Apply saves the switch, the corner, the width, the PID switch, and the excludes."
             }
 
             Item {
@@ -557,6 +557,15 @@ Item {
                             onChanged: (value) => ActiveWindowSettings.editor.set("width", value)
                         }
                     }
+
+                    CheckRow {
+                        width: parent.width
+                        title: "Show PID"
+                        detail: "The focused window's process id, after the title."
+                        tip: "Show the process id on the Active Window popup"
+                        checked: !!ActiveWindowSettings.editor.value.showPid
+                        onToggled: ActiveWindowSettings.editor.set("showPid", !ActiveWindowSettings.editor.value.showPid)
+                    }
                 }
             }
             }
@@ -570,9 +579,9 @@ Item {
         anchors.bottom: parent.bottom
         applyEnabled: ActiveWindowSettings.editor.dirty
         undoEnabled: ActiveWindowSettings.editor.canUndo
-        applyTip: "Save the show switch, the corner, the width, and the excludes"
+        applyTip: "Save the show switch, the corner, the width, the PID switch, and the excludes"
         undoTip: "Drop an unsaved draft, or put back the last applied one"
-        resetTip: "Restore the show switch, top left, the default width, and the screensaver exclude. Apply saves it."
+        resetTip: "Restore the show switch, top left, the default width, PID off, and the screensaver exclude. Apply saves it."
         onApplyClicked: ActiveWindowSettings.editor.apply()
         onUndoClicked: ActiveWindowSettings.editor.undo()
         onResetClicked: ActiveWindowSettings.editor.reset()

@@ -30,13 +30,15 @@ PanelWindow {
     readonly property int textGap: Math.max(1, Math.round(Theme.space * root.ui))
     readonly property int pillMax: Math.max(1, Math.round(ActiveWindowSettings.widthValue() * root.ui))
     readonly property bool showTitle: root.winTitle.length > 0 && root.winTitle !== root.classLabel
-    // Room left for the title after padding, the icon, and the whole class name.
+    // Room left for the title after padding, the icon, the PID, and the whole class name.
     readonly property int titleLimit: {
         if (!root.showTitle)
             return 0
         let used = root.hPad * 2 + Math.ceil(classText.implicitWidth)
         if (root.iconSource.length > 0)
             used += root.iconPx + root.textGap
+        if (root.pidShown)
+            used += Math.ceil(pidText.implicitWidth) + root.textGap
         used += root.textGap
         return Math.max(0, root.pillMax - used)
     }
@@ -59,6 +61,10 @@ PanelWindow {
         }
         if (root.titleVisible) {
             w += root.clipTitle ? root.titleLimit : root.titleNatural
+            parts += 1
+        }
+        if (root.pidShown) {
+            w += Math.ceil(pidText.implicitWidth)
             parts += 1
         }
         if (parts > 1)
@@ -140,6 +146,13 @@ PanelWindow {
         return root.field(root.toplevel ? root.toplevel.lastIpcObject : null, "initialTitle")
     }
     readonly property bool steamGame: root.winClass.indexOf("steam_app_") === 0
+    readonly property string winPid: {
+        const n = root.field(root.toplevel ? root.toplevel.lastIpcObject : null, "pid")
+        if (!n.length || n === "0")
+            return ""
+        return n
+    }
+    readonly property bool pidShown: ActiveWindowSettings.showPidValue() && root.winPid.length > 0
     readonly property string classLabel: {
         if (root.steamGame && root.winTitle.length)
             return root.winTitle
@@ -305,6 +318,17 @@ PanelWindow {
                     when: root.clipTitle
                     value: root.titleLimit
                 }
+            }
+
+            Text {
+                id: pidText
+                visible: root.pidShown
+                height: root.pillHeight
+                verticalAlignment: Text.AlignVCenter
+                text: root.winPid
+                color: root.theme.colFgMuted
+                font.family: root.theme.fontFamily
+                font.pixelSize: root.fontPx
             }
         }
     }

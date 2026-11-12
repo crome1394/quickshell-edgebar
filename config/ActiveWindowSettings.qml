@@ -103,6 +103,7 @@ Singleton {
             show: !!src.show,
             corner: root.cornerNorm(src.corner),
             width: root.widthNorm(src.width),
+            showPid: !!src.showPid,
             excludes: root.excludeJson(src.excludes)
         }
     }
@@ -112,8 +113,13 @@ Singleton {
             show: Config.showActiveWindowPill,
             corner: Config.activeWindowPillCorner,
             width: Config.activeWindowPillWidth,
+            showPid: Config.activeWindowShowPid,
             excludes: Config.activeWindowExcludesJson
         })
+    }
+
+    function showPidValue() {
+        return !!Config.activeWindowShowPid
     }
 
     function defaults() {
@@ -121,6 +127,7 @@ Singleton {
             show: true,
             corner: "topLeft",
             width: Theme.activeWindowWidthDefault,
+            showPid: false,
             excludes: "[\"hypr-screensaver\"]"
         }
     }
@@ -131,6 +138,7 @@ Singleton {
             Config.showActiveWindowPill = clean.show
             Config.activeWindowPillCorner = clean.corner
             Config.activeWindowPillWidth = clean.width
+            Config.activeWindowShowPid = clean.showPid
             Config.activeWindowExcludesJson = clean.excludes
         })
     }

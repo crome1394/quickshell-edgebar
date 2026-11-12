@@ -32,7 +32,8 @@ Nothing on those pages is saved until Apply.
   bar) puts that one bar on a monitor of its own, or back on every bar
   monitor; while its monitor is unplugged it shows on the main monitor.
   Apply saves it.
-- **Active Window**: show it, corner, width, and classes to exclude.
+- **Active Window**: show it, corner, width, **Show PID** (the process id
+  after the title), and classes to exclude.
 - **System Stats**: one combined pill, or (with **Combine into one
   widget** off) CPU, Memory, GPU, and VRAM as separate widgets you turn on
   and place under Bars; which graphics card to read (Auto: the only one, or

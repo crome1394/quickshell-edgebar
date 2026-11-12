@@ -36,7 +36,8 @@ ignores other apps' inhibitors (so tab video does not block it). Caffeine
 wins over "Always start after idle" too.
 
 **Active Window** is not a bar pill: it shows the focused window's icon,
-class, and title in a screen corner (Widgets → Active Window).
+class, and title in a screen corner (Widgets → Active Window). **Show PID**
+adds the window's process id after the title.
 
 ## Menus
 
