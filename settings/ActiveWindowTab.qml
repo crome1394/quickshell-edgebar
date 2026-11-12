@@ -569,6 +569,12 @@ Item {
                 }
             }
             }
+
+            SectionHeader {
+                width: parent.width
+                title: "Layout"
+                hint: "The order of the icon, class, title, and PID on the popup. The first part is the leftmost."
+            }
         }
     }
 

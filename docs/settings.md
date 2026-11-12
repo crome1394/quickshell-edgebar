@@ -33,7 +33,8 @@ Nothing on those pages is saved until Apply.
   monitor; while its monitor is unplugged it shows on the main monitor.
   Apply saves it.
 - **Active Window**: show it, corner, width, **Show PID** (the process id
-  after the title), and classes to exclude.
+  after the title), and classes to exclude. **Layout** is the order of
+  those parts on the popup.
 - **System Stats**: one combined pill, or (with **Combine into one
   widget** off) CPU, Memory, GPU, and VRAM as separate widgets you turn on
   and place under Bars; which graphics card to read (Auto: the only one, or

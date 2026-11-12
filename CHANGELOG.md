@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Active Window: a **Layout** section (Widgets → Active Window) for how the popup's parts are arranged.
+
 - Active Window: **Show PID** (Widgets → Active Window) adds the focused window's process id after the title. Off by default.
 
 - Firewall menu: a rule shows its UFW comment when it has one (the hex comment on the rule line, decoded).
