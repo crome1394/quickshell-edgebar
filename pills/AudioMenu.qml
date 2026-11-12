@@ -8,8 +8,9 @@ import qs.config
 import qs.services
 import qs.theme
 
-// Left-click menu for the audio pill: active streams, playback, recording,
-// and pw-top and Restart Audio pinned along the bottom.
+// Left-click menu for the audio pill. An Audio header, then Active Streams,
+// Playback, and Recording, each in its own bubble. pw-top and Restart Audio
+// stay pinned along the bottom.
 Item {
     id: root
 
@@ -178,7 +179,23 @@ Item {
         Column {
             id: column
             width: Math.max(0, flick.width - root.scrollGutter)
-            spacing: Theme.space * 2
+            spacing: Theme.space
+
+            Row {
+                width: parent.width
+                spacing: Theme.tabGap
+
+                Text {
+                    width: parent.width
+                    height: Theme.fieldHeight
+                    verticalAlignment: Text.AlignVCenter
+                    text: "Audio"
+                    color: root.theme.colFg
+                    font.family: root.theme.uiFont
+                    font.pixelSize: root.theme.fontPx
+                    font.bold: true
+                }
+            }
 
             Text {
                 visible: root.notice.length > 0 || AudioCardService.lastError.length > 0
@@ -190,9 +207,20 @@ Item {
                 font.pixelSize: root.theme.smallPx
             }
 
-            Column {
+            Rectangle {
                 width: parent.width
-                spacing: Theme.space
+                implicitHeight: streamsInner.implicitHeight + Theme.space * 2
+                radius: Theme.radiusSm
+                color: root.theme.colSurface
+                border.width: Theme.borderWidth
+                border.color: root.theme.colBorder
+
+                Column {
+                    id: streamsInner
+                    x: Theme.space
+                    y: Theme.space
+                    width: parent.width - Theme.space * 2
+                    spacing: Theme.space
 
                 Text {
                     width: parent.width
@@ -258,32 +286,57 @@ Item {
                         }
                     }
                 }
+                }
             }
 
-            AudioDeviceSection {
+            Rectangle {
                 width: parent.width
-                theme: root.theme
-                title: "Playback"
-                sink: true
-                devices: root.sinks
-                current: root.currentSink
-                live: root.open
-                expanded: Config.audioPlaybackOpen
-                meter: Config.audioMeterDevices
-                onToggleRequested: AudioSettings.setSectionOpen(true, !Config.audioPlaybackOpen)
+                implicitHeight: playbackSection.implicitHeight + Theme.space * 2
+                radius: Theme.radiusSm
+                color: root.theme.colSurface
+                border.width: Theme.borderWidth
+                border.color: root.theme.colBorder
+
+                AudioDeviceSection {
+                    id: playbackSection
+                    x: Theme.space
+                    y: Theme.space
+                    width: parent.width - Theme.space * 2
+                    theme: root.theme
+                    title: "Playback"
+                    sink: true
+                    devices: root.sinks
+                    current: root.currentSink
+                    live: root.open
+                    expanded: Config.audioPlaybackOpen
+                    meter: Config.audioMeterDevices
+                    onToggleRequested: AudioSettings.setSectionOpen(true, !Config.audioPlaybackOpen)
+                }
             }
 
-            AudioDeviceSection {
+            Rectangle {
                 width: parent.width
-                theme: root.theme
-                title: "Recording"
-                sink: false
-                devices: root.sources
-                current: root.currentSource
-                live: root.open
-                expanded: Config.audioRecordingOpen
-                meter: Config.audioMeterDevices
-                onToggleRequested: AudioSettings.setSectionOpen(false, !Config.audioRecordingOpen)
+                implicitHeight: recordingSection.implicitHeight + Theme.space * 2
+                radius: Theme.radiusSm
+                color: root.theme.colSurface
+                border.width: Theme.borderWidth
+                border.color: root.theme.colBorder
+
+                AudioDeviceSection {
+                    id: recordingSection
+                    x: Theme.space
+                    y: Theme.space
+                    width: parent.width - Theme.space * 2
+                    theme: root.theme
+                    title: "Recording"
+                    sink: false
+                    devices: root.sources
+                    current: root.currentSource
+                    live: root.open
+                    expanded: Config.audioRecordingOpen
+                    meter: Config.audioMeterDevices
+                    onToggleRequested: AudioSettings.setSectionOpen(false, !Config.audioRecordingOpen)
+                }
             }
 
             Text {

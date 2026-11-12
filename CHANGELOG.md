@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Audio menu: an **Audio** header, then Active Streams, Playback, and Recording, each in its own bubble.
 - Bar menus on a top or bottom bar open centered on that bar, the same way a side-bar menu centers on its bar. A wide menu stays on the monitor when its widget sits at one end of the bar.
 - The firewall menu is a quarter wider.
 - Active Window settings: the show switch and corner, the width, the pattern, and the layout each sit in their own bubble. Overrides sit in a bubble too. The show switch is on the right of its row.
