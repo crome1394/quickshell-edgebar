@@ -1,28 +1,79 @@
+pragma ComponentBehavior: Bound
 import QtQuick
+import Quickshell
 import qs.components
 import qs.config
 import qs.services
 import qs.theme
 
 // Night light: warms the screen against blue light. Left click turns it
-// on or off; the wheel makes it warmer or cooler (100 K a step). The tip
-// shows the temperature and the schedule.
+// on or off; the wheel makes it warmer or cooler (100 K a step). Right
+// click opens the menu (warmth and schedule). The tip shows the
+// temperature and the schedule.
 Rectangle {
     id: root
 
     required property var theme
     property string edge: "top"
     property real widthFactor: 1
+    property bool menuOpen: false
     property bool dockHot: dock.mag > 1.01 || Math.abs(dock.jumpY) > 0.5
 
     readonly property real ui: WidgetService.uiScale
     readonly property bool on: NightLightService.on
-    readonly property bool lit: mouse.containsMouse || root.on
+    readonly property bool hot: nlMouse.containsMouse || root.menuOpen
+    readonly property bool lit: root.hot || root.on
+
+    function tipText() {
+        if (NightLightService.checked && !NightLightService.available)
+            return "Night light needs hyprsunset (sudo pacman -S hyprsunset)."
+        let text = "Night light " + (root.on ? "on" : "off") + " · " + NightLightService.temp + " K"
+        if (Config.nightSchedule)
+            text += " · schedule " + Config.nightStart + "–" + Config.nightEnd
+        return text + ". Right-click for warmth and schedule. Wheel: warmer or cooler."
+    }
+
+    function placeMenu() {
+        const content = root.Window.contentItem
+        if (!content)
+            return
+        const bounds = root.mapToItem(content, 0, 0, root.width, root.height)
+        const cx = Math.round(bounds.x + bounds.width / 2)
+        const cy = Math.round(bounds.y + bounds.height / 2)
+        let x = cx
+        // Closer to the bar than the window's outer edge (Theme.popupGapCut).
+        const inset = WidgetService.popupInset(content, root.edge)
+        let y = Math.round(content.height) - inset
+        let edgeFlags = Edges.Bottom
+        let grow = Edges.Bottom
+        if (root.edge === "bottom") {
+            y = inset
+            edgeFlags = Edges.Top
+            grow = Edges.Top
+        } else if (root.edge === "left") {
+            x = Math.round(content.width) - inset
+            y = cy
+            edgeFlags = Edges.Right
+            grow = Edges.Right
+        } else if (root.edge === "right") {
+            x = inset
+            y = cy
+            edgeFlags = Edges.Left
+            grow = Edges.Left
+        }
+        const anchor = menuPopup.anchor
+        // qmllint disable missing-property
+        anchor.edges = edgeFlags
+        anchor.gravity = grow
+        anchor.rect = Qt.rect(x + 3, y + 3, 1, 1)
+        anchor.rect = Qt.rect(x, y, 1, 1)
+        // qmllint enable missing-property
+    }
 
     implicitWidth: Math.max(1, Math.round((Theme.barHeight - Theme.barPad) * root.widthFactor * root.ui))
     implicitHeight: Math.max(1, Math.round((Theme.barHeight - Theme.barPad) * root.ui))
     radius: Theme.radiusSm
-    color: root.on ? root.theme.colAccentDim : (mouse.containsMouse ? root.theme.colHover : root.theme.colSurface)
+    color: root.on ? root.theme.colAccentDim : (root.hot ? root.theme.colHover : root.theme.colSurface)
     border.width: Theme.borderWidth
     border.color: root.lit ? root.theme.colAccent : root.theme.colBorder
     opacity: NightLightService.checked && !NightLightService.available ? Theme.widgetOffOpacity : 1
@@ -39,7 +90,7 @@ Rectangle {
     DockFace {
         id: dock
         edge: root.edge
-        hovered: mouse.containsMouse
+        hovered: nlMouse.containsMouse
     }
 
     Text {
@@ -52,12 +103,18 @@ Rectangle {
     }
 
     MouseArea {
-        id: mouse
+        id: nlMouse
         anchors.fill: parent
         hoverEnabled: true
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
         cursorShape: Qt.PointingHandCursor
-        onClicked: {
+        onClicked: (mouse) => {
             dock.play()
+            if (mouse.button === Qt.RightButton) {
+                NightLightService.recheck()
+                root.menuOpen = !root.menuOpen
+                return
+            }
             NightLightService.toggle()
         }
         onWheel: (wheel) => {
@@ -67,12 +124,51 @@ Rectangle {
 
         BarTip {
             edge: root.edge
-            message: !NightLightService.available
-                ? "Night light needs hyprsunset (sudo pacman -S hyprsunset)."
-                : "Night light " + (NightLightService.on ? "on" : "off") + " · " + NightLightService.temp + " K"
-                    + (Config.nightSchedule ? " · schedule " + Config.nightStart + "–" + Config.nightEnd : "")
-                    + ". Wheel: warmer or cooler."
-            show: mouse.containsMouse
+            message: root.tipText()
+            show: nlMouse.containsMouse && !root.menuOpen
+        }
+    }
+
+    // qmllint disable uncreatable-type
+    PopupWindow {
+    // qmllint enable uncreatable-type
+        id: menuPopup
+        visible: root.menuOpen
+        color: "transparent"
+        grabFocus: true
+        implicitWidth: Theme.nightPopupWidth
+        // qmllint disable missing-property
+        implicitHeight: Math.min(Theme.nightPopupMaxHeight, menu.implicitHeight)
+        // qmllint enable missing-property
+        onClosed: root.menuOpen = false
+        // qmllint disable missing-property
+        anchor.item: root
+        anchor.adjustment: PopupAdjustment.Slide
+        // qmllint enable missing-property
+
+        Rectangle {
+            anchors.fill: parent
+            radius: Theme.radius
+            color: root.theme.colBg
+            border.width: Theme.borderWidth
+            border.color: root.theme.colBorder
+
+            NightLightMenu {
+                id: menu
+                anchors.fill: parent
+                theme: root.theme
+                open: root.menuOpen
+                onCloseRequested: root.menuOpen = false
+            }
+        }
+    }
+
+    Connections {
+        // qmllint disable incompatible-type
+        target: menuPopup.anchor
+        // qmllint enable incompatible-type
+        function onAnchoring() {
+            root.placeMenu()
         }
     }
 }

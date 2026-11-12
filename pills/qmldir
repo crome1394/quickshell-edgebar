@@ -31,6 +31,7 @@ InspectorPill 1.0 InspectorPill.qml
 FreshRssPill 1.0 FreshRssPill.qml
 CaffeinePill 1.0 CaffeinePill.qml
 NightLightPill 1.0 NightLightPill.qml
+NightLightMenu 1.0 NightLightMenu.qml
 RecorderPill 1.0 RecorderPill.qml
 FirewallPill 1.0 FirewallPill.qml
 FirewallMenu 1.0 FirewallMenu.qml

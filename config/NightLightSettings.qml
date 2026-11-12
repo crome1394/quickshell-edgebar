@@ -4,8 +4,10 @@ import Quickshell
 import qs.theme
 
 // Night light: how warm (Kelvin) and an optional schedule. Settings →
-// Tools → Night Light edits these through `editor`; the pill's wheel
-// changes the temperature at once with setTempLive().
+// Tools → Night Light edits these through `editor`. The pill's wheel and
+// its right-click menu change the temperature at once with setTempLive(),
+// and the menu saves the schedule with setScheduleLive(), setStartLive(),
+// and setEndLive().
 Singleton {
     id: root
 
@@ -51,6 +53,40 @@ Singleton {
         Config.saveFields(() => {
             Config.nightTemp = next
         })
+    }
+
+    // The right-click menu saves these at once. A time that is not HH:MM
+    // (24-hour) is refused, and the saved value stays.
+    function setScheduleLive(on) {
+        const next = !!on
+        if (next === Config.nightSchedule)
+            return false
+        Config.saveFields(() => {
+            Config.nightSchedule = next
+        })
+        return true
+    }
+
+    function setStartLive(value) {
+        return root.setTimeLive(false, value)
+    }
+
+    function setEndLive(value) {
+        return root.setTimeLive(true, value)
+    }
+
+    function setTimeLive(end, value) {
+        const current = end ? Config.nightEnd : Config.nightStart
+        const next = root.timeNorm(value, "")
+        if (next.length !== 5 || next === current)
+            return false
+        Config.saveFields(() => {
+            if (end)
+                Config.nightEnd = next
+            else
+                Config.nightStart = next
+        })
+        return true
     }
 
     function normalize(src) {

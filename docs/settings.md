@@ -222,7 +222,8 @@ only while it shows; clicks pass through it.
   notification when saved. Uses `gpu-screen-recorder`.
 - **Night Light**: on/off now, warmth (2500–6500 K), and an optional
   schedule (from – to, crossing midnight is fine; a click on the widget
-  holds until the next switch). Uses `hyprsunset`.
+  holds until the next switch). Uses `hyprsunset`. The widget's right-click
+  menu sets the same things and saves at once.
 - **Screensaver**: the program run after idle, idle time, whether it
   starts over fullscreen video, the look, and brightness (dimming uses
   DDC/CI, for external monitors). The video defaults to

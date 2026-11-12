@@ -24,7 +24,7 @@ not loaded at all. Tooltips open outside the bar, away from the edge.
 | **FreshRSS** | Unread count | Opens the [reader](freshrss.md) |
 | **Clipboard** | Clipboard icon (dim while no history is kept) | Opens the [clipboard viewer](clipboard.md) |
 | **Caffeine** | A tea cup, filled while on | Left: keep the screen awake (no screensaver or idle lock). Right: 30 min → 1 h → 2 h → until off |
-| **Night Light** | A moon | Left: warm the screen against blue light (needs `hyprsunset`). Wheel: warmer or cooler |
+| **Night Light** | A moon | Left: on or off (needs `hyprsunset`). Right: menu with on/off, warmth, and schedule. Wheel: warmer or cooler |
 | **Battery** (laptops) | Level glyph and percent; red when low, a bolt while charging | Left: next power profile. The tip shows time left and the profile |
 | **Brightness** (laptops) | A sun | Wheel: brighter or dimmer. Left: 25, 50, 75, 100 % |
 | **Firewall** | A shield, checked while on, crossed out in red while off | Left: menu with on/off, default policies, the rules, and Add a rule. Right: turn the firewall on or off. Changes ask for your password |
@@ -48,6 +48,10 @@ class, and title in a screen corner (Widgets → Active Window).
   editor, Refresh IP, and Flush DNS at the bottom.
 - **Bluetooth**: devices, Scan, Discoverable, and power. Pairing trusts and
   connects the device, so headsets reconnect on their own.
+- **Night Light**: on/off, warmth (2500–6500 K, with − and +), and a schedule
+  (from – to; crossing midnight is fine; a left click holds until the next
+  switch). Same values as Settings → Tools → Night Light, saved at once.
+  Escape or ✕ closes it.
 - **Tailscale**: on/off, this device's addresses with copy buttons, exit
   node (searchable), options (DNS, subnet routes, Shields up, SSH, …), and
   the machines on the tailnet with Taildrop send. Checks every 30 seconds,

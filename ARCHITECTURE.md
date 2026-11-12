@@ -163,7 +163,10 @@ ThemeBuilder.build()  →  ThemePalette (Theme.palette)  →  every pill's `them
   layer surface holding a Wayland `IdleInhibitor`, only while on.
 - **Night Light**: `NightLightService` runs `hyprsunset -t <K>` only while
   on (restarted on a new temperature); with a schedule it checks once a
-  minute via `SystemClock`.
+  minute via `SystemClock`. The pill's right-click menu
+  (`pills/NightLightMenu.qml`) sets the same on/off, warmth, and schedule
+  as Settings → Tools → Night Light; warmth and schedule save at once
+  through `NightLightSettings`.
 - **Firewall**: `FirewallService` reads `/etc/ufw/ufw.conf`,
   `/etc/default/ufw`, and the `user*.rules` files (world-readable) and
   watches them; changes run `pkexec /usr/bin/ufw <words>` with words built

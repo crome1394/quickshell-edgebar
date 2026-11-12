@@ -308,6 +308,9 @@ Singleton {
     readonly property int nightTempStep: 100
     // Wait this long after a temperature change before restarting hyprsunset.
     readonly property int nightRestartMs: 300
+    // Right-click menu. Same size family as the Tailscale menu.
+    readonly property int nightPopupWidth: 440
+    readonly property int nightPopupMaxHeight: 620
     // Screen recorder (gpu-screen-recorder).
     readonly property string recordGlyph: "\u{f044a}"
     readonly property string recordingGlyph: "\u{f044b}"

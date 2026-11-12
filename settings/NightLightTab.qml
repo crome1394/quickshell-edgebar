@@ -5,7 +5,8 @@ import qs.services
 import qs.theme
 
 // Settings → Tools → Night Light: how warm, and an optional schedule.
-// Apply saves. The widget and qs ipc call nightLight toggle turn it on.
+// Apply saves. The widget's left click and qs ipc call nightLight toggle
+// turn it on; its right-click menu sets the same warmth and schedule.
 Item {
     id: root
 
@@ -22,7 +23,7 @@ Item {
         SectionHeader {
             width: parent.width
             title: "Night Light"
-            hint: "Warms the screen in the evening to cut blue light, with hyprsunset. Turn on the Night Light widget under Widgets, or use qs ipc call nightLight toggle."
+            hint: "Warms the screen in the evening to cut blue light, with hyprsunset. Turn on the Night Light widget under Widgets. Right-click it for these controls, or use qs ipc call nightLight toggle."
         }
 
         Column {
