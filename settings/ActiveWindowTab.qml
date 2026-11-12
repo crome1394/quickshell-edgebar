@@ -72,6 +72,17 @@ Item {
         excludeField.text = ""
     }
 
+    function movePart(index, delta) {
+        const cur = ActiveWindowSettings.draftLayout().slice()
+        const j = index + delta
+        if (j < 0 || j >= cur.length)
+            return
+        const held = cur[index]
+        cur[index] = cur[j]
+        cur[j] = held
+        ActiveWindowSettings.editor.set("layout", JSON.stringify(cur))
+    }
+
     Flickable {
         id: scroll
         anchors.left: parent.left
@@ -382,7 +393,7 @@ Item {
             SectionHeader {
                 width: parent.width
                 title: "Other"
-                hint: "Show the focused window's icon, class, and title in a screen corner. Show PID adds the process id after the title. Apply saves the switch, the corner, the width, the PID switch, and the excludes."
+                hint: "Show the focused window's icon, class, and title in a screen corner. Show PID adds the process id. Layout sets the order. Apply saves these."
             }
 
             Item {
@@ -561,7 +572,7 @@ Item {
                     CheckRow {
                         width: parent.width
                         title: "Show PID"
-                        detail: "The focused window's process id, after the title."
+                        detail: "The focused window's process id. Layout sets where it sits."
                         tip: "Show the process id on the Active Window popup"
                         checked: !!ActiveWindowSettings.editor.value.showPid
                         onToggled: ActiveWindowSettings.editor.set("showPid", !ActiveWindowSettings.editor.value.showPid)
@@ -575,6 +586,77 @@ Item {
                 title: "Layout"
                 hint: "The order of the icon, class, title, and PID on the popup. The first part is the leftmost."
             }
+
+            Item {
+                width: parent.width
+                height: layoutCol.implicitHeight
+
+                Column {
+                    id: layoutCol
+                    x: Theme.sectionInset
+                    width: parent.width - Theme.sectionInset * 2
+                    spacing: Theme.tabGap
+
+                    Repeater {
+                        model: ActiveWindowSettings.draftLayout()
+                        delegate: Rectangle {
+                            id: partRow
+                            required property string modelData
+                            required property int index
+                            width: layoutCol.width
+                            height: Theme.fieldHeight
+                            radius: Theme.radiusSm
+                            color: Theme.pillBg
+                            border.width: Theme.borderWidth
+                            border.color: Theme.border
+
+                            Text {
+                                anchors.left: parent.left
+                                anchors.leftMargin: Theme.space
+                                anchors.right: partButtons.left
+                                anchors.rightMargin: Theme.space
+                                anchors.verticalCenter: parent.verticalCenter
+                                elide: Text.ElideRight
+                                text: (partRow.index + 1) + ". " + ActiveWindowSettings.layoutLabel(partRow.modelData)
+                                color: Theme.text
+                                font.family: Theme.uiFont
+                                font.pixelSize: Theme.fontPx
+                            }
+
+                            Row {
+                                id: partButtons
+                                anchors.right: parent.right
+                                anchors.rightMargin: Theme.tabGap
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: Theme.tabGap
+
+                                ChipButton {
+                                    enabled: partRow.index > 0
+                                    label: "Move up"
+                                    tip: "Move this part left on the popup"
+                                    onClicked: root.movePart(partRow.index, -1)
+                                }
+
+                                ChipButton {
+                                    enabled: partRow.index < ActiveWindowSettings.draftLayout().length - 1
+                                    label: "Move down"
+                                    tip: "Move this part right on the popup"
+                                    onClicked: root.movePart(partRow.index, 1)
+                                }
+                            }
+                        }
+                    }
+
+                    Text {
+                        width: parent.width
+                        wrapMode: Text.WordWrap
+                        text: "Move up moves a part left. Move down moves it right. Show PID turns the process id on. A part with nothing to show, such as a title that matches the class, is skipped."
+                        color: Theme.subtext
+                        font.family: Theme.uiFont
+                        font.pixelSize: Theme.smallPx
+                    }
+                }
+            }
         }
     }
 
@@ -585,9 +667,9 @@ Item {
         anchors.bottom: parent.bottom
         applyEnabled: ActiveWindowSettings.editor.dirty
         undoEnabled: ActiveWindowSettings.editor.canUndo
-        applyTip: "Save the show switch, the corner, the width, the PID switch, and the excludes"
+        applyTip: "Save the show switch, the corner, the width, the PID switch, the layout, and the excludes"
         undoTip: "Drop an unsaved draft, or put back the last applied one"
-        resetTip: "Restore the show switch, top left, the default width, PID off, and the screensaver exclude. Apply saves it."
+        resetTip: "Restore the show switch, top left, the default width, PID off, icon then class then title then PID, and the screensaver exclude. Apply saves it."
         onApplyClicked: ActiveWindowSettings.editor.apply()
         onUndoClicked: ActiveWindowSettings.editor.undo()
         onResetClicked: ActiveWindowSettings.editor.reset()

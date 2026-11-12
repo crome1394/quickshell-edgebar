@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Active Window → **Layout**: reorder Icon, Class, Title, and PID. Move up moves a part left on the popup; Move down moves it right. Show PID still turns the process id on or off. A part with nothing to show is skipped.
+
 - Active Window: a **Layout** section (Widgets → Active Window) for how the popup's parts are arranged.
 
 - Active Window: **Show PID** (Widgets → Active Window) adds the focused window's process id after the title. Off by default.

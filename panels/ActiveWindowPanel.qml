@@ -1,3 +1,4 @@
+pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
@@ -7,7 +8,7 @@ import qs.services
 import qs.theme
 
 // Focused-window pill in a screen corner. It is not a bar-zone widget.
-// Show, corner, and excludes are the Widgets → Active Window settings.
+// Show, corner, PID, layout, and excludes are the Widgets → Active Window settings.
 // qmllint disable uncreatable-type
 PanelWindow {
 // qmllint enable uncreatable-type
@@ -30,16 +31,27 @@ PanelWindow {
     readonly property int textGap: Math.max(1, Math.round(Theme.space * root.ui))
     readonly property int pillMax: Math.max(1, Math.round(ActiveWindowSettings.widthValue() * root.ui))
     readonly property bool showTitle: root.winTitle.length > 0 && root.winTitle !== root.classLabel
-    // Room left for the title after padding, the icon, the PID, and the whole class name.
+    // Room left for the title after padding and every other part that shows.
     readonly property int titleLimit: {
         if (!root.showTitle)
             return 0
-        let used = root.hPad * 2 + Math.ceil(classText.implicitWidth)
-        if (root.iconSource.length > 0)
-            used += root.iconPx + root.textGap
-        if (root.pidShown)
-            used += Math.ceil(pidText.implicitWidth) + root.textGap
-        used += root.textGap
+        let others = 0
+        let used = root.hPad * 2
+        if (root.iconSource.length > 0) {
+            used += root.iconPx
+            others += 1
+        }
+        const classW = Math.ceil(classMetrics.width)
+        if (classW > 0) {
+            used += classW
+            others += 1
+        }
+        if (root.pidShown) {
+            used += Math.ceil(pidMetrics.width)
+            others += 1
+        }
+        if (others > 0)
+            used += root.textGap * others
         return Math.max(0, root.pillMax - used)
     }
     readonly property int titleNatural: Math.ceil(titleMetrics.width)
@@ -47,28 +59,43 @@ PanelWindow {
     readonly property bool titleVisible: root.showTitle && root.titleNatural > 0
         && (root.titleNatural <= root.titleLimit || root.titleLimit >= root.fontPx * 2)
     readonly property bool clipTitle: root.titleVisible && root.titleNatural > root.titleLimit
+    // Parts that have something to draw, in the saved left-to-right order.
+    readonly property var shownParts: {
+        const order = ActiveWindowSettings.layoutValue()
+        const out = []
+        for (let i = 0; i < order.length; i++) {
+            const id = String(order[i] || "")
+            if (id === "icon" && root.iconSource.length > 0)
+                out.push(id)
+            else if (id === "class" && root.classLabel.length > 0)
+                out.push(id)
+            else if (id === "title" && root.titleVisible)
+                out.push(id)
+            else if (id === "pid" && root.pidShown)
+                out.push(id)
+        }
+        return out
+    }
+
+    function partWidth(id) {
+        if (id === "icon")
+            return root.iconPx
+        if (id === "class")
+            return Math.ceil(classMetrics.width)
+        if (id === "title")
+            return root.clipTitle ? root.titleLimit : root.titleNatural
+        if (id === "pid")
+            return Math.ceil(pidMetrics.width)
+        return 0
+    }
+
     readonly property int contentWidth: {
-        let parts = 0
+        const parts = root.shownParts
         let w = 0
-        if (root.iconSource.length > 0) {
-            w += root.iconPx
-            parts += 1
-        }
-        const classW = Math.ceil(classText.implicitWidth)
-        if (classW > 0) {
-            w += classW
-            parts += 1
-        }
-        if (root.titleVisible) {
-            w += root.clipTitle ? root.titleLimit : root.titleNatural
-            parts += 1
-        }
-        if (root.pidShown) {
-            w += Math.ceil(pidText.implicitWidth)
-            parts += 1
-        }
-        if (parts > 1)
-            w += root.textGap * (parts - 1)
+        for (let i = 0; i < parts.length; i++)
+            w += root.partWidth(parts[i])
+        if (parts.length > 1)
+            w += root.textGap * (parts.length - 1)
         return Math.max(0, w)
     }
     readonly property bool edgeBarShown: root.atTop ? Config.showTopBar : Config.showBottomBar
@@ -259,10 +286,25 @@ PanelWindow {
     Component.onCompleted: root.noteFocus(Hyprland.activeToplevel !== null)
 
     TextMetrics {
+        id: classMetrics
+        font.family: root.theme.fontFamily
+        font.pixelSize: root.fontPx
+        font.bold: true
+        text: root.classLabel
+    }
+
+    TextMetrics {
         id: titleMetrics
         font.family: root.theme.fontFamily
         font.pixelSize: root.fontPx
         text: root.winTitle
+    }
+
+    TextMetrics {
+        id: pidMetrics
+        font.family: root.theme.fontFamily
+        font.pixelSize: root.fontPx
+        text: root.winPid
     }
 
     Rectangle {
@@ -281,54 +323,36 @@ PanelWindow {
             width: root.contentWidth
             spacing: root.textGap
 
-            Image {
-                visible: root.iconSource.length > 0
-                width: root.iconPx
-                height: root.pillHeight
-                source: root.iconSource
-                sourceSize.width: root.iconPx
-                sourceSize.height: root.iconPx
-                fillMode: Image.PreserveAspectFit
-            }
+            Repeater {
+                model: root.shownParts
+                delegate: Item {
+                    id: slot
+                    required property string modelData
+                    width: root.partWidth(slot.modelData)
+                    height: root.pillHeight
 
-            Text {
-                id: classText
-                height: root.pillHeight
-                verticalAlignment: Text.AlignVCenter
-                text: root.classLabel
-                color: root.theme.colAccent
-                font.family: root.theme.fontFamily
-                font.pixelSize: root.fontPx
-                font.bold: true
-            }
+                    Image {
+                        visible: slot.modelData === "icon"
+                        anchors.fill: parent
+                        source: slot.modelData === "icon" ? root.iconSource : ""
+                        sourceSize.width: root.iconPx
+                        sourceSize.height: root.iconPx
+                        fillMode: Image.PreserveAspectFit
+                    }
 
-            Text {
-                id: titleText
-                visible: root.titleVisible
-                height: root.pillHeight
-                verticalAlignment: Text.AlignVCenter
-                elide: root.clipTitle ? Text.ElideRight : Text.ElideNone
-                text: root.winTitle
-                color: root.theme.colFg
-                font.family: root.theme.fontFamily
-                font.pixelSize: root.fontPx
-
-                // Width stays unset while the title fits, so a short string is never ellipsized.
-                Binding on width {
-                    when: root.clipTitle
-                    value: root.titleLimit
+                    Text {
+                        visible: slot.modelData !== "icon"
+                        width: slot.modelData === "title" ? parent.width : implicitWidth
+                        height: parent.height
+                        verticalAlignment: Text.AlignVCenter
+                        elide: slot.modelData === "title" && root.clipTitle ? Text.ElideRight : Text.ElideNone
+                        text: slot.modelData === "class" ? root.classLabel : (slot.modelData === "pid" ? root.winPid : root.winTitle)
+                        color: slot.modelData === "class" ? root.theme.colAccent : (slot.modelData === "pid" ? root.theme.colFgMuted : root.theme.colFg)
+                        font.family: root.theme.fontFamily
+                        font.pixelSize: root.fontPx
+                        font.bold: slot.modelData === "class"
+                    }
                 }
-            }
-
-            Text {
-                id: pidText
-                visible: root.pidShown
-                height: root.pillHeight
-                verticalAlignment: Text.AlignVCenter
-                text: root.winPid
-                color: root.theme.colFgMuted
-                font.family: root.theme.fontFamily
-                font.pixelSize: root.fontPx
             }
         }
     }

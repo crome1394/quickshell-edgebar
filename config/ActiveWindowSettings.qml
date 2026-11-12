@@ -3,11 +3,13 @@ import QtQuick
 import Quickshell
 import qs.theme
 
-// Widgets → Active Window: the corner pill, its width cap, and excludes.
+// Widgets → Active Window: the corner pill, its width cap, PID, layout, and excludes.
 Singleton {
     id: root
 
     readonly property int excludeMax: 40
+    // Left to right, unless Layout says otherwise.
+    readonly property var layoutOrder: ["icon", "class", "title", "pid"]
 
     readonly property Draft editor: Draft {
         owner: root
@@ -63,6 +65,43 @@ Singleton {
         return JSON.stringify(root.normalizeExcludes(root.parseList(raw)))
     }
 
+    function layoutLabel(id) {
+        if (id === "icon")
+            return "Icon"
+        if (id === "class")
+            return "Class"
+        if (id === "title")
+            return "Title"
+        if (id === "pid")
+            return "PID"
+        return ""
+    }
+
+    // Every part once, in the saved order. Unknown ids are dropped. A missing
+    // part is added at the end, in the default order.
+    function layoutNorm(raw) {
+        const src = root.parseList(raw)
+        const want = root.layoutOrder
+        const out = []
+        const seen = {}
+        for (let i = 0; i < src.length; i++) {
+            const id = String(src[i] || "")
+            if (want.indexOf(id) < 0 || seen[id])
+                continue
+            seen[id] = true
+            out.push(id)
+        }
+        for (let i = 0; i < want.length; i++) {
+            if (!seen[want[i]])
+                out.push(want[i])
+        }
+        return out
+    }
+
+    function layoutJson(raw) {
+        return JSON.stringify(root.layoutNorm(raw))
+    }
+
     function cornerNorm(corner) {
         const c = String(corner || "")
         if (c === "topRight" || c === "bottomLeft" || c === "bottomRight")
@@ -104,6 +143,7 @@ Singleton {
             corner: root.cornerNorm(src.corner),
             width: root.widthNorm(src.width),
             showPid: !!src.showPid,
+            layout: root.layoutJson(src.layout),
             excludes: root.excludeJson(src.excludes)
         }
     }
@@ -114,6 +154,7 @@ Singleton {
             corner: Config.activeWindowPillCorner,
             width: Config.activeWindowPillWidth,
             showPid: Config.activeWindowShowPid,
+            layout: Config.activeWindowLayoutJson,
             excludes: Config.activeWindowExcludesJson
         })
     }
@@ -122,12 +163,21 @@ Singleton {
         return !!Config.activeWindowShowPid
     }
 
+    function layoutValue() {
+        return root.layoutNorm(Config.activeWindowLayoutJson)
+    }
+
+    function draftLayout() {
+        return root.layoutNorm(root.editor.value.layout)
+    }
+
     function defaults() {
         return {
             show: true,
             corner: "topLeft",
             width: Theme.activeWindowWidthDefault,
             showPid: false,
+            layout: root.layoutJson(root.layoutOrder),
             excludes: "[\"hypr-screensaver\"]"
         }
     }
@@ -139,6 +189,7 @@ Singleton {
             Config.activeWindowPillCorner = clean.corner
             Config.activeWindowPillWidth = clean.width
             Config.activeWindowShowPid = clean.showPid
+            Config.activeWindowLayoutJson = clean.layout
             Config.activeWindowExcludesJson = clean.excludes
         })
     }

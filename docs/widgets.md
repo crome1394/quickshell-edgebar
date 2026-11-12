@@ -37,7 +37,9 @@ wins over "Always start after idle" too.
 
 **Active Window** is not a bar pill: it shows the focused window's icon,
 class, and title in a screen corner (Widgets → Active Window). **Show PID**
-adds the window's process id after the title.
+adds the window's process id. **Layout** sets the left-to-right order of
+the icon, class, title, and PID (Move up moves a part left, Move down
+moves it right). A part with nothing to show is skipped.
 
 ## Menus
 

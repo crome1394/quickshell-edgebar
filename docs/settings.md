@@ -32,9 +32,10 @@ Nothing on those pages is saved until Apply.
   bar) puts that one bar on a monitor of its own, or back on every bar
   monitor; while its monitor is unplugged it shows on the main monitor.
   Apply saves it.
-- **Active Window**: show it, corner, width, **Show PID** (the process id
-  after the title), and classes to exclude. **Layout** is the order of
-  those parts on the popup.
+- **Active Window**: show it, corner, width, **Show PID** (the process id),
+  and classes to exclude. **Layout** lists Icon, Class, Title, and PID.
+  Move up moves a part left on the popup; Move down moves it right. The
+  first row is the leftmost. A part with nothing to show is skipped.
 - **System Stats**: one combined pill, or (with **Combine into one
   widget** off) CPU, Memory, GPU, and VRAM as separate widgets you turn on
   and place under Bars; which graphics card to read (Auto: the only one, or
