@@ -56,11 +56,12 @@ class, and title in a screen corner (Widgets → Active Window).
   node (searchable), options (DNS, subnet routes, Shields up, SSH, …), and
   the machines on the tailnet with Taildrop send. Checks every 30 seconds,
   every 3 while the menu is open.
-- **Transparency**: glass (Bar and Menus), one slider for every app, a
-  slider per override with ✕ to remove it, and Add override to pick an
-  open window. The list scrolls when it is taller than the screen. Use
-  theme sets every app back to the theme default. Changes save at once.
-  Unfocused levels stay in Settings. See [Settings → Transparency](settings.md#system).
+- **Transparency**: glass (Bar and Menus), one slider for every app, and
+  a slider per override with ✕ to remove it. The list scrolls when it is
+  taller than the screen. Along the bottom, **Use theme** sets every app
+  back to the theme default, and **Add override** (to its right) picks an
+  open window. Changes save at once. Unfocused levels stay in Settings.
+  See [Settings → Transparency](settings.md#system).
 - **Notifications**: the history list beside the bar, with copy, dismiss,
   and clear.
 - **Firewall** (UFW): on or off with a switch; the incoming, outgoing, and

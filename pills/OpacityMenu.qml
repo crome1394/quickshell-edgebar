@@ -374,14 +374,6 @@ Item {
                         }
                     }
 
-                    MenuChip {
-                        theme: root.theme
-                        label: root.picking ? "Hide open windows" : "Add override"
-                        accent: root.picking
-                        tip: "Add an override for one of the windows open now"
-                        onClicked: root.togglePicker()
-                    }
-
                     Note {
                         visible: root.picking && (OpacityService.listing || OpacityService.windows.length === 0)
                         text: OpacityService.listing ? "Reading open windows…" : "No open windows found."
@@ -427,6 +419,14 @@ Item {
             label: "Use theme"
             tip: "Set All applications back to the theme default (" + DefaultTheme.opacityQuickshell + "%)"
             onClicked: OpacitySettings.useTheme()
+        }
+
+        MenuChip {
+            theme: root.theme
+            label: root.picking ? "Hide open windows" : "Add override"
+            accent: root.picking
+            tip: "Add an override for one of the windows open now"
+            onClicked: root.togglePicker()
         }
     }
 }

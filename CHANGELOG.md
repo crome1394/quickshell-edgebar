@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Transparency menu: **Add override** sits to the right of **Use theme** along the bottom.
+
 - **Transparency menu** uses the same layout as the Tailscale menu: glass (Bar and Menus), all applications, and overrides, with the list scrolling when it grows. **Bar menus** on a side bar open on the screen side of the bar, centered on the bar, so a tall menu is not cut off when its widget sits low. Top and bottom bars still open over the widget. New: `pills/OpacityMenu.qml`. Placement is `WidgetService.placePopup()`.
 
 - **Night Light menu**: right-click the moon for on/off, the warmth slider (− and +), and the schedule (from – to). Same settings as Tools → Night Light, saved at once. Left click still toggles; the wheel still changes warmth. New: `pills/NightLightMenu.qml`.
